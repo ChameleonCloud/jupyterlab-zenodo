@@ -1,0 +1,63 @@
+/****** Main widget styles ******/
+h1, h2{
+    text-align: center;
+}
+
+#zenodo-upload-main {
+    padding: 15px;
+    font-family: var(--jp-ui-font-family);
+}
+
+#zenodo-jupyterlab .p-Widget{
+    overflow-y: scroll;
+}
+
+.basic-btn {
+    background-color: #ededed; 
+    border: 1px solid transparent;
+    border-color: grey;
+    border-radius: 4px;
+    padding: 6px;
+}
+
+/****** Styles for upload form ******/
+input {
+    font-family: var(--jp-ui-font-family);
+    font-size: 14px;
+}
+
+td {
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+th {
+    padding: 10px;
+    text-align: left;
+    font-weight: bold;
+}
+
+.submit-btn:hover{
+    background-color: #bdbdbd;
+}
+
+#submit-form p {
+    margin-bottom: 10px;
+}
+/* Make non-required fields normal weight */
+#zenodo_token th {
+    font-weight: normal;
+}
+
+#directory th {
+    font-weight: normal;
+}
+
+
+/***** Styles for success page ******/
+#success-div {
+    display: flex;
+    flex-direction: column;
+}
+

@@ -1,0 +1,15 @@
+# Python build files
+*.bundle.*
+*.pyc
+*.egg-info/
+__pycache__/
+dist/
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# Typescript output
+lib/
+
+# JS dependencies
+node_modules/
