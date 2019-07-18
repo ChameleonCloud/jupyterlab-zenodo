@@ -1,1 +1,1 @@
-# jupyterlab-zenodo
+# Zenodo extension for JupyterHub
