@@ -5,12 +5,11 @@ import tornado
 from tornado.testing import AsyncHTTPTestCase
 from traitlets.config.loader import Config
 
-#from jupyterlab_zenodo import load_jupyter_server_extension
 from jupyterlab_zenodo import load_jupyter_server_extension
 
 class TestZenodoHandler(AsyncHTTPTestCase):
     def get_app(self):
-        nbapp = NotebookApp(notebook_dir=TemporaryDirectory.name())
+        nbapp = NotebookApp(runtime_dir=TemporaryDirectory().name)
         nbapp.initialize()
         load_jupyter_server_extension(nbapp)
 

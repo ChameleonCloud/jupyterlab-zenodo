@@ -2,8 +2,8 @@
 
 from notebook.utils import url_path_join
 
-from _version import __version__
-from upload import ZenodoUploadHandler
+from ._version import __version__
+from .upload import ZenodoUploadHandler
 # from .synctex import LatexSynctexHandler
 
 path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
