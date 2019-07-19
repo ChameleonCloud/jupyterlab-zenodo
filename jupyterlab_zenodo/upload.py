@@ -122,7 +122,8 @@ class ZenodoUploadHandler(APIHandler):
     @web.authenticated
     @gen.coroutine
     # MK: should this be post?
-    def get(self, file_prefix='', title='', authors=[], description=""):
+    def post(self, path=''):
+        #file_prefix='', title='', authors=[], description=""):
         """
         Takes in a a file prefix string, and metadata
         Zips notebook_dir to file_prefix.zip, uploads to Zenodo
