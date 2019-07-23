@@ -126,25 +126,27 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
                          params={'access_token': ACCESS_TOKEN}, 
                          data=json.dumps({'metadata': metadata}),
                          headers=headers)
-        print(r.json())
-        doi = r.json().get('doi', None) 
-        if doi == '':
-            doi = r.json().get('metadata',{}).get('prereserve_doi',{}).get('doi')
+        r_dict = r.json()
+        print(r_dict)
+        doi = r_dict.get('doi') 
+        if not doi:
+            doi = r_dict.get('metadata',{}).get('prereserve_doi',{}).get('doi')
         print("doi: "+str(doi))
         return doi
 
     @web.authenticated
     @gen.coroutine
-    def post(self, path=''):
-        print("yoooo you got it")
-        info = {'status':'get got', 'doi':"no doi here"}
+    def get(self, path=''):
+        print("In GET routine for upload handler")
+        info = {'status':'executed get', 'doi':"no doi here"}
         self.set_status(200)
         self.write(json.dumps(info))
         self.finish()
 
     @web.authenticated
     @gen.coroutine
-    def get(self, path=''):
+    def post(self, path=''):
+        print("In POST routine for upload handler")
         #file_prefix='', title='', authors=[], description=""):
         """
         Takes in a a file prefix string, and metadata
@@ -152,7 +154,6 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         Returns dictionary with status (success or failure) and doi (if successful)
         """
 
-        print("\nHI\n")
         print(self.notebook_dir)
         zenodo_params = self.api_params()
         title = zenodo_params['title']
@@ -171,16 +172,13 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         doi = self.upload_file(filename, path_to_file, metadata, access_token) 
         info = {'status':'success', 'doi':doi}
         if (doi is not None):
-            print("DOI! "+str(doi))
+            print("doi: "+str(doi))
             self.set_status(200)
             self.write(json.dumps(info))
-            # return ({'status':'success', 'doi': doi})
         else:
-            info = {'status':'failure', 'doi':"no doi here"}
-            print("NO DOI!!")
+            info = {'status':'failure', 'doi':"no doi"}
+            print("no doi")
             self.set_status(404)
             self.write(json.dumps(info))
-            # return ({'status':'failure'})
         self.finish()
-        # return upload_id
         
