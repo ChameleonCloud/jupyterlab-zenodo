@@ -79,7 +79,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         metadata = {}
         metadata['title'] = title 
         metadata['upload_type'] = 'publication' 
-        metadata['publication_type'] = 'working_paper'
+        metadata['publication_type'] = 'workingpaper'
         metadata['description'] = description 
         metadata['creators'] = creator_list 
         return metadata
@@ -126,19 +126,18 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
                          params={'access_token': ACCESS_TOKEN}, 
                          data=json.dumps({'metadata': metadata}),
                          headers=headers)
+        print(r.json())
         doi = r.json().get('doi', None) 
         return doi
 
-    '''
     @web.authenticated
     @gen.coroutine
-    def get(self, path=''):
+    def post(self, path=''):
         print("yoooo you got it")
         info = {'status':'get got', 'doi':"no doi here"}
         self.set_status(200)
         self.write(json.dumps(info))
         self.finish()
-    '''
 
     @web.authenticated
     @gen.coroutine
@@ -163,7 +162,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
 
         self.zip_dir(self.notebook_dir, filename)
 
-        path_to_file = self.notebook_dir + "/../" + filename
+        path_to_file = self.notebook_dir + "/" + filename
         metadata = self.assemble_metadata(title, authors, description)
 
         doi = self.upload_file(filename, path_to_file, metadata, access_token) 
