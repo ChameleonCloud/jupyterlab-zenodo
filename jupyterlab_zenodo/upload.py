@@ -128,6 +128,9 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
                          headers=headers)
         print(r.json())
         doi = r.json().get('doi', None) 
+        if doi == '':
+            doi = r.json().get('metadata',{}).get('prereserve_doi',{}).get('doi')
+        print("doi: "+str(doi))
         return doi
 
     @web.authenticated
@@ -170,7 +173,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         if (doi is not None):
             print("DOI! "+str(doi))
             self.set_status(200)
-            self.write(json.dumps(info, default=json_util.default)) 
+            self.write(json.dumps(info))
             # return ({'status':'success', 'doi': doi})
         else:
             info = {'status':'failure', 'doi':"no doi here"}
