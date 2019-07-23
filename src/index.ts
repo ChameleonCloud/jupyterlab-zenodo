@@ -40,7 +40,7 @@ import { ErrorPanel } from './error';
 
 import { PDFJSDocumentWidget, PDFJSViewer, PDFJSViewerFactory } from './pdf';
 
-import '../style/index.css';
+//import '../style/index.css';
 
 
 /**
