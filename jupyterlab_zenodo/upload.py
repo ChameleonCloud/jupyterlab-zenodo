@@ -10,13 +10,6 @@ from notebook.base.handlers import APIHandler
 
 from .base import ZenodoBaseHandler
 
-#from .config import LatexConfig
-#from .util import run_command
-
-def myPrint(string):
-    cmd = "echo "+string
-    os.system(cmd)
-
 class ZenodoUploadHandler(ZenodoBaseHandler):
     """
     A handler that uploads your files to Zenodo
@@ -147,20 +140,27 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
     @gen.coroutine
     def post(self, path=''):
         print("In POST routine for upload handler")
-        #file_prefix='', title='', authors=[], description=""):
+
         """
         Takes in a a file prefix string, and metadata
         Zips notebook_dir to file_prefix.zip, uploads to Zenodo
         Returns dictionary with status (success or failure) and doi (if successful)
         """
 
-        print(self.notebook_dir)
         zenodo_params = self.api_params()
-        title = zenodo_params['title']
-        file_prefix = zenodo_params.get('file_prefix','workingdir')
-        authors = [zenodo_params['author']]
-        description = zenodo_params['description']      
-        access_token = zenodo_params['access_token']      
+        try:
+            title = zenodo_params['title']
+            file_prefix = zenodo_params.get('file_prefix','workingdir')
+            authors = [zenodo_params['author']]
+            description = zenodo_params['description']      
+            access_token = zenodo_params['access_token']      
+        except KeyError:
+            info = {'status':'failure', 'message':'Missing data', 'doi' : None}
+            self.set_status(400)
+            self.write(json.dumps(info))
+            self.finish()
+            return
+            
 
         filename = file_prefix + ".zip"
 
@@ -170,13 +170,13 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         metadata = self.assemble_metadata(title, authors, description)
 
         doi = self.upload_file(filename, path_to_file, metadata, access_token) 
-        info = {'status':'success', 'doi':doi}
         if (doi is not None):
+            info = {'status':'success', 'doi':doi}
             print("doi: "+str(doi))
-            self.set_status(200)
+            self.set_status(201)
             self.write(json.dumps(info))
         else:
-            info = {'status':'failure', 'doi':"no doi"}
+            info = {'status':'failure', 'doi': None}
             print("no doi")
             self.set_status(404)
             self.write(json.dumps(info))
