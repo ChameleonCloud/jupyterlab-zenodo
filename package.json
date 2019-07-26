@@ -47,13 +47,14 @@
     ]
   },
   "dependencies": {
-    "@jupyterlab/application": "*",
+    "@jupyterlab/application": "^1.0.0",
     "@jupyterlab/apputils": "*",
     "@jupyterlab/codeeditor": "*",
     "@jupyterlab/coreutils": "*",
     "@jupyterlab/docmanager": "*",
     "@jupyterlab/docregistry": "*",
     "@jupyterlab/fileeditor": "*",
+    "@jupyterlab/mainmenu": "*",
     "@jupyterlab/services": "*",
     "@phosphor/coreutils": "*",
     "@phosphor/disposable": "*",
