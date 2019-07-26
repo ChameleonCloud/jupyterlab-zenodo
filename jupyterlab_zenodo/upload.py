@@ -2,6 +2,8 @@
 
 import glob, json, re, os
 import requests
+import sqlite3
+from datetime import datetime
 from contextlib import contextmanager
 
 from tornado import gen, web
@@ -126,11 +128,37 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             doi = r_dict.get('metadata',{}).get('prereserve_doi',{}).get('doi')
         print("doi: "+str(doi))
         return doi
+    
+    def store_record(self, doi):
+        """Store a record of publication in a local sqlite database
+    
+        Parameters
+        ----------
+        doi : string
+            Zenodo DOI given to uploaded record
+    
+        Returns
+        -------
+            void
+
+        """
+        cmd = "cd /work && mkdir .zenodo"
+        os.system(cmd)
+        conn = sqlite3.connect('zenodo.db')
+        c = conn.cursor()
+        c.execute('''CREATE TABLE uploads
+             (date_uploaded, doi)''')
+        c.execute("INSERT INTO uploads VALUES (?,?)",[datetime.now(),doi])
+
+        # Commit and close
+        conn.commit()
+        conn.close()
 
     @web.authenticated
     @gen.coroutine
     def get(self, path=''):
-        print("In GET routine for upload handler")
+        # print("In GET routine for upload handler")
+        print("testing my store data function")
         info = {'status':'executed get', 'doi':"no doi here"}
         self.set_status(200)
         self.write(json.dumps(info))

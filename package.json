@@ -23,9 +23,11 @@
     "lib/*/*.js",
     "lib/*.d.ts",
     "lib/*.js",
-    "schema/*.json",
-    "style/*.*"
+    "style/**/*.*"
   ],
+
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "directories": {
     "lib": "lib/"
   },
@@ -45,19 +47,19 @@
     ]
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.0.0",
-    "@jupyterlab/apputils": "^1.0.0",
-    "@jupyterlab/codeeditor": "^1.0.0",
-    "@jupyterlab/coreutils": "^3.0.0",
-    "@jupyterlab/docmanager": "^1.0.0",
-    "@jupyterlab/docregistry": "^1.0.0",
-    "@jupyterlab/fileeditor": "^1.0.0",
-    "@jupyterlab/services": "^4.0.0",
-    "@phosphor/coreutils": "^1.3.1",
-    "@phosphor/disposable": "^1.2.0",
-    "@phosphor/domutils": "^1.1.3",
-    "@phosphor/messaging": "^1.2.3",
-    "@phosphor/widgets": "^1.8.0",
+    "@jupyterlab/application": "*",
+    "@jupyterlab/apputils": "*",
+    "@jupyterlab/codeeditor": "*",
+    "@jupyterlab/coreutils": "*",
+    "@jupyterlab/docmanager": "*",
+    "@jupyterlab/docregistry": "*",
+    "@jupyterlab/fileeditor": "*",
+    "@jupyterlab/services": "*",
+    "@phosphor/coreutils": "*",
+    "@phosphor/disposable": "*",
+    "@phosphor/domutils": "*",
+    "@phosphor/messaging": "*",
+    "@phosphor/widgets": "*",
     "pdfjs-dist": "^2.0.943",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
@@ -78,7 +80,16 @@
     "@types/react": "~16.4.13"
   },
   "jupyterlab": {
-    "extension": "lib/index.js",
-    "schemaDir": "schema"
+    "extension": true,
+    "discovery": {
+      "server": {
+        "managers": [
+          "pip"
+        ],
+        "base": {
+          "name": "jupyterlab_zenodo"
+        }
+      }
+    }
   }
 }
