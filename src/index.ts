@@ -101,6 +101,7 @@ function activateZenodoPlugin(
         command: command,
         args: {},
     });
+    menu.title.label = 'Zenodo';
     
 
     mainMenu.addMenu(menu, { rank: 40 });
