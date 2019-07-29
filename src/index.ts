@@ -1,6 +1,6 @@
 /*
  * NOTE: All of this was copy/pasted from jupyterlab/jupyterlab-latex from src/index.ts and then edited */ 
-console.log("TESTING 4:46")
+console.log("TESTING 0939")
 
 import {
   JupyterFrontEnd,
@@ -92,7 +92,7 @@ function activateZenodoPlugin(
     
     }); 
 
-    //palette.addItem({command, category: 'Zenodo'})
+    palette.addItem({command, category: 'Zenodo'})
     console.log("Checking main menu");
     console.log(mainMenu);
     const menu = new Menu({ commands: app.commands });

@@ -35,7 +35,6 @@
     "build": "tsc",
     "build:test": "cd test && ./build-tests.sh",
     "clean": "rimraf lib",
-    "precommit": "lint-staged",
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "test": "cd test && ./run-tests.sh",
     "watch": "tsc -w"
