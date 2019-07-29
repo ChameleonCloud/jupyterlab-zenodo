@@ -3,10 +3,11 @@
 import glob, json, re, os
 import requests
 import sqlite3
+from urllib.parse import unquote_plus, parse_qs
 from datetime import datetime
 from contextlib import contextmanager
 
-from tornado import gen, web
+from tornado import escape, gen, web
 
 from notebook.base.handlers import APIHandler
 
@@ -175,20 +176,30 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         Returns dictionary with status (success or failure) and doi (if successful)
         """
 
-        zenodo_params = self.api_params()
+        request_data_str= (str(self.request.body)[2:])[:-1]
+        request_data = parse_qs(request_data_str)
+
         try:
-            title = zenodo_params['title']
-            file_prefix = zenodo_params.get('file_prefix','workingdir')
-            authors = [zenodo_params['author']]
-            description = zenodo_params['description']      
-            access_token = zenodo_params['access_token']      
+            # add [0] because parse_qs returns a list for each key
+            title = request_data['title'][0]
+            print(title)
+            file_prefix = request_data.get('file_prefix',['workingdir'])[0]
+            print(file_prefix)
+            authors = request_data['author']
+            print(authors[0])
+            description = request_data['description'][0]      
+            print(description)
         except KeyError:
-            info = {'status':'failure', 'message':'Missing data', 'doi' : None}
+            info = {'status':'failure', 'message':'Missing some data!', 'doi' : None}
             self.set_status(400)
             self.write(json.dumps(info))
             self.finish()
             return
-            
+
+        try:
+            access_token = request_data['access_token'][0] 
+        except KeyError:
+            access_token = '***REMOVED***'
 
         filename = file_prefix + ".zip"
 
