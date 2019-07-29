@@ -1,0 +1,48 @@
+body {
+    font-family: var(--jp-ui-font-family);
+}
+
+input {
+    font-family: var(--jp-ui-font-family);
+    font-size: 14px;
+}
+
+.submit-btn {
+    background-color: #ededed; 
+    border: 1px solid transparent;
+    border-color: grey;
+    border-radius: 4px;
+    padding: 6px;
+}
+
+.submit-btn:hover{
+    background-color: #bdbdbd;
+}
+
+#submit-form {
+    padding: 15px;
+}
+
+#submit-form p {
+    margin-bottom: 10px;
+}
+
+th,td {
+    padding: 10px;
+}
+
+td {
+    display: flex;
+    justify-content: center;
+}
+
+th {
+    text-align: left;
+    font-weight: bold;
+}
+
+
+#zenodo-token {
+    font-weight: normal;
+}
+

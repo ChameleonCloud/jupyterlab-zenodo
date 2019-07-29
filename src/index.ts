@@ -1,6 +1,5 @@
 /*
  * NOTE: All of this was copy/pasted from jupyterlab/jupyterlab-latex from src/index.ts and then edited */ 
-console.log("TESTING 0939")
 
 import {
   JupyterFrontEnd,
@@ -13,14 +12,11 @@ import {
 
 import {
     ISettingRegistry,
-    //URLExt,
 } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { IEditorTracker } from '@jupyterlab/fileeditor';
-
-//import { ServerConnection } from '@jupyterlab/services';
 
 import { Widget, Menu } from '@phosphor/widgets';
 
@@ -41,59 +37,27 @@ const zenodoPlugin: JupyterFrontEndPlugin<void> = {
   activate: activateZenodoPlugin
 };
 
-/**
- * Make a request to the notebook server Zenodo endpoint.
- *
- * @param filename - the file name
- *
- * @param settings - the settings for the current notebook server.
- *
- * @returns a Promise resolved with the text response.
- */
-
-/*
-function zenodoUploadRequest(
-    path: string,
-    settings: ServerConnection.ISettings
-): Promise<any> {
-    console.log("upload req");
-    let fullUrl = URLExt.join(settings.baseUrl, 'zenodo', 'upload', "hi");
-
-    return ServerConnection.makeRequest(fullUrl, {}, settings).then(response => {
-        if (response.status !== 200) {
-            return response.text().then(data => {
-                throw new ServerConnection.ResponseError(response, data);
-            });
-        }
-        return response.text();
-    });
-}
-*/
-
 
 function newInput(
     label: string,
     id: string
   ): HTMLElement {
-    let input_section = document.createElement('div');
-    input_section.innerHTML = label + ": ";
-    let input_item = document.createElement('input');
-    input_item.type = 'text';
-    input_item.id = id;
-    input_item.name = id;
-    //TODO: delete this
-    input_item.value = 'test';
-    input_section.appendChild(input_item); 
-    return input_section; 
-}
+    let input_row = document.createElement('tr');
+    input_row.id = id;
 
-/*
-function submit_form(
-  ): void {
-    let title = document.getElementById('title-input').value
-    console.log("Wow got the title! Here: "+title);
+    let label_cell = document.createElement('th')
+    label_cell.innerHTML = label + ": ";
+
+    let input_cell = document.createElement('td');
+    let input = document.createElement('input');
+    input.type = 'text';
+    input.name = id;
+    input_cell.appendChild(input); 
+
+    input_row.appendChild(label_cell); 
+    input_row.appendChild(input_cell); 
+    return input_row; 
 }
-*/
 
 function activateZenodoPlugin(
     app: JupyterFrontEnd,
@@ -116,18 +80,36 @@ function activateZenodoPlugin(
     upload_form.action="/zenodo/upload?token="
     upload_form.method="post"
 
-    upload_form.appendChild(newInput('Title','title'));
-    upload_form.appendChild(newInput('Prefix for zip file','file_prefix'));
-    upload_form.appendChild(newInput('Author','author'));
-    upload_form.appendChild(newInput('Description','description'));
-    upload_form.appendChild(newInput('Access token (optional)','zenodo-token'));
-    
+    let header = document.createElement('h2');
+    header.innerHTML = "Submission Details"
+    let subheader = document.createElement('p');
+    subheader.innerHTML = "Please fill out the bolded fields and then click 'Submit' to upload to Zenodo"
 
+    upload_form.appendChild(header);
+    upload_form.appendChild(subheader);
+
+    let form_table = document.createElement('table')
+    let form_body = document.createElement('tbody')
+    form_body.appendChild(newInput('Title','title'));
+    form_body.appendChild(newInput('Prefix for zip file','file_prefix'));
+    form_body.appendChild(newInput('Author','author'));
+    form_body.appendChild(newInput('Description','description'));
+    form_body.appendChild(newInput('Access token (optional)','zenodo-token'));
+    
+    let submit_row = document.createElement('tr')
+    let submit_label = document.createElement('th')
+    let submit_cell = document.createElement('td')
     let submit_button = document.createElement('input');
     submit_button.type = 'submit';
-    submit_button.value = 'submit';
-    upload_form.appendChild(submit_button);
+    submit_button.value = 'Submit';
+    submit_button.classList.add("submit-btn");
+    submit_cell.appendChild(submit_button);
+    submit_row.appendChild(submit_label);
+    submit_row.appendChild(submit_cell);
+    form_body.appendChild(submit_row);
 
+    form_table.appendChild(form_body);
+    upload_form.appendChild(form_table);
     content.node.appendChild(upload_form);
     //HERE
 
