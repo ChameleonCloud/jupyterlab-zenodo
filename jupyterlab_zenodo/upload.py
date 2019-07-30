@@ -143,12 +143,17 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             void
 
         """
-        cmd = "cd /work && mkdir .zenodo"
-        os.system(cmd)
-        conn = sqlite3.connect('zenodo.db')
+        db_dest = "/work/.zenodo/"
+        print(os.path.exists(db_dest))
+        if not os.path.exists(db_dest):
+            cmd = "mkdir" + db_dest
+            os.system(cmd)
+        conn = sqlite3.connect(db_dest+'zenodo.db')
         c = conn.cursor()
-        c.execute('''CREATE TABLE uploads
-             (date_uploaded, doi)''')
+        try:
+            c.execute("CREATE TABLE uploads (date_uploaded, doi)")
+        except:
+            pass
         c.execute("INSERT INTO uploads VALUES (?,?)",[datetime.now(),doi])
 
         # Commit and close
@@ -158,8 +163,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
     @web.authenticated
     @gen.coroutine
     def get(self, path=''):
-        # print("In GET routine for upload handler")
-        print("testing my store data function")
+        print("In GET routine for upload handler")
         info = {'status':'executed get', 'doi':"no doi here"}
         self.set_status(200)
         self.write(json.dumps(info))
@@ -214,10 +218,13 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             print("doi: "+str(doi))
             self.set_status(201)
             self.write(json.dumps(info))
+            self.store_record(doi)
+            #self.redirect("http://127.0.0.1:7000/portal/upload/"+doi)
+            self.finish()
         else:
             info = {'status':'failure', 'doi': None}
             print("no doi")
             self.set_status(404)
             self.write(json.dumps(info))
-        self.finish()
+            self.finish()
         

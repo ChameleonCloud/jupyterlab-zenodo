@@ -124,25 +124,21 @@ function activateZenodoPlugin(
             if (!widget.isAttached){
                 app.shell.add(widget, 'main');
             }
-            console.log("trying to do a thing");
-            console.log('Executed ${commandIDs.uploadToZenodo}');
         },
     
     }); 
 
-    palette.addItem({command, category: 'Zenodo'})
-    console.log("Checking main menu");
-    console.log(mainMenu);
+    palette.addItem({command, category: 'Sharing'})
     const menu = new Menu({ commands: app.commands });
     
     menu.addItem({
         command: command,
         args: {},
     });
-    menu.title.label = 'Zenodo';
+    menu.title.label = 'Share';
     
 
-    mainMenu.addMenu(menu, { rank: 40 });
+    mainMenu.addMenu(menu, { rank: 20 });
 
 } 
  
