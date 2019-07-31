@@ -3,7 +3,7 @@
 import glob, json, re, os
 import requests
 import sqlite3
-from urllib.parse import unquote_plus, parse_qs
+from urllib.parse import unquote_plus, parse_qsl
 from datetime import datetime
 from contextlib import contextmanager
 
@@ -172,6 +172,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
     @web.authenticated
     @gen.coroutine
     def post(self, path=''):
+        self.check_xsrf_cookie()
         print("In POST routine for upload handler")
 
         """
@@ -181,17 +182,16 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         """
 
         request_data_str= (str(self.request.body)[2:])[:-1]
-        request_data = parse_qs(request_data_str)
+        request_data = dict(parse_qsl(request_data_str))
+        
 
         try:
-            # add [0] because parse_qs returns a list for each key
-            title = request_data['title'][0]
+            title = request_data['title']
             print(title)
-            file_prefix = request_data.get('file_prefix',['workingdir'])[0]
+            file_prefix = request_data['file_prefix']
             print(file_prefix)
             authors = request_data['author']
-            print(authors[0])
-            description = request_data['description'][0]      
+            description = request_data['description']
             print(description)
         except KeyError:
             info = {'status':'failure', 'message':'Missing some data!', 'doi' : None}
@@ -200,16 +200,15 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             self.finish()
             return
 
-        try:
-            access_token = request_data['access_token'][0] 
-        except KeyError:
-            access_token = '***REMOVED***'
+        our_access_token = '***REMOVED***'
+        access_token = request_data.get('access_token', our_access_token)
+        directory_to_zip = request_data.get('directory','work')
 
         filename = file_prefix + ".zip"
 
-        self.zip_dir(self.notebook_dir, filename)
+        self.zip_dir(directory_to_zip, filename)
 
-        path_to_file = self.notebook_dir + "/" + filename
+        path_to_file = directory_to_zip + "/../" + filename
         metadata = self.assemble_metadata(title, authors, description)
 
         doi = self.upload_file(filename, path_to_file, metadata, access_token) 

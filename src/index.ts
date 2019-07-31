@@ -76,8 +76,7 @@ function activateZenodoPlugin(
 
     let upload_form = document.createElement('form');
     upload_form.id = 'submit-form';
-    //upload_form.action="/zenodo/upload?_xsrf=444b220ba95f2c2edcb4fa0be19219c2b8c26f3072663b34"
-    upload_form.action="/zenodo/upload?token="
+    upload_form.action="/zenodo/upload?token=729tokMK2019"
     upload_form.method="post"
 
     let header = document.createElement('h2');
@@ -94,6 +93,7 @@ function activateZenodoPlugin(
     form_body.appendChild(newInput('Prefix for zip file','file_prefix'));
     form_body.appendChild(newInput('Author','author'));
     form_body.appendChild(newInput('Description','description'));
+    form_body.appendChild(newInput('Directory to zip (default is work)','directory'));
     form_body.appendChild(newInput('Access token (optional)','zenodo-token'));
     
     let submit_row = document.createElement('tr')
