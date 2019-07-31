@@ -1,4 +1,4 @@
-""" JupyterLab Zenodo : Exporting from JupyterLab to Zenodo """
+""" JupyterLab Zenodo : Updating Zenodo Deposition """
 
 import cgi
 import glob, json, re, os
@@ -14,74 +14,14 @@ from notebook.base.handlers import APIHandler
 
 from .base import ZenodoBaseHandler
 
-class ZenodoUploadHandler(ZenodoBaseHandler):
+class ZenodoUpdateHandler(ZenodoBaseHandler):
     """
-    A handler that uploads your files to Zenodo
+    A handler that updates your files on Zenodo
     """
     def initialize(self, notebook_dir):
         self.notebook_dir = notebook_dir
 
-    def zip_dir(self, notebook_dir, filename):
-        """Create zip file filename from notebook_dir
-        
-        Parameters
-        ----------
-        notebook_dir : string
-            Explicit path to directory to be zipped
-        filename : string
-            Filename to zip to; must end with '.zip'
-
-        Returns
-        -------
-        null
-            Raises exception on error
-
-        Notes
-        -----
-        - Error handling incomplete
-        """  
-
-        if filename[-4:] != ".zip":
-            raise Exception("filename invalid")
-
-        # Go to directly outside work directory
-        cmd = "cd /"+notebook_dir+"/.."
-        os.system(cmd)
-        
-        # Zip work directory to filename
-        cmd = "zip -r "+filename+" "+notebook_dir+"/"
-        os.system(cmd) 
-
-
-    def assemble_metadata(self, title, authors, description):
-        """Turn metadata into a dictionary for Zenodo upload
-
-        Parameters
-        ----------
-        title : string
-        authors : list of strings
-        description : string
-
-        Returns
-        -------
-        dictionary
-            Dictionary fields are left empty if not provided
-
-        """
-        # Turn list of author strings into list of author dictionaries
-        creator_list = []
-        for author in authors:
-            creator_list.append({'name': author, 'affiliation': 'Chameleon Cloud'})
-
-        metadata = {}
-        metadata['title'] = title 
-        metadata['upload_type'] = 'publication' 
-        metadata['publication_type'] = 'workingpaper'
-        metadata['description'] = description 
-        metadata['creators'] = creator_list 
-        return metadata
-
-    def upload_file(self, filename, path_to_file, metadata, access_token):
+    def update_file(self, filename, path_to_file, metadata, access_token):
         """Upload the given file at the given path to Zenodo
            Add included metadata
 
@@ -164,8 +104,8 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
     @web.authenticated
     @gen.coroutine
     def get(self, path=''):
-        print("In GET routine for upload handler")
-        info = {'status':'executed get', 'doi':"no doi here"}
+        print("In GET routine for update handler")
+        info = {'status':'executed get in update', 'doi':"no doi here"}
         self.set_status(200)
         self.write(json.dumps(info))
         self.finish()
@@ -173,46 +113,51 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
     @web.authenticated
     @gen.coroutine
     def post(self, path=''):
-
-        """
-        Takes in a a file prefix string, and metadata
-        Zips notebook_dir to file_prefix.zip, uploads to Zenodo
-        Returns dictionary with status (success or failure) and doi (if successful)
-        """
         self.check_xsrf_cookie()
-        print("\n\n\n\nIn POST routine for upload handler")
+        print("In POST routine for update handler")
 
+        """
+        Takes in a a file prefix string
+        Zips notebook_dir to file_prefix.zip, updates on Zenodo
+        Returns dictionary with status (success or failure)
+        """
         form = cgi.FieldStorage() 
         print("form")
         print(form)
+        title = form.getvalue("title")
+        file_prefix = form.getvalue("file_prefix") 
+        author = form.getvalue("author") 
+        print("all these! "+title+author+file_prefix)
 
 
         my_body = self.request.body.decode("utf-8")
         print(str(self.request.body))
         print(my_body)
         print(path)
-        #request_data_str= (str(self.request.body)[2:])[:-1]
-        #request_data = dict(parse_qsl(request_data_str))
-        request_data = json.loads(my_body)
+        request_data_str= (str(self.request.body)[2:])[:-1]
+        request_data = dict(parse_qsl(request_data_str))
 
         
-        title = request_data['title']
-        file_prefix = request_data['file_prefix']
-        authors = request_data['author']
-        description = request_data['description']
 
-        if any([len(title) <= 3, len(authors) <=3, len(description) <= 3]):
-            info = {'status':'failure', 'message':'Title, author, and description fields must all be filled in and at least four characters long', 'doi' : None}
+        try:
+            title = request_data['title']
+            print(title)
+            file_prefix = request_data['file_prefix']
+            print(file_prefix)
+            authors = request_data['author']
+            description = request_data['description']
+            print(description)
+        except KeyError:
+            print("key error\n\n")
+            info = {'status':'failure', 'message':'Missing some data!', 'doi' : None}
             self.set_status(400)
             self.write(json.dumps(info))
             self.finish()
             return
 
         our_access_token = '***REMOVED***'
-        access_token = request_data.get('access_token') or our_access_token
-        directory_to_zip = request_data.get('directory') or 'work'
-            
-        print("dir: "+directory_to_zip)
+        access_token = request_data.get('access_token', our_access_token)
+        directory_to_zip = request_data.get('directory','work')
 
         filename = file_prefix + ".zip"
 
@@ -232,10 +177,9 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             #self.redirect("http://127.0.0.1:7000/portal/upload/"+doi)
             self.finish()
         else:
-            info = {'status':'failure', 'doi': None,
-                 'message': "There was an error uploading to Zenodo"}
+            info = {'status':'failure', 'doi': None}
             print("no doi")
-            self.set_status(404);
+            self.set_status(404)
             self.write(json.dumps(info))
             self.finish()
         
