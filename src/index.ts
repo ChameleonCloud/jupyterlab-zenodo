@@ -237,19 +237,6 @@ function activateZenodoPlugin(
     // Add main upload div to widget
     content.node.appendChild(main);
 
-    /*  Sample values for testing 
-    
-    let item = document.getElementById('title-input') as HTMLInputElement;
-    item.value = 'test';
-    item = document.getElementById('description-input') as HTMLInputElement;
-    item.value = 'test';
-    item = document.getElementById('file_prefix-input') as HTMLInputElement;
-    item.value = 'test';
-    item = document.getElementById('author-input') as HTMLInputElement;
-    item.value = 'test';
-
-    */
-
     const command: string = 'zenodo:upload'
     app.commands.addCommand(command, {
         label: 'Upload to Zenodo',
@@ -264,11 +251,29 @@ function activateZenodoPlugin(
     
     }); 
 
+    const command2: string = 'zenodo:update'
+    app.commands.addCommand(command2, {
+        label: 'Update Zenodo Deposition',
+        isEnabled: () => true,
+        isToggled: () => false, 
+        iconClass: 'icon-class',
+        execute: () => {
+            alert("This causes an update"); 
+        },
+    
+    }); 
+
+
     palette.addItem({command, category: 'Sharing'})
+    palette.addItem({command2, category: 'Sharing'})
     const menu = new Menu({ commands: app.commands });
     
     menu.addItem({
         command: command,
+        args: {},
+    });
+    menu.addItem({
+        command: command2,
         args: {},
     });
     menu.title.label = 'Share';
