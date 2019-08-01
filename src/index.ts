@@ -212,11 +212,11 @@ function activateZenodoPlugin(
     let form_table = document.createElement('table')
     let form_body = document.createElement('tbody')
     form_body.appendChild(newInput('Title','title'));
-    form_body.appendChild(newInput('Prefix for zip file','file_prefix'));
+    form_body.appendChild(newInput('Name for compressed file','filename'));
     form_body.appendChild(newInput('Author','author'));
     form_body.appendChild(newInput('Description','description'));
     form_body.appendChild(newInput('Directory to zip (default is work)','directory'));
-    form_body.appendChild(newInput('Access token (optional)','zenodo-token'));
+    form_body.appendChild(newInput('Access token (optional)','zenodo_token'));
 
     // Make space for submit button    
     let submit_row = document.createElement('tr')
