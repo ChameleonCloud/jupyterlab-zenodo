@@ -62,7 +62,7 @@ function handleUploadResponse(
             var portal_button = document.getElementById("portal-button") as HTMLLinkElement;
         
             loading.style.display = "None";
-            success.style.display = "Block";
+            success.style.display = "Flex";
             let doi = data.doi;
             console.log(doi);
             let record_id = (doi.split('.')).pop();
@@ -101,27 +101,7 @@ function sendFormData(){
     console.log("about to connect");
     ServerConnection.makeRequest(fullURL,
         {method: 'POST', body: body_json}, settings).then(
-        //response => { handleUploadResponse(JSON.parse(String(response))); });
         response => { handleUploadResponse(response); });
-//            handleJsonResponse<void>()).then(() => {});
-
-    //console.log("connected");
-    //alert(FD.get('title'));
-    
-    /*
-    XHR.addEventListener(
-        "error", function(event){ alert("testing...error!")}
-    );
-
-    XHR.addEventListener(
-        "load", function(event){ alert("testing...success!")}
-    );
-
-
-    XHR.open("POST","/zenodo/upload?token=729tokMK2019");
-
-    XHR.send(FD);
-    */
 }
 
 
@@ -154,7 +134,6 @@ function activateZenodoPlugin(
     editorTracker: IEditorTracker,
     mainMenu: IMainMenu
   ): void {
-    //const serverSettings = ServerConnection.makeSettings();
     console.log("Activating plugin");
     const content = new Widget();
     const widget = new MainAreaWidget({content});
@@ -178,15 +157,24 @@ function activateZenodoPlugin(
     let success_div = document.createElement('div');
     success_div.style.display = "None";
     success_div.id = 'success-div';
-    success_div.innerHTML = "Congratulations, your files have been uploaded to Zenodo!";
+    success_div.innerHTML = "<h1> Congratulations, your files have been uploaded to Zenodo! </h1>";
+    let tr = document.createElement("tr");
     let zenodo_button = document.createElement("a"); 
-    zenodo_button.innerHTML = "<p> View on Zenodo </p>";
+    zenodo_button.innerHTML = "View on Zenodo";
     zenodo_button.id = "zenodo-button";
+    zenodo_button.classList.add("basic-btn");
+    
+    let td_zenodo = document.createElement("td");
     let portal_button = document.createElement("a"); 
-    portal_button.innerHTML = "<p> Upload to the Chameleon sharing portal </p>";
+    portal_button.innerHTML = "Upload to the Chameleon sharing portal";
     portal_button.id = "portal-button";
-    success_div.appendChild(zenodo_button);
-    success_div.appendChild(portal_button);
+    portal_button.classList.add("basic-btn");
+    let td_portal = document.createElement("td");
+    td_zenodo.appendChild(zenodo_button);
+    td_portal.appendChild(portal_button);
+    tr.appendChild(td_zenodo);
+    tr.appendChild(td_portal);
+    success_div.appendChild(tr);
     // Add to main div
     main.appendChild(success_div);
 
@@ -227,7 +215,7 @@ function activateZenodoPlugin(
     // Create submit button
     submit_button.type = 'submit';
     submit_button.value = 'Submit';
-    submit_button.classList.add("submit-btn");
+    submit_button.classList.add("basic-btn");
     upload_form.addEventListener('submit', function (event) {
         event.preventDefault();
         sendFormData();

@@ -1,13 +1,23 @@
-body {
-    font-family: var(--jp-ui-font-family);
-}
-
 input {
     font-family: var(--jp-ui-font-family);
     font-size: 14px;
 }
 
-.submit-btn {
+h1, h2{
+    text-align: center;
+}
+
+#zenodo-upload-main {
+    padding: 15px;
+    font-family: var(--jp-ui-font-family);
+}
+
+#success-div {
+    display: flex;
+    flex-direction: column;
+}
+
+.basic-btn {
     background-color: #ededed; 
     border: 1px solid transparent;
     border-color: grey;
@@ -17,10 +27,6 @@ input {
 
 .submit-btn:hover{
     background-color: #bdbdbd;
-}
-
-#zenodo-upload-main {
-    padding: 15px;
 }
 
 #submit-form p {
@@ -42,10 +48,14 @@ th {
 }
 
 
-#zenodo-token th {
+#zenodo_token th {
     font-weight: normal;
 }
 
 #directory th {
     font-weight: normal;
+}
+
+#zenodo-jupyterlab .p-Widget{
+    overflow-y: scroll;
 }
