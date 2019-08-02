@@ -265,11 +265,11 @@ function activateZenodoPlugin(
 
 
     palette.addItem({command, category: 'Sharing'})
-    palette.addItem({command2, category: 'Sharing'})
+    palette.addItem({command: command2, category: 'Sharing'})
     const menu = new Menu({ commands: app.commands });
     
     menu.addItem({
-        command: command,
+        command,
         args: {},
     });
     menu.addItem({
