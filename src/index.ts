@@ -283,6 +283,10 @@ function activateZenodoPlugin(
             if (!widget.isAttached){
                 app.shell.add(widget, 'main');
             }
+            upload_form.style.display = "Block";
+            outer_error.style.display = "None";
+            success_div.style.display = "None";
+            loading_div.style.display = "None";
         },
     
     }); 
@@ -298,6 +302,7 @@ function activateZenodoPlugin(
             }
             upload_form.style.display = "None";
             outer_error.style.display = "None";
+            success_div.style.display = "None";
             loading_div.style.display = "Flex";
             console.log("This causes an update"); 
             var settings =ServerConnection.makeSettings()
