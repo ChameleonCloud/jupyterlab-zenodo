@@ -284,10 +284,20 @@ function activateZenodoPlugin(
 
     }); 
 
+<<<<<<< HEAD
     const menu = new Menu({ commands: app.commands });
     
     menu.addItem({
         command: CommandIDs.upload
+=======
+    palette.addItem({command, category: 'Sharing'})
+    palette.addItem({command: command2, category: 'Sharing'})
+    const menu = new Menu({ commands: app.commands });
+    
+    menu.addItem({
+        command,
+        args: {},
+>>>>>>> b3f10cb3d7e761186293f1deb1a2a98d37b3e371
     });
  
     menu.addItem({
