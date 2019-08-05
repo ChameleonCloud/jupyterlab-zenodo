@@ -46,6 +46,23 @@ namespace CommandIDs {
     export const update = 'zenodo:update';
 }
 
+function show_success(
+    doi : string
+  ){
+    var success = document.getElementById("success-div") as HTMLElement;
+    var zenodo_button = document.getElementById("zenodo-button") as HTMLLinkElement;
+
+    var loading = document.getElementById("loading-div") as HTMLElement;
+    loading.style.display = "None";
+    success.style.display = "Flex";
+    console.log(doi);
+    let record_id = (doi.split('.')).pop();
+    zenodo_button.target="_blank";
+    //TODO: delete 'sandbox' before Zenodo
+    zenodo_button.href = "https://sandbox.zenodo.org/record/"+record_id;
+    console.log("it worked!");
+}
+
 function handleUploadResponse(
     response : Response
    ){
@@ -62,21 +79,12 @@ function handleUploadResponse(
         });
     } else {
         return response.json().then(data => {
-            var success = document.getElementById("success-div") as HTMLElement;
-            var zenodo_button = document.getElementById("zenodo-button") as HTMLLinkElement;
-            var portal_button = document.getElementById("portal-button") as HTMLLinkElement;
-        
-            loading.style.display = "None";
-            success.style.display = "Flex";
             let doi = data.doi;
-            console.log(doi);
-            let record_id = (doi.split('.')).pop();
-            zenodo_button.target="_blank";
-            zenodo_button.href = "https://zenodo.org/record/"+record_id;
-            //TODO: fix this before deployment
+            show_success(doi);
+            var portal_button = document.getElementById("portal-button") as HTMLLinkElement;
             portal_button.target="_blank";
+            //TODO: fix this before deployment
             portal_button.href = "http://localhost:7000/portal/upload/"+doi;
-            console.log("it worked!");
         });
     }
 }
@@ -92,7 +100,11 @@ function handleUpdateResponse(
         });
     } else {
         return response.json().then(data => {
-            alert("Your deposition was successfully updated");
+            let doi = data.doi;
+            show_success(doi);
+            var portal_button = document.getElementById("portal-button") as HTMLLinkElement;
+            portal_button.style.display = "None"
+            //alert("Your deposition was successfully updated");
         });
     }
 }
@@ -272,6 +284,11 @@ function activateZenodoPlugin(
         isToggled: () => false, 
         iconClass: 'icon-class',
         execute: () => {
+            if (!widget.isAttached){
+                upload_form.style.display = "None"
+                loading_div.style.display = "Flex"
+                app.shell.add(widget, 'main');
+            }
             console.log("This causes an update"); 
             var settings =ServerConnection.makeSettings()
             const parts = [settings.baseUrl, 'zenodo', 'update']
@@ -284,20 +301,10 @@ function activateZenodoPlugin(
 
     }); 
 
-<<<<<<< HEAD
     const menu = new Menu({ commands: app.commands });
     
     menu.addItem({
         command: CommandIDs.upload
-=======
-    palette.addItem({command, category: 'Sharing'})
-    palette.addItem({command: command2, category: 'Sharing'})
-    const menu = new Menu({ commands: app.commands });
-    
-    menu.addItem({
-        command,
-        args: {},
->>>>>>> b3f10cb3d7e761186293f1deb1a2a98d37b3e371
     });
  
     menu.addItem({
