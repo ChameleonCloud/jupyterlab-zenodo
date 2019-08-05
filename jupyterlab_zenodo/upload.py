@@ -15,6 +15,12 @@ from notebook.base.handlers import APIHandler
 from .base import ZenodoBaseHandler
 from .utils import zip_dir, get_id, store_record
 
+
+debug = True
+
+def myPrint(string):
+    if debug:
+        print(string)
 class ZenodoUploadHandler(ZenodoBaseHandler):
     """
     A handler that uploads your files to Zenodo
@@ -22,18 +28,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
     def initialize(self, notebook_dir):
         self.notebook_dir = notebook_dir
 
-    def return_error(self, error_message):
-        info = {
-            'status':'failure',
-            'message': error_message,
-            'doi' : None
-        }
-        self.set_status(400)
-        self.write(json.dumps(info))
-        self.finish()
-        return
-
-    def assemble_metadata(self, title, authors, description):
+    def assemble_metadata(self, title, author, description):
         """Turn metadata into a dictionary for Zenodo upload
 
         Parameters
@@ -50,8 +45,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         """
         # Turn list of author strings into list of author dictionaries
         creator_list = []
-        for author in authors:
-            creator_list.append({'name': author, 'affiliation': 'Chameleon Cloud'})
+        creator_list.append({'name': author, 'affiliation': 'Chameleon Cloud'})
 
         metadata = {}
         metadata['title'] = title 
@@ -82,29 +76,53 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         Notes
         -----
         - Does not yet have ANY error handling
+        - Currently using Zenodo sandbox
     
         """
 
+        #TODO: get rid of 'sandbox' before deployment
+        print("metadata creators: "+str(metadata['creators']))
+        url_base = 'https://sandbox.zenodo.org/api'
+
         ACCESS_TOKEN = access_token
         headers = {"Content-Type": "application/json"}
+
         # Create deposition
-        r = requests.post('https://zenodo.org/api/deposit/depositions',
+        r = requests.post(url_base + '/deposit/depositions',
                           params={'access_token': ACCESS_TOKEN}, json={},
                           headers=headers)
-        deposition_id = r.json()['id']
+        # retrieve deposition id
+        rdict = r.json()
+        print(rdict)
+        deposition_id = rdict['id']
+
+        # Organize and upload file
         data = {'filename': path_to_file.split('/')[-1]}
         files = {'file': open(path_to_file, 'rb')}
-        r = requests.post('https://zenodo.org/api/deposit/depositions/%s/files' % deposition_id,
+        r = requests.post(url_base + '/deposit/depositions/%s/files' 
+                            % deposition_id,
                           params={'access_token': ACCESS_TOKEN}, data=data,
                           files=files)
-        r = requests.put('https://zenodo.org/api/deposit/depositions/%s' % deposition_id,
+        myPrint(r.json())
+
+        # Add metadata
+        r = requests.put(url_base + '/deposit/depositions/%s' 
+                            % deposition_id,
                          params={'access_token': ACCESS_TOKEN}, 
                          data=json.dumps({'metadata': metadata}),
                          headers=headers)
-        r_dict = r.json()
-        doi = r_dict.get('doi') 
+        myPrint(r.json())
+        # Publish
+        r = requests.post(url_base + '/deposit/depositions/%s/actions/publish' 
+                            % deposition_id,
+                          params={'access_token': ACCESS_TOKEN})
+        rdict = r.json()
+        myPrint(rdict)
+    
+        # Get doi (or prereserve_doi)
+        doi = rdict.get('doi') 
         if not doi:
-            doi = r_dict.get('metadata',{}).get('prereserve_doi',{}).get('doi')
+            doi = rdict.get('metadata',{}).get('prereserve_doi',{}).get('doi')
         return doi
     
     @web.authenticated
@@ -146,6 +164,10 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
            self.return_error("Please provide a name for the zip file")
             
 
+        #Real version
+        #our_access_token = '***REMOVED***'
+
+        #Sandbox version:
         our_access_token = '***REMOVED***'
         # If the user has no access token, use ours
         access_token = request_data.get('zenodo_token') or our_access_token

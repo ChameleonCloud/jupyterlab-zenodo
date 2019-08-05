@@ -41,6 +41,11 @@ const zenodoPlugin: JupyterFrontEndPlugin<void> = {
   activate: activateZenodoPlugin
 };
 
+namespace CommandIDs {
+    export const upload = 'zenodo:upload';
+    export const update = 'zenodo:update';
+}
+
 function handleUploadResponse(
     response : Response
    ){
@@ -76,10 +81,23 @@ function handleUploadResponse(
     }
 }
 
+function handleUpdateResponse(
+    response : Response
+   ){
+    console.log('status',response.status);
 
+    if (response.status > 299) {
+        return response.json().then(data => {
+            alert("Error: " + data.message + ". Please try again.");
+        });
+    } else {
+        return response.json().then(data => {
+            alert("Your deposition was successfully updated");
+        });
+    }
+}
+ 
 function sendFormData(){
-    //var XHR = new XMLHttpRequest();
-
     var form = document.getElementById('submit-form') as HTMLFormElement;
     var loading = document.getElementById('loading-div') as HTMLElement;
     form.style.display = "None";
@@ -92,9 +110,7 @@ function sendFormData(){
     });
     var body_json = JSON.stringify(formbody);
 
-    //var token_param = '?token=729tokMK2019'    
     var settings =ServerConnection.makeSettings()
-    //const parts = [settings.baseUrl, 'zenodo', 'upload', token_param]
     const parts = [settings.baseUrl, 'zenodo', 'upload']
     const fullURL = URLExt.join.apply(URLExt, parts);
 
@@ -237,8 +253,7 @@ function activateZenodoPlugin(
     // Add main upload div to widget
     content.node.appendChild(main);
 
-    const command: string = 'zenodo:upload'
-    app.commands.addCommand(command, {
+    app.commands.addCommand(CommandIDs.upload, {
         label: 'Upload to Zenodo',
         isEnabled: () => true,
         isToggled: () => false, 
@@ -251,33 +266,41 @@ function activateZenodoPlugin(
     
     }); 
 
-    const command2: string = 'zenodo:update'
-    app.commands.addCommand(command2, {
+    app.commands.addCommand(CommandIDs.update, {
         label: 'Update Zenodo Deposition',
         isEnabled: () => true,
         isToggled: () => false, 
         iconClass: 'icon-class',
         execute: () => {
-            alert("This causes an update"); 
-        },
-    
+            console.log("This causes an update"); 
+            var settings =ServerConnection.makeSettings()
+            const parts = [settings.baseUrl, 'zenodo', 'update']
+            const fullURL = URLExt.join.apply(URLExt, parts);
+
+            ServerConnection.makeRequest(fullURL,
+                {method: 'POST'}, settings).then(
+                response => { handleUpdateResponse(response); });
+        }
+
     }); 
 
-
-    palette.addItem({command, category: 'Sharing'})
-    palette.addItem({command2, category: 'Sharing'})
     const menu = new Menu({ commands: app.commands });
     
     menu.addItem({
-        command: command,
-        args: {},
+        command: CommandIDs.upload
     });
+ 
     menu.addItem({
-        command: command2,
-        args: {},
+        command: CommandIDs.update
     });
-    menu.title.label = 'Share';
     
+
+    palette.addItem({command: CommandIDs.upload, category: 'Sharing'})
+    palette.addItem({command: CommandIDs.update, category: 'Sharing'})
+    
+
+
+    menu.title.label = 'Share';
 
     mainMenu.addMenu(menu, { rank: 20 });
 

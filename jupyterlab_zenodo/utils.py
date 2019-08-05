@@ -1,3 +1,7 @@
+from datetime import datetime
+import os
+import sqlite3
+
 
 def get_id(doi):
     """Parses Zenodo DOI to isolate record id"""
@@ -34,7 +38,7 @@ def zip_dir(notebook_dir, filename):
     
     try:
         # Zip work directory to filename
-        cmd = "zip -r "+filename+" "+notebook_dir+"/"
+        cmd = "zip -u -r "+filename+" "+notebook_dir+"/"
         os.system(cmd) 
     except:
         raise Exception("Your files were unable to be compressed. Please try again.")
@@ -64,6 +68,10 @@ def store_record(doi, filename, directory, access_token):
     -------
         void
         """
+    
+    if filename[-4:] != '.zip':
+        filename = filename + '.zip'
+
     db_dest = "/work/.zenodo/"
     print(os.path.exists(db_dest))
     if not os.path.exists(db_dest):
@@ -75,7 +83,7 @@ def store_record(doi, filename, directory, access_token):
         c.execute("CREATE TABLE uploads (date_uploaded, doi, directory, filename, access_token)")
     except:
         pass
-    c.execute("INSERT INTO uploads VALUES (?,?,?,?)",[datetime.now(),doi, directory, filename])
+    c.execute("INSERT INTO uploads VALUES (?,?,?,?,?)",[datetime.now(),doi, directory, filename, access_token])
         # Commit and close
     conn.commit()
     conn.close()
