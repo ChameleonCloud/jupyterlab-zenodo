@@ -72,7 +72,7 @@ function handleUploadResponse(
     if (response.status > 299) {
         return response.json().then(data => {
             var form = document.getElementById("submit-form") as HTMLElement;
-            let error = document.getElementById("error-div") as HTMLElement;
+            let error = document.getElementById("form-error-div") as HTMLElement;
             loading.style.display = "None";
             form.style.display = "Block";
             error.innerHTML = "Error: "+data.message + ". Please try again.";
@@ -93,10 +93,14 @@ function handleUpdateResponse(
     response : Response
    ){
     console.log('status',response.status);
+    var loading = document.getElementById("loading-div") as HTMLElement;
 
     if (response.status > 299) {
         return response.json().then(data => {
-            alert("Error: " + data.message + ". Please try again.");
+            let error = document.getElementById("outer-error-div") as HTMLElement;
+            loading.style.display = "None";
+            error.style.display = "Block";
+            error.innerHTML = "Error: "+data.message + ". Please try again.";
         });
     } else {
         return response.json().then(data => {
@@ -219,10 +223,15 @@ function activateZenodoPlugin(
     upload_form.appendChild(subheader);
 
     // Error messages
-    let error = document.createElement('p');
-    error.id = "error-div";
-    error.style.color = "red";
-    upload_form.appendChild(error);
+    let form_error = document.createElement('p');
+    form_error.id = "form-error-div";
+    form_error.style.color = "red";
+    upload_form.appendChild(form_error);
+
+    let outer_error = document.createElement('p');
+    outer_error.id = "outer-error-div";
+    outer_error.style.color = "red";
+    main.appendChild(outer_error);
 
     // The actual form
     let form_table = document.createElement('table')
@@ -285,10 +294,11 @@ function activateZenodoPlugin(
         iconClass: 'icon-class',
         execute: () => {
             if (!widget.isAttached){
-                upload_form.style.display = "None"
-                loading_div.style.display = "Flex"
                 app.shell.add(widget, 'main');
             }
+            upload_form.style.display = "None";
+            outer_error.style.display = "None";
+            loading_div.style.display = "Flex";
             console.log("This causes an update"); 
             var settings =ServerConnection.makeSettings()
             const parts = [settings.baseUrl, 'zenodo', 'update']

@@ -131,6 +131,12 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
                           params={'access_token': access_token})
         r_dict = r.json()
         print(r_dict)
+        if r_dict['status'] == 400:
+            if r_dict['errors'][0]['code'] == 10:
+                print("the thing happened")
+                raise Exception("You need to update some of your files before trying to update your deposition on Zenodo")
+            else:
+                raise Exception("Something went wrong with Zenodo")
 
         # Get doi (or prereserve doi)
         doi = r_dict.get('doi') 
@@ -139,36 +145,6 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
         print("doi: "+str(doi))
         return doi
     
-    def store_record(self, doi):
-        """Store a record of publication in a local sqlite database
-    
-        Parameters
-        ----------
-        doi : string
-            Zenodo DOI given to uploaded record
-    
-        Returns
-        -------
-            void
-
-        """
-        db_dest = "/work/.zenodo/"
-        print(os.path.exists(db_dest))
-        if not os.path.exists(db_dest):
-            cmd = "mkdir" + db_dest
-            os.system(cmd)
-        conn = sqlite3.connect(db_dest+'zenodo.db')
-        c = conn.cursor()
-        try:
-            c.execute("CREATE TABLE uploads (date_uploaded, doi)")
-        except:
-            pass
-        c.execute("INSERT INTO uploads VALUES (?,?)",[datetime.now(),doi])
-
-        # Commit and close
-        conn.commit()
-        conn.close()
-
     @web.authenticated
     @gen.coroutine
     def get(self, path=''):
@@ -212,6 +188,7 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
 
             doi = self.update_file(filename, directory+'/../'+filename, record_id, access_token)
         except Exception as e:
+            print("In update POST: returning error")
             self.return_error(str(e))
             return
 
