@@ -52,6 +52,7 @@
     "@jupyterlab/coreutils": "*",
     "@jupyterlab/docmanager": "*",
     "@jupyterlab/docregistry": "*",
+    "@jupyterlab/filebrowser": "*",
     "@jupyterlab/fileeditor": "*",
     "@jupyterlab/mainmenu": "*",
     "@jupyterlab/services": "*",

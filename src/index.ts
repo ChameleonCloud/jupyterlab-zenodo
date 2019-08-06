@@ -14,6 +14,10 @@ import {
     ISettingRegistry,
 } from '@jupyterlab/coreutils';
 
+import {
+    IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
+
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { IEditorTracker } from '@jupyterlab/fileeditor';
@@ -33,10 +37,11 @@ const zenodoPlugin: JupyterFrontEndPlugin<void> = {
   id: zenodoPluginId,
   autoStart: true,
   requires: [
-    ISettingRegistry,
     ICommandPalette,
     IEditorTracker,
+    IFileBrowserFactory,
     IMainMenu,
+    ISettingRegistry,
   ],
   activate: activateZenodoPlugin
 };
@@ -44,6 +49,7 @@ const zenodoPlugin: JupyterFrontEndPlugin<void> = {
 namespace CommandIDs {
     export const upload = 'zenodo:upload';
     export const update = 'zenodo:update';
+    export const publish_directory = 'zenodo:publish-directory';
 }
 
 function show_success(
@@ -149,6 +155,7 @@ function newInput(
 
     let input_cell = document.createElement('td');
     let input = document.createElement('input');
+    //input.value = "";
     input.type = 'text';
     input.name = id;
     input.id = id+'-input';
@@ -161,12 +168,17 @@ function newInput(
 
 function activateZenodoPlugin(
     app: JupyterFrontEnd,
-    settingRegistry: ISettingRegistry,
     palette: ICommandPalette,
     editorTracker: IEditorTracker,
-    mainMenu: IMainMenu
+    factory: IFileBrowserFactory,
+    mainMenu: IMainMenu,
+    settingRegistry: ISettingRegistry,
   ): void {
-    console.log("Activating plugin");
+
+
+
+    const { tracker } = factory;
+
     const content = new Widget();
     const widget = new MainAreaWidget({content});
     widget.id = 'zenodo-jupyterlab';
@@ -274,6 +286,36 @@ function activateZenodoPlugin(
     // Add main upload div to widget
     content.node.appendChild(main);
 
+    app.commands.addCommand(CommandIDs.publish_directory, {
+        //HERE
+        label: 'Publish to Zenodo',
+        isEnabled: () => true,
+        isToggled: () => false, 
+        execute: () => {
+            if (!tracker.currentWidget){
+                return;
+            }
+            const item = tracker.currentWidget.selectedItems().next();
+            if (!item){
+                return;
+            } 
+            if (!widget.isAttached){
+                app.shell.add(widget, 'main');
+            }
+            let path = item.path;
+            console.log(path); 
+            let dir_input = document.getElementById("directory-input") as HTMLInputElement
+            dir_input.value = path;
+            let dir_row = document.getElementById("directory") as HTMLElement;
+            dir_row.style.display = "None";
+            
+            upload_form.style.display = "Block";
+            outer_error.style.display = "None";
+            success_div.style.display = "None";
+            loading_div.style.display = "None";
+        },
+    });
+
     app.commands.addCommand(CommandIDs.upload, {
         label: 'Upload to Zenodo',
         isEnabled: () => true,
@@ -325,16 +367,21 @@ function activateZenodoPlugin(
     menu.addItem({
         command: CommandIDs.update
     });
-    
 
     palette.addItem({command: CommandIDs.upload, category: 'Sharing'})
     palette.addItem({command: CommandIDs.update, category: 'Sharing'})
-    
-
 
     menu.title.label = 'Share';
 
     mainMenu.addMenu(menu, { rank: 20 });
+
+    const selectorItem = '.jp-DirListing-item[data-isdir=true]';
+
+    app.contextMenu.addItem({
+        command: CommandIDs.publish_directory,
+        selector: selectorItem,
+        rank: 4
+    });
 
 } 
  
