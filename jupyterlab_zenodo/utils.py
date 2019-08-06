@@ -1,6 +1,9 @@
 from datetime import datetime
 import os
 import sqlite3
+import tempfile
+import zipfile
+
 
 
 def get_id(doi):
@@ -25,40 +28,35 @@ def zip_dir(notebook_dir, filename):
     -------
     string
         Full path of zipped file
-        Notes
+    Notes
     -----
     - Error handling incomplete
     """  
-    try:
-        # Go to directly outside work directory
-        cmd = "cd "+notebook_dir+"/.."
-        os.system(cmd)
-    except:
-        raise Exception("Invalid directory. Please provide a real path, excluding leading /'s")
-    
-    try:
-        # Zip work directory to filename
-        cmd = "zip -u -r "+filename+" "+notebook_dir+"/"
-        os.system(cmd) 
-    except:
-        raise Exception("Your files were unable to be compressed. Please try again.")
-
+    temp_dir = tempfile.mkdtemp();
+    if filename[-4:] != '.zip':
+        filename = filename+'.zip'
     # Final filename will end in .zip
-    if filename[-4:] == '.zip':
-        filepath = notebook_dir+'/../'+filename
-    else:
-        filepath = notebook_dir+'/../'+filename+'.zip'
+
+    filepath = temp_dir + "/" + filename
+    print(filepath)
+    
+    zipf = zipfile.ZipFile(filepath, 'w', zipfile.ZIP_DEFLATED)
+
+    for root, dirs, files in os.walk(notebook_dir):
+        for afile in files:
+            zipf.write(os.path.join(root,afile));
+    zipf.close()
     return filepath
 
-def store_record(doi, filename, directory, access_token):
+def store_record(doi, filepath, directory, access_token):
     """Store a record of publication in a local sqlite database
 
     Parameters
     ----------
     doi : string
         Zenodo DOI given to uploaded record
-    filename : string
-        Name of zip file that was uploaded
+    filepath : string
+        Full path of zip file that was uploaded
     directory : string
         Directory just compressed and uploaded
     access_token : string
@@ -69,8 +67,6 @@ def store_record(doi, filename, directory, access_token):
         void
         """
     
-    if filename[-4:] != '.zip':
-        filename = filename + '.zip'
 
     db_dest = "/work/.zenodo/"
     print(os.path.exists(db_dest))
@@ -83,7 +79,7 @@ def store_record(doi, filename, directory, access_token):
         c.execute("CREATE TABLE uploads (date_uploaded, doi, directory, filename, access_token)")
     except:
         pass
-    c.execute("INSERT INTO uploads VALUES (?,?,?,?,?)",[datetime.now(),doi, directory, filename, access_token])
+    c.execute("INSERT INTO uploads VALUES (?,?,?,?,?)",[datetime.now(),doi, directory, filepath, access_token])
         # Commit and close
     conn.commit()
     conn.close()

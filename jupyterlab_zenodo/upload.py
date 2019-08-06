@@ -189,7 +189,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             print("doi: "+str(doi))
             self.set_status(201)
             self.write(json.dumps(info))
-            store_record(doi, filename, directory_to_zip, access_token)
+            store_record(doi, path_to_file, directory_to_zip, access_token)
             #self.redirect("http://127.0.0.1:7000/portal/upload/"+doi)
             self.finish()
         else:
