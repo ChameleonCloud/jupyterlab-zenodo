@@ -314,6 +314,7 @@ function activateZenodoPlugin(
             success_div.style.display = "None";
             loading_div.style.display = "None";
         },
+        iconClass: 'jp-MaterialIcon jp-FileUploadIcon',
     });
 
     app.commands.addCommand(CommandIDs.upload, {
