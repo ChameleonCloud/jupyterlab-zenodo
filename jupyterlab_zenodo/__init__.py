@@ -29,14 +29,6 @@ def load_jupyter_server_extension(nb_server_app):
     upload_endpoint = url_path_join(base_endpoint, 'upload')
     status_endpoint = url_path_join(base_endpoint, 'status')
     update_endpoint = url_path_join(base_endpoint, 'update')
-    # synctex = url_path_join(latex, 'synctex')
 
     handlers = [(upload_endpoint, ZenodoUploadHandler, {"notebook_dir": nb_server_app.notebook_dir}),(status_endpoint, ZenodoStatusHandler, {}),(update_endpoint, ZenodoUpdateHandler, {})]
     web_app.add_handlers('.*$', handlers)
-                 # This dict might be where to add the access token
-#                ,
-#                (f'{synctex}{path_regex}',
-#                 LatexSynctexHandler,
-#                 {"notebook_dir": nb_server_app.notebook_dir}
-#                 )
-#                ]

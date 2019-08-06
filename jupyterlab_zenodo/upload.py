@@ -21,6 +21,7 @@ debug = True
 def myPrint(string):
     if debug:
         print(string)
+
 class ZenodoUploadHandler(ZenodoBaseHandler):
     """
     A handler that uploads your files to Zenodo

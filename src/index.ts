@@ -1,6 +1,3 @@
-/*
- * NOTE: All of this was copy/pasted from jupyterlab/jupyterlab-latex from src/index.ts and then edited */ 
-
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -35,7 +32,6 @@ const zenodoPluginId = '@jupyterlab/zenodo:plugin';
  */
 const zenodoPlugin: JupyterFrontEndPlugin<void> = {
   id: zenodoPluginId,
-  autoStart: true,
   requires: [
     ICommandPalette,
     IEditorTracker,
@@ -43,7 +39,8 @@ const zenodoPlugin: JupyterFrontEndPlugin<void> = {
     IMainMenu,
     ISettingRegistry,
   ],
-  activate: activateZenodoPlugin
+  activate: activateZenodoPlugin,
+  autoStart: true,
 };
 
 namespace CommandIDs {
@@ -67,6 +64,17 @@ function show_success(
     //TODO: delete 'sandbox' before Zenodo
     zenodo_button.href = "https://sandbox.zenodo.org/record/"+record_id;
     console.log("it worked!");
+}
+
+function hide_all(){
+    let submit_form = document.getElementById("submit-form") as HTMLElement;
+    let outer_error = document.getElementById("outer-error-div") as HTMLElement;
+    let success_div = document.getElementById("success-div") as HTMLElement;
+    let loading_div = document.getElementById("loading-div") as HTMLElement;
+    submit_form.style.display = "None";
+    outer_error.style.display = "None";
+    success_div.style.display = "None";
+    loading_div.style.display = "None";
 }
 
 function handleUploadResponse(
@@ -175,10 +183,6 @@ function activateZenodoPlugin(
     settingRegistry: ISettingRegistry,
   ): void {
 
-
-
-    const { tracker } = factory;
-
     const content = new Widget();
     const widget = new MainAreaWidget({content});
     widget.id = 'zenodo-jupyterlab';
@@ -286,8 +290,23 @@ function activateZenodoPlugin(
     // Add main upload div to widget
     content.node.appendChild(main);
 
+    addZenodoCommands(app, palette, editorTracker, factory, mainMenu, settingRegistry, widget);
+    return;
+}
+
+//    const widget = new MainAreaWidget({content});
+function addZenodoCommands(
+    app: JupyterFrontEnd,
+    palette: ICommandPalette,
+    editorTracker: IEditorTracker,
+    factory: IFileBrowserFactory,
+    mainMenu: IMainMenu,
+    settingRegistry: ISettingRegistry,
+    widget: MainAreaWidget
+){
+    const { tracker } = factory;
+
     app.commands.addCommand(CommandIDs.publish_directory, {
-        //HERE
         label: 'Publish to Zenodo',
         isEnabled: () => true,
         isToggled: () => false, 
@@ -309,10 +328,9 @@ function activateZenodoPlugin(
             let dir_row = document.getElementById("directory") as HTMLElement;
             dir_row.style.display = "None";
             
-            upload_form.style.display = "Block";
-            outer_error.style.display = "None";
-            success_div.style.display = "None";
-            loading_div.style.display = "None";
+            hide_all();
+            let submit_form = document.getElementById("submit-form") as HTMLElement;
+            submit_form.style.display = "Block";
         },
         iconClass: 'jp-MaterialIcon jp-FileUploadIcon',
     });
@@ -326,10 +344,9 @@ function activateZenodoPlugin(
             if (!widget.isAttached){
                 app.shell.add(widget, 'main');
             }
-            upload_form.style.display = "Block";
-            outer_error.style.display = "None";
-            success_div.style.display = "None";
-            loading_div.style.display = "None";
+            hide_all();
+            let submit_form = document.getElementById("submit-form") as HTMLElement;
+            submit_form.style.display = "Block";
         },
     
     }); 
@@ -343,11 +360,10 @@ function activateZenodoPlugin(
             if (!widget.isAttached){
                 app.shell.add(widget, 'main');
             }
-            upload_form.style.display = "None";
-            outer_error.style.display = "None";
-            success_div.style.display = "None";
+            hide_all();
+            let loading_div = document.getElementById("loading-div") as HTMLElement;
             loading_div.style.display = "Flex";
-            console.log("This causes an update"); 
+
             var settings =ServerConnection.makeSettings()
             const parts = [settings.baseUrl, 'zenodo', 'update']
             const fullURL = URLExt.join.apply(URLExt, parts);
