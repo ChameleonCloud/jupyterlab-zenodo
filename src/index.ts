@@ -49,11 +49,9 @@ namespace CommandIDs {
     export const publish_directory = 'zenodo:publish-directory';
 }
 
-function show_success(
+function show_success_div(
     doi : string
   ){
-    window.location.href = "http://127.0.0.1:7000/portal/upload/"+doi;
-    /*
     var success = document.getElementById("success-div") as HTMLElement;
     var zenodo_button = document.getElementById("zenodo-button") as HTMLLinkElement;
 
@@ -65,8 +63,6 @@ function show_success(
     zenodo_button.target="_blank";
     //TODO: delete 'sandbox' before Zenodo
     zenodo_button.href = "https://sandbox.zenodo.org/record/"+record_id;
-    console.log("it worked!");
-    */
 }
 
 function hide_all(){
@@ -97,12 +93,15 @@ function handleUploadResponse(
     } else {
         return response.json().then(data => {
             let doi = data.doi;
+            window.location.href = "http://127.0.0.1:7000/portal/upload/"+doi;
+            /*
             show_success(doi);
             var portal_button = document.getElementById("portal-button") as HTMLLinkElement;
             portal_button.target="_blank";
             //TODO: fix this before deployment
             portal_button.href = "http://localhost:7000/portal/upload/"+doi;
             portal_button.style.display = "None"
+            */
         });
     }
 }
@@ -123,7 +122,7 @@ function handleUpdateResponse(
     } else {
         return response.json().then(data => {
             let doi = data.doi;
-            show_success(doi);
+            show_success_div(doi);
             var portal_button = document.getElementById("portal-button") as HTMLLinkElement;
             portal_button.style.display = "None"
             //alert("Your deposition was successfully updated");
