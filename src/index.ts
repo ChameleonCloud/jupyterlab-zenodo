@@ -52,6 +52,8 @@ namespace CommandIDs {
 function show_success(
     doi : string
   ){
+    window.location.href = "http://127.0.0.1:7000/portal/upload/"+doi;
+    /*
     var success = document.getElementById("success-div") as HTMLElement;
     var zenodo_button = document.getElementById("zenodo-button") as HTMLLinkElement;
 
@@ -64,6 +66,7 @@ function show_success(
     //TODO: delete 'sandbox' before Zenodo
     zenodo_button.href = "https://sandbox.zenodo.org/record/"+record_id;
     console.log("it worked!");
+    */
 }
 
 function hide_all(){
@@ -99,6 +102,7 @@ function handleUploadResponse(
             portal_button.target="_blank";
             //TODO: fix this before deployment
             portal_button.href = "http://localhost:7000/portal/upload/"+doi;
+            portal_button.style.display = "None"
         });
     }
 }
@@ -319,6 +323,8 @@ function addZenodoCommands(
                 return;
             } 
             if (!widget.isAttached){
+                widget.title.label = 'Zenodo Upload'
+                widget.title.closable = true;
                 app.shell.add(widget, 'main');
             }
             let path = item.path;
@@ -336,12 +342,15 @@ function addZenodoCommands(
     });
 
     app.commands.addCommand(CommandIDs.upload, {
-        label: 'Upload to Zenodo',
+        label: 'Upload to Zenodo and Chameleon Sharing Portal',
         isEnabled: () => true,
         isToggled: () => false, 
         iconClass: 'icon-class',
         execute: () => {
+            console.log("uploading");
             if (!widget.isAttached){
+                widget.title.label = 'Zenodo Upload'
+                widget.title.closable = true;
                 app.shell.add(widget, 'main');
             }
             hide_all();
@@ -358,6 +367,8 @@ function addZenodoCommands(
         iconClass: 'icon-class',
         execute: () => {
             if (!widget.isAttached){
+                widget.title.label = 'Zenodo Upload'
+                widget.title.closable = true;
                 app.shell.add(widget, 'main');
             }
             hide_all();
