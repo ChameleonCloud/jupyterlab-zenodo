@@ -48,7 +48,7 @@ def zip_dir(notebook_dir, filename):
         filepath = notebook_dir+'/../'+filename
     else:
         filepath = notebook_dir+'/../'+filename+'.zip'
-        return filepath
+    return filepath
 
 def store_record(doi, filename, directory, access_token):
     """Store a record of publication in a local sqlite database
