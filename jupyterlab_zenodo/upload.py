@@ -159,7 +159,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         # If the user has no access token, use ours
         access_token = request_data.get('zenodo_token') or our_access_token
         # If the user hasn't specified a directory, use the notebook directory
-        directory_to_zip = request_data.get('directory') or self.notebook_dir
+        directory_to_zip = request_data.get('directory') or 'work'
 
         try:
             path_to_file = zip_dir(directory_to_zip, filename)
