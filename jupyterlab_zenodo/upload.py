@@ -1,26 +1,14 @@
 """ JupyterLab Zenodo : Exporting from JupyterLab to Zenodo """
 
-import cgi
-import glob, json, re, os
+import json
 import requests
-import sqlite3
-from urllib.parse import unquote_plus, parse_qsl
-from datetime import datetime
-from contextlib import contextmanager
-
-from tornado import escape, gen, web
 
 from notebook.base.handlers import APIHandler
+from tornado import gen, web
 
 from .base import ZenodoBaseHandler
-from .utils import zip_dir, get_id, store_record
+from .utils import get_id, store_record, UserMistake, zip_dir
 
-
-debug = True
-
-def myPrint(string):
-    if debug:
-        print(string)
 
 class ZenodoUploadHandler(ZenodoBaseHandler):
     """
@@ -82,7 +70,6 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         """
 
         #TODO: get rid of 'sandbox' before deployment
-        print("metadata creators: "+str(metadata['creators']))
         url_base = 'https://sandbox.zenodo.org/api'
 
         ACCESS_TOKEN = access_token
@@ -93,9 +80,10 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
                           params={'access_token': ACCESS_TOKEN}, json={},
                           headers=headers)
         # retrieve deposition id
-        rdict = r.json()
-        print(rdict)
-        deposition_id = rdict['id']
+        r_dict = r.json()
+        deposition_id = r_dict.get('id')
+        if deposition_id is None:
+            raise Exception("Issue creating a new deposition")
 
         # Organize and upload file
         data = {'filename': path_to_file.split('/')[-1]}
@@ -104,7 +92,11 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
                             % deposition_id,
                           params={'access_token': ACCESS_TOKEN}, data=data,
                           files=files)
-        myPrint(r.json())
+
+        # Make sure nothing went wrong
+        r_dict = r.json()
+        if int(r_dict.get('status','0')) > 399:
+            raise Exception("Something went wrong with the file upload")
 
         # Add metadata
         r = requests.put(url_base + '/deposit/depositions/%s' 
@@ -112,29 +104,22 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
                          params={'access_token': ACCESS_TOKEN}, 
                          data=json.dumps({'metadata': metadata}),
                          headers=headers)
-        myPrint(r.json())
-        # Publish
+        # Make sure nothing went wrong
+        r_dict = r.json()
+        if int(r_dict.get('status','0')) > 399:
+            raise Exception("Something went wrong with the metadata upload")
+
         r = requests.post(url_base + '/deposit/depositions/%s/actions/publish' 
                             % deposition_id,
                           params={'access_token': ACCESS_TOKEN})
-        rdict = r.json()
-        myPrint(rdict)
     
         # Get doi (or prereserve_doi)
-        doi = rdict.get('doi') 
+        r_dict = r.json()
+        doi = r_dict.get('doi') 
         if not doi:
-            doi = rdict.get('metadata',{}).get('prereserve_doi',{}).get('doi')
+            doi = r_dict.get('metadata',{}).get('prereserve_doi',{}).get('doi')
         return doi
     
-    @web.authenticated
-    @gen.coroutine
-    def get(self, path=''):
-        print("In GET routine for upload handler")
-        info = {'status':'executed get', 'doi':"no doi here"}
-        self.set_status(200)
-        self.write(json.dumps(info))
-        self.finish()
-
     @web.authenticated
     @gen.coroutine
     def post(self, path=''):
@@ -156,14 +141,15 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
 
         # Zenodo requires each field to be at least 4 characters long
         if any([len(title) <= 3, len(authors) <=3, len(description) <= 3]):
-            msg = "Title, author, and description fields must all be filled in and at least four characters long"
+            msg = ("Title, author, and description fields must all be filled in"
+                  " and at least four characters long")
             self.return_error(msg)
             return
 
         # Make sure a filename has been provided
         if len(filename) < 1:
-           self.return_error("Please provide a name for the zip file")
-            
+            self.return_error("File name must be provided")
+            return
 
         #Real version
         #our_access_token = '***REMOVED***'
@@ -172,27 +158,31 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         our_access_token = '***REMOVED***'
         # If the user has no access token, use ours
         access_token = request_data.get('zenodo_token') or our_access_token
-        # If the user hasn't specified a directory, use 'work'
-        directory_to_zip = request_data.get('directory') or 'work'
-            
+        # If the user hasn't specified a directory, use the notebook directory
+        directory_to_zip = request_data.get('directory') or self.notebook_dir
 
         try:
             path_to_file = zip_dir(directory_to_zip, filename)
             metadata = self.assemble_metadata(title, authors, description)
             doi = self.upload_file(path_to_file, metadata, access_token) 
-        except Exception as e:
+        except UserMistake as e:
+            # UserMistake exceptions contain messages for the user
             self.return_error(str(e))
+        except Exception as x:
+            # All other exceptions are internal
+            print("Internal error:")
+            print(x)
+            self.return_error("Something went wrong")
             return
-
-        if (doi is not None):
-            info = {'status':'success', 'doi':doi}
-            print("doi: "+str(doi))
-            self.set_status(201)
-            self.write(json.dumps(info))
-            store_record(doi, path_to_file, directory_to_zip, access_token)
-            #self.redirect("http://127.0.0.1:7000/portal/upload/"+doi)
-            self.finish()
         else:
-            self.return_error("There was an error uploading to Zenodo")
-            return
+            if (doi is not None):
+                info = {'status':'success', 'doi':doi}
+                print("doi: "+str(doi))
+                self.set_status(201)
+                self.write(json.dumps(info))
+                store_record(doi, path_to_file, directory_to_zip, access_token)
+                self.finish()
+            else:
+                self.return_error("There was an error uploading to Zenodo")
+                return
         

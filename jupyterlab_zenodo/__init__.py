@@ -8,8 +8,6 @@ from .update import ZenodoUpdateHandler
 from .status import ZenodoStatusHandler
 # from .synctex import LatexSynctexHandler
 
-path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
-
 def _jupyter_server_extension_paths():
     return [{
         'module': 'jupyterlab_zenodo'
@@ -21,7 +19,7 @@ def load_jupyter_server_extension(nb_server_app):
     Args:
         nb_server_app (NotebookApp): handle to the Notebook webserver instance.
     """
-    print("Woauh! My extension has loaded!")
+    print("The Zenodo extension has loaded")
     web_app = nb_server_app.web_app
     # Prepend the base_url so that it works in a jupyterhub setting
     base_url = web_app.settings['base_url']

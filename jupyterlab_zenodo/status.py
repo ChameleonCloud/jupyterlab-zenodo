@@ -1,25 +1,20 @@
 """ JupyterLab Zenodo : Checking status of Zenodo upload """
 
-import glob, json, re, os
-import requests
+import json
 import sqlite3
-from urllib.parse import unquote_plus, parse_qs
-from datetime import datetime
-from contextlib import contextmanager
 
-from tornado import escape, gen, web
-
-from notebook.base.handlers import APIHandler
+from tornado import gen, web
 
 from .base import ZenodoBaseHandler
 
 class ZenodoStatusHandler(ZenodoBaseHandler):
     """
-    A handler that uploads your files to Zenodo
+    A handler that checks to see if anything has been uploaded
     """
 
     def check_status(self):
         """Look in a local sqlite database to see Zenodo upload status
+
         Parameters
         ---------
         none
@@ -35,16 +30,18 @@ class ZenodoStatusHandler(ZenodoBaseHandler):
         """
 
         db_dest = "/work/.zenodo/"
-        print(db_dest)
+
+        conn = sqlite3.connect(db_dest+'zenodo.db')
+        c = conn.cursor()
+
+        # Get last upload if it exists, otherwise return none
         try:
-            conn = sqlite3.connect(db_dest+'zenodo.db')
-            c = conn.cursor()
             c.execute("SELECT doi FROM uploads ORDER BY date_uploaded DESC")
+        except:
+            return None
+        else:
             rows = c.fetchall()
             return rows[0][0]
-        except Exception as e:
-            print(e)
-            return None
 
     @web.authenticated
     @gen.coroutine
