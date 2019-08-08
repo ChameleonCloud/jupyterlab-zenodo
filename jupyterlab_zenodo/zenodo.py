@@ -84,6 +84,20 @@ class Deposition:
         """
         self.file_id = self.client.add_file(self.id, path_to_file)
 
+    def clear_files(self):
+        """ Add metadata to deposition
+        
+        Parameters
+        ---------
+        none
+
+        Returns
+        -------
+        void
+        """
+        file_ids = self.client.get_deposition_files(self.id)
+        self.client.delete_deposition_files(self.id, file_ids)
+
     def publish(self):
         """ Publish deposition
         
@@ -245,6 +259,55 @@ class Client:
             raise Exception("Something went wrong with the file upload")
         else:
             return file_id
+
+    def get_deposition_files(self, deposition_id):
+        """Get the file id of a deposition
+    
+        Parameters
+        ----------
+        deposition_id : string
+            Zenodo id of the existing deposition
+    
+        Returns
+        -------
+        list of strings
+            file_ids
+    
+        Notes
+        -----
+        - Raises an exception if the operation fails
+        """
+
+        # Get file information
+        r = requests.get((self.url_base + '/deposit/depositions/' 
+                         + deposition_id + '/files'),
+                         params={'access_token': self.access_token})
+        response_dict = r.json()
+
+        file_ids = []
+        for file_dict in response_dict:
+            file_id = file_dict.get('id')
+            if file_id is not None:
+                file_ids.append(file_id)
+
+        if file_ids == []:
+            raise Exception("Something went wrong getting the last upload: seems like there aren't files: "+str(response_dict))
+        else:
+            return file_ids
+
+    def delete_deposition_files(self, deposition_id, file_ids):
+        # Delete the file
+        for file_id in file_ids:
+            r = requests.delete(self.url_base + '/deposit/depositions/'
+                            + deposition_id + '/files/' + file_id, 
+                            params={'access_token': self.access_token})
+            try:
+                r.json()
+            except:
+                pass
+            else:
+                raise Exception("Something went wrong deleting the files " + r.status())
+ 
 
     def publish_deposition(self, deposition_id):
         """Publish existing deposition

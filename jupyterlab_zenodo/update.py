@@ -103,29 +103,9 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
         base_url = 'https://sandbox.zenodo.org/api'
 
         # Create new version
-        print('old id: ' + str(record_id))
         deposition = Deposition(self.dev, access_token, record_id)
         deposition.new_version() 
-
-        new_record_id = deposition.id
-        print('new id: ' + str(new_record_id))
-
-        # Get file information from new draft
-        r = requests.get((base_url + '/deposit/depositions/' 
-                         + new_record_id + '/files'),
-                         params={'access_token': access_token})
-        response_dict = r.json()
-        print(response_dict)
-        file_id = response_dict[0].get('id')
-
-        if file_id is None:
-            raise Exception("Something went wrong getting the last upload")
-            
-        # Delete the file
-        r = requests.delete(base_url + '/deposit/depositions/'
-                            + new_record_id + '/files/' + file_id, 
-                            params={'access_token': access_token})
-        
+        deposition.clear_files()
         deposition.set_file(path_to_file)
         deposition.publish()
         return deposition.doi

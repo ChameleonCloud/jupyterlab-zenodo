@@ -1,3 +1,5 @@
+from datetime import datetime
+import os
 import requests
 import unittest
 
@@ -187,4 +189,43 @@ class PublishNewVersionTest(unittest.TestCase):
         with self.assertRaises(UserMistake): self.client.publish_deposition(new_id)
 
 
+class GetFilesTest(unittest.TestCase):
+    def setUp(self):
+        good_token = '***REMOVED***'
+        self.client = Client(True, good_token)
 
+    def test_success(self):
+        new_id = self.client.new_deposition_version('355162')
+        file_ids = self.client.get_deposition_files(new_id)
+        self.assertNotEqual(len(file_ids),0)
+
+    def test_bad_id(self):
+        with self.assertRaises(Exception): self.client.get_deposition_files('1010101')
+
+class DeleteFilesSuccessTest(unittest.TestCase):
+    def setUp(self):
+        good_token = '***REMOVED***'
+        self.client = Client(True, good_token)
+        self.new_id = self.client.new_deposition_version('355162')
+        self.file_ids = self.client.get_deposition_files(self.new_id)
+        cmd = "echo "+str(datetime.now())+" > ***REMOVED***test.txt"
+        os.system(cmd)
+
+    def test_success(self):
+        try:
+            self.client.delete_deposition_files(self.new_id, self.file_ids)
+        except Exception as e:
+            self.fail("deletion failed: "+str(e))        
+
+    def tearDown(self):
+        filepath = '***REMOVED***test.txt'
+        self.client.add_file(self.new_id, filepath)
+        self.client.publish_deposition(self.new_id)
+
+class DeleteFilesFailTest(unittest.TestCase):
+    def setUp(self):
+        good_token = '***REMOVED***'
+        self.client = Client(True, good_token)
+
+    def test_bad_id(self):
+        with self.assertRaises(Exception): self.client.delete_deposition_files('1010101',['1'])
