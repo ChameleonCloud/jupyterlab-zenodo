@@ -8,7 +8,7 @@ from tornado import gen, web
 
 from .base import ZenodoBaseHandler
 from .utils import get_id, store_record, UserMistake, zip_dir
-from .zenodo import Client
+from .zenodo import Deposition
 
 
 class ZenodoUploadHandler(ZenodoBaseHandler):
@@ -69,22 +69,13 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         - Currently using Zenodo sandbox
     
         """
-
         #TODO: get rid of 'sandbox' before deployment
         url_base = 'https://sandbox.zenodo.org/api'
-
         ACCESS_TOKEN = access_token
         headers = {"Content-Type": "application/json"}
 
-        # Create deposition
-        r = requests.post(url_base + '/deposit/depositions',
-                          params={'access_token': ACCESS_TOKEN}, json={},
-                          headers=headers)
-        # retrieve deposition id
-        r_dict = r.json()
-        deposition_id = r_dict.get('id')
-        if deposition_id is None:
-            raise Exception("Issue creating a new deposition")
+        deposition = Deposition(True, access_token)
+        deposition_id = deposition.id
 
         # Organize and upload file
         data = {'filename': path_to_file.split('/')[-1]}
@@ -99,8 +90,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         if int(r_dict.get('status','0')) > 399:
             raise Exception("Something went wrong with the file upload")
 
-        c = Client(True, ACCESS_TOKEN)
-        c.add_metadata(deposition_id, metadata)
+        deposition.set_metadata(metadata)
 
         # Publish deposition
         r = requests.post(url_base + '/deposit/depositions/%s/actions/publish' 

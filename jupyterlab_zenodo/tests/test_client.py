@@ -3,6 +3,21 @@ import unittest
 
 from zenodo import Client
 
+class CreateDepositionTest(unittest.TestCase):
+   
+    def test_success(self):
+        token = '***REMOVED***'
+        self.client = Client(True, token)
+        try:
+            self.client.create_deposition()
+        except Exception as e:
+            print(r)
+            self.fail("Add metadata raised an exception: "+str(e)) 
+
+    def test_bad_token(self):
+        bad_client = Client(True, 'notatoken')
+        with self.assertRaises(Exception): bad_client.create_deposition()
+
 class AddMetadataTest(unittest.TestCase):
    
     def setUp(self):
