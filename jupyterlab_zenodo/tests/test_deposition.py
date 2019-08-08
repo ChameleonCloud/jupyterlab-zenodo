@@ -35,3 +35,19 @@ class SetMetadataTest(unittest.TestCase):
     def test_bad_data(self):
         with self.assertRaises(Exception): self.dep.set_metadata({})
 
+class SetFileTest(unittest.TestCase):
+    def setUp(self):
+        token = '***REMOVED***'
+        self.dep = Deposition(True, token)
+        self.good_filepath = '***REMOVED***test.txt'
+
+    def test_success(self):
+        self.dep.set_file(self.good_filepath)
+        self.assertIsNotNone(self.dep.file_id)
+
+    def test_bad_data(self):
+        with self.assertRaises(Exception): self.dep.set_file('notafile')
+
+
+
+

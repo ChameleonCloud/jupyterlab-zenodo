@@ -43,6 +43,25 @@ class Deposition:
         self.client.add_metadata(self.id, metadata)
         self.metadata = metadata
         
+    def set_file(self, path_to_file):
+        """ Add metadata to deposition
+        
+        Parameters
+        ---------
+        path_to_file : string
+            Path to file to be uploaded
+
+        Returns
+        -------
+        void
+
+        Notes
+        -----
+        - sets self.file_id on success
+        """
+        self.file_id = self.client.add_file(self.id, path_to_file)
+    
+
 
 class Client:
     def __init__(self, dev, access_token):
@@ -125,3 +144,42 @@ class Client:
         if int(r_dict.get('status','0')) > 399:
             raise Exception("Something went wrong with the metadata upload: "+str(r_dict))
      
+
+    def add_file(self, deposition_id, path_to_file):
+        """Upload a file to an existing deposition
+    
+        Parameters
+        ----------
+        deposition_id : string
+            Zenodo id of the existing deposition
+        path_to_file : string
+            Path to file to be uploaded
+    
+        Returns
+        -------
+        string
+            File id
+    
+        Notes
+        -----
+        - Raises an exception if the operation fails
+        """
+        # Organize and upload file
+        data = {'filename': path_to_file.split('/')[-1]}
+        files = {'file': open(path_to_file, 'rb')}
+        r = requests.post(self.url_base + '/deposit/depositions/%s/files' 
+                            % deposition_id,
+                          params={'access_token': self.access_token}, data=data,
+                          files=files)
+
+        # Make sure nothing went wrong
+        r_dict = r.json()
+        file_id = r_dict.get('id')
+        
+
+        if file_id is None:
+            raise Exception("Something went wrong with the file upload")
+        else:
+            return file_id
+
+

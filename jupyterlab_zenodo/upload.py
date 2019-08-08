@@ -77,19 +77,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         deposition = Deposition(True, access_token)
         deposition_id = deposition.id
 
-        # Organize and upload file
-        data = {'filename': path_to_file.split('/')[-1]}
-        files = {'file': open(path_to_file, 'rb')}
-        r = requests.post(url_base + '/deposit/depositions/%s/files' 
-                            % deposition_id,
-                          params={'access_token': ACCESS_TOKEN}, data=data,
-                          files=files)
-
-        # Make sure nothing went wrong
-        r_dict = r.json()
-        if int(r_dict.get('status','0')) > 399:
-            raise Exception("Something went wrong with the file upload")
-
+        deposition.set_file(path_to_file)
         deposition.set_metadata(metadata)
 
         # Publish deposition
