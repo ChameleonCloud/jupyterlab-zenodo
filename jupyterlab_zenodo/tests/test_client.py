@@ -86,4 +86,35 @@ class AddFileTest(unittest.TestCase):
         with self.assertRaises(Exception): self.client.add_file(self.deposition_id, 'notafile')
 
 
+class PublishDepositionTest(unittest.TestCase):
+    def setUp(self):
+        url_base = 'https://sandbox.zenodo.org/api'
+        good_token = '***REMOVED***'
 
+        r = requests.post(url_base + '/deposit/depositions',
+                          params={'access_token': good_token}, json={},
+                          headers={"Content-Type": "application/json"})
+        # retrieve deposition id
+        r_dict = r.json()
+        self.deposition_id = r_dict['id']
+
+        metadata = {
+            'title': 'Sample Title',
+            'upload_type': 'publication',
+            'publication_type': 'workingpaper',
+            'description': 'This is a description',
+            'creators': [{'name': 'Some Name', 
+                         'affiliation': 'Chameleon Cloud'}],
+        }  
+        filepath = '***REMOVED***test.txt'
+
+        self.client = Client(True, good_token)
+        self.client.add_metadata(self.deposition_id, metadata)
+        self.client.add_file(self.deposition_id, filepath)
+
+    def test_success(self):
+        doi = self.client.publish_deposition(self.deposition_id)
+        self.assertIsNotNone(doi)
+
+    def test_bad_id(self):
+        with self.assertRaises(Exception): self.client.publish_deposition('1010101')

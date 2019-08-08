@@ -60,7 +60,23 @@ class Deposition:
         - sets self.file_id on success
         """
         self.file_id = self.client.add_file(self.id, path_to_file)
-    
+
+    def publish(self):
+        """ Publish deposition
+        
+        Parameters
+        ---------
+        none
+
+        Returns
+        -------
+        void
+
+        Notes
+        -----
+        - sets self.doi on success
+        """
+        self.doi = self.client.publish_deposition(self.id)
 
 
 class Client:
@@ -172,14 +188,46 @@ class Client:
                           params={'access_token': self.access_token}, data=data,
                           files=files)
 
-        # Make sure nothing went wrong
+        # Return file id if nothing went wrong
         r_dict = r.json()
         file_id = r_dict.get('id')
-        
 
         if file_id is None:
             raise Exception("Something went wrong with the file upload")
         else:
             return file_id
+
+    def publish_deposition(self, deposition_id):
+        """Publish existing deposition
+    
+        Parameters
+        ----------
+        deposition_id : string
+            Zenodo id of the existing deposition
+    
+        Returns
+        -------
+        string
+            DOI
+    
+        Notes
+        -----
+        - Raises an exception if the operation fails
+        """
+
+        # Publish deposition
+        r = requests.post(self.url_base + '/deposit/depositions/%s/actions/publish' 
+                            % deposition_id,
+                          params={'access_token': self.access_token})
+    
+        # Get doi (or prereserve_doi)
+        r_dict = r.json()
+        doi = r_dict.get('doi') 
+
+        if doi is None:
+            raise Exception("Something went wrong publishing the deposition.\nResponse: "+str(r_dict))
+        else:
+            return doi
+ 
 
 

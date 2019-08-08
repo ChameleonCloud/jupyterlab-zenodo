@@ -17,6 +17,8 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
     """
     def initialize(self, notebook_dir):
         self.notebook_dir = notebook_dir
+        #TODO: change dev to False before deployment
+        self.dev = True
 
     def assemble_metadata(self, title, author, description):
         """Turn metadata into a dictionary for Zenodo upload
@@ -65,33 +67,17 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
                 
         Notes
         -----
-        - Does not yet have ANY error handling
-        - Currently using Zenodo sandbox
+        Raises an exception if something goes wrong
     
         """
-        #TODO: get rid of 'sandbox' before deployment
-        url_base = 'https://sandbox.zenodo.org/api'
-        ACCESS_TOKEN = access_token
-        headers = {"Content-Type": "application/json"}
 
-        deposition = Deposition(True, access_token)
-        deposition_id = deposition.id
-
+        deposition = Deposition(self.dev, access_token)
         deposition.set_file(path_to_file)
         deposition.set_metadata(metadata)
+        deposition.publish()
 
-        # Publish deposition
-        r = requests.post(url_base + '/deposit/depositions/%s/actions/publish' 
-                            % deposition_id,
-                          params={'access_token': ACCESS_TOKEN})
-    
-        # Get doi (or prereserve_doi)
-        r_dict = r.json()
-        doi = r_dict.get('doi') 
-        if not doi:
-            doi = r_dict.get('metadata',{}).get('prereserve_doi',{}).get('doi')
-        return doi
-    
+        return deposition.doi
+   
     @web.authenticated
     @gen.coroutine
     def post(self, path=''):
@@ -123,11 +109,13 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             self.return_error("File name must be provided")
             return
 
-        #Real version
-        #our_access_token = '***REMOVED***'
+        if self.dev:
+            #Sandbox version:
+            our_access_token = '***REMOVED***'
+        else:
+            #Real version
+            our_access_token = '***REMOVED***'
 
-        #Sandbox version:
-        our_access_token = '***REMOVED***'
         # If the user has no access token, use ours
         access_token = request_data.get('zenodo_token') or our_access_token
         # If the user hasn't specified a directory, use the notebook directory

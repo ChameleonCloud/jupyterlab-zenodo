@@ -49,5 +49,24 @@ class SetFileTest(unittest.TestCase):
         with self.assertRaises(Exception): self.dep.set_file('notafile')
 
 
+class PublishTest(unittest.TestCase):
+    def setUp(self):
+        token = '***REMOVED***'
+        self.dep = Deposition(True, token)
+        metadata = {
+            'title': 'Sample Title',
+            'upload_type': 'publication',
+            'publication_type': 'workingpaper',
+            'description': 'This is a description',
+            'creators': [{'name': 'Some Name', 
+                         'affiliation': 'Chameleon Cloud'}],
+        }  
+        self.dep.set_metadata(metadata)
+        self.dep.set_file('***REMOVED***test.txt')
+
+
+    def test_success(self):
+        self.dep.publish()
+        self.assertIsNotNone(self.dep.doi)
 
 
