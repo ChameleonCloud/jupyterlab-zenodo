@@ -8,6 +8,7 @@ from tornado import gen, web
 
 from .base import ZenodoBaseHandler
 from .utils import get_id, store_record, UserMistake, zip_dir
+import .zenodo
 
 
 class ZenodoUploadHandler(ZenodoBaseHandler):
@@ -98,17 +99,9 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         if int(r_dict.get('status','0')) > 399:
             raise Exception("Something went wrong with the file upload")
 
-        # Add metadata
-        r = requests.put(url_base + '/deposit/depositions/%s' 
-                            % deposition_id,
-                         params={'access_token': ACCESS_TOKEN}, 
-                         data=json.dumps({'metadata': metadata}),
-                         headers=headers)
-        # Make sure nothing went wrong
-        r_dict = r.json()
-        if int(r_dict.get('status','0')) > 399:
-            raise Exception("Something went wrong with the metadata upload")
+        zenodo.add_metadata(url_base, headers, ACCESS_TOKEN, deposition_id, metadata)
 
+        # Publish deposition
         r = requests.post(url_base + '/deposit/depositions/%s/actions/publish' 
                             % deposition_id,
                           params={'access_token': ACCESS_TOKEN})
