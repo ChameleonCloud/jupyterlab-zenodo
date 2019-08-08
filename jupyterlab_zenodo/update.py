@@ -11,11 +11,16 @@ from tornado import gen, web
 
 from .base import ZenodoBaseHandler
 from .utils import get_id, store_record, UserMistake, zip_dir
+from .zenodo import Deposition
 
 class ZenodoUpdateHandler(ZenodoBaseHandler):
     """
     A handler that updates your files on Zenodo
     """
+    def initialize(self):
+        #TODO: change dev to False before deployment
+        self.dev = True
+
     def get_last_upload(self):
         """Get information about the last upload
 
@@ -98,22 +103,19 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
         base_url = 'https://sandbox.zenodo.org/api'
 
         # Create new version
-        r = requests.post(base_url + '/deposit/depositions/'+record_id
-                            +'/actions/newversion',
-                          params={'access_token': access_token})
-        response_dict = r.json()
+        print('old id: ' + str(record_id))
+        deposition = Deposition(self.dev, access_token, record_id)
+        deposition.new_version() 
 
-        new_record_loc = response_dict.get('links',{}).get('latest_draft')
-
-        if new_record_loc is None:
-            raise Exception("Something went wrong getting the last upload")
-        new_record_id = new_record_loc.split('/')[-1]
+        new_record_id = deposition.id
+        print('new id: ' + str(new_record_id))
 
         # Get file information from new draft
         r = requests.get((base_url + '/deposit/depositions/' 
                          + new_record_id + '/files'),
                          params={'access_token': access_token})
         response_dict = r.json()
+        print(response_dict)
         file_id = response_dict[0].get('id')
 
         if file_id is None:
@@ -123,41 +125,10 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
         r = requests.delete(base_url + '/deposit/depositions/'
                             + new_record_id + '/files/' + file_id, 
                             params={'access_token': access_token})
-
-        # Organize file data
-        data = {'filename': path_to_file.split('/')[-1]}
-        files = {'file': open(path_to_file, 'rb')}
-
-        # Upload new file
-        r = requests.post(base_url + '/deposit/depositions/%s/files'
-                          % new_record_id,
-                          params={'access_token': access_token}, data=data,
-                          files=files)
-
-        # Make sure nothing went wrong
-        r_dict = r.json()
-        if int(r_dict.get('status','0')) > 399:
-            raise Exception("Something went wrong with the file upload")
-
-        # Re-publish deposition
-        r = requests.post(base_url + '/deposit/depositions/%s/actions/publish'
-                          % new_record_id,
-                          params={'access_token': access_token})
-
-        # Make sure nothing went wrong
-        r_dict = r.json()
-        if int(r_dict.get('status','0')) > 399:
-            if r_dict['errors'][0]['code'] == 10:
-                raise UserMistake("You need to update some of your files"
-                        " before trying to update your deposition on Zenodo")
-            else:
-                raise Exception("Something went wrong with Zenodo")
-
-        # Get doi (or prereserve doi)
-        doi = r_dict.get('doi') 
-        if not doi:
-            doi = r_dict.get('metadata',{}).get('prereserve_doi',{}).get('doi')
-        return doi
+        
+        deposition.set_file(path_to_file)
+        deposition.publish()
+        return deposition.doi
     
     @web.authenticated
     @gen.coroutine

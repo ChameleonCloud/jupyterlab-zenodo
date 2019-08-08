@@ -3,9 +3,11 @@
 import json
 import requests
 
+from .utils import UserMistake
+
 class Deposition:
     
-    def __init__(self, dev, access_token):
+    def __init__(self, dev, access_token, existing_id=None):
         """ Initialize new deposition 
         
         Parameters
@@ -14,14 +16,35 @@ class Deposition:
             True if in development environment, False in deployment
         access_token : string
             Access token for Zenodo
+        existing_id : string
+            Optional: provide id of existing deposition
+            If none is provided, a new deposition is created
 
         Returns
         -------
         Deposition
         """
+        
         self.client = Client(dev, access_token)
-        self.id = self.client.create_deposition() 
+        self.id = existing_id or self.client.create_deposition()
 
+    def new_version(self):
+        """ Create new version the deposition
+        
+        Parameters
+        ----------
+        none
+
+        Returns
+        -------
+        void
+
+        Notes
+        -----
+        - Changes self.id on success, raises Exception on failure
+        """
+        self.id = self.client.new_deposition_version(self.id)
+	
     def set_metadata(self, metadata):
         """ Add metadata to deposition
         
@@ -127,6 +150,32 @@ class Client:
         else:
             return deposition_id
 
+    def new_deposition_version(self, deposition_id):
+        """ Create new version of a published deposition on Zenodo 
+        
+        Parameters
+        ----------
+        deposition_id : string
+            Id of published deposition
+
+        Returns
+        -------
+        string
+            Id of newly created deposition draft
+        """
+        r = requests.post((self.url_base + '/deposit/depositions/' + str(deposition_id)
+                     + '/actions/newversion'),
+                     params={'access_token': self.access_token})
+
+        response_dict = r.json()
+        new_record_loc = response_dict.get('links',{}).get('latest_draft')
+
+        if new_record_loc is None:
+            raise Exception("Something went wrong getting the last upload")
+
+        new_record_id = new_record_loc.split('/')[-1]
+        return new_record_id
+
          
     def add_metadata(self, deposition_id, metadata):
         """Add metadata to an existing deposition
@@ -220,12 +269,16 @@ class Client:
                             % deposition_id,
                           params={'access_token': self.access_token})
     
-        # Get doi (or prereserve_doi)
+        # Get doi 
         r_dict = r.json()
         doi = r_dict.get('doi') 
 
         if doi is None:
-            raise Exception("Something went wrong publishing the deposition.\nResponse: "+str(r_dict))
+            if r_dict.get('errors',[{}])[0].get('code',0) == 10:
+                raise UserMistake("You need to update some of your files"
+                        " before trying to update your deposition on Zenodo")
+            else:
+                raise Exception("Something went wrong publishing the deposition.\nResponse: "+str(r_dict))
         else:
             return doi
  

@@ -69,4 +69,26 @@ class PublishTest(unittest.TestCase):
         self.dep.publish()
         self.assertIsNotNone(self.dep.doi)
 
+class NewVersionTest(unittest.TestCase):
+    def setUp(self):
+        token = '***REMOVED***'
+        self.dep = Deposition(True, token)
+        metadata = {
+            'title': 'Sample Title',
+            'upload_type': 'publication',
+            'publication_type': 'workingpaper',
+            'description': 'This is a description',
+            'creators': [{'name': 'Some Name', 
+                         'affiliation': 'Chameleon Cloud'}],
+        }  
+        self.dep.set_metadata(metadata)
+        self.dep.set_file('***REMOVED***test.txt')
+        self.dep.publish()
+
+    def test_success(self):
+        old_id = self.dep.id
+        self.dep.new_version()
+        new_id = self.dep.id
+        self.assertNotEqual(old_id, new_id)
+
 

@@ -1,6 +1,7 @@
 import requests
 import unittest
 
+from utils import UserMistake
 from zenodo import Client
 
 class CreateDepositionTest(unittest.TestCase):
@@ -118,3 +119,72 @@ class PublishDepositionTest(unittest.TestCase):
 
     def test_bad_id(self):
         with self.assertRaises(Exception): self.client.publish_deposition('1010101')
+
+class NewDepositionVersionTest(unittest.TestCase):
+
+    def setUp(self):
+        url_base = 'https://sandbox.zenodo.org/api'
+        good_token = '***REMOVED***'
+
+        r = requests.post(url_base + '/deposit/depositions',
+                          params={'access_token': good_token}, json={},
+                          headers={"Content-Type": "application/json"})
+        # retrieve deposition id
+        r_dict = r.json()
+        self.deposition_id = r_dict['id']
+
+        metadata = {
+            'title': 'Sample Title',
+            'upload_type': 'publication',
+            'publication_type': 'workingpaper',
+            'description': 'This is a description',
+            'creators': [{'name': 'Some Name', 
+                         'affiliation': 'Chameleon Cloud'}],
+        }  
+        filepath = '***REMOVED***test.txt'
+
+        self.client = Client(True, good_token)
+        self.client.add_metadata(self.deposition_id, metadata)
+        self.client.add_file(self.deposition_id, filepath)
+        self.client.publish_deposition(self.deposition_id)
+
+    def test_success(self):
+        new_record_id = self.client.new_deposition_version(self.deposition_id)
+        self.assertIsNotNone(new_record_id)
+
+    def test_bad_id(self):
+        with self.assertRaises(Exception): self.client.new_deposition_version('1010101')
+
+class PublishNewVersionTest(unittest.TestCase):
+    def setUp(self):
+        url_base = 'https://sandbox.zenodo.org/api'
+        good_token = '***REMOVED***'
+
+        r = requests.post(url_base + '/deposit/depositions',
+                          params={'access_token': good_token}, json={},
+                          headers={"Content-Type": "application/json"})
+        # retrieve deposition id
+        r_dict = r.json()
+        self.deposition_id = r_dict['id']
+
+        metadata = {
+            'title': 'Sample Title',
+            'upload_type': 'publication',
+            'publication_type': 'workingpaper',
+            'description': 'This is a description',
+            'creators': [{'name': 'Some Name', 
+                         'affiliation': 'Chameleon Cloud'}],
+        }  
+        filepath = '***REMOVED***test.txt'
+
+        self.client = Client(True, good_token)
+        self.client.add_metadata(self.deposition_id, metadata)
+        self.client.add_file(self.deposition_id, filepath)
+        self.client.publish_deposition(self.deposition_id)
+
+    def test_user_error(self):
+        new_id = self.client.new_deposition_version(self.deposition_id)
+        with self.assertRaises(UserMistake): self.client.publish_deposition(new_id)
+
+
+
