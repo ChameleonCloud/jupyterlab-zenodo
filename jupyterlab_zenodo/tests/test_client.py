@@ -3,8 +3,35 @@ import os
 import requests
 import unittest
 
+from unittest.mock import patch
+
 from ..utils import UserMistake
 from ..zenodo import Client
+
+class CheckAccessTokenTest(unittest.TestCase):
+    def temp_init(self, obj, dev, access_token):
+        if dev is True:
+            obj.url_base = 'https://sandbox.zenodo.org/api'
+        else:
+            obj.url_base = 'https://zenodo.org/api'
+        obj.access_token = access_token
+        return None
+
+    def setUp(self):
+        self.token = '***REMOVED***'
+        #self.client = Client(True, self.token)
+    def test_success(self):
+        with patch.object(Client, "__init__", lambda x, y, z: self.temp_init(x, y, z)):
+            c = Client(True, self.token)
+            try:
+                c.check_access_token()
+            except:
+                self.fail("Access token should be correct")
+
+    def test_bad_token(self):
+        with patch.object(Client, "__init__", lambda x, y, z: self.temp_init(x, y, z)):
+            c = Client(True, 'notatoken')
+            with self.assertRaises(UserMistake): c.check_access_token()
 
 class CreateDepositionTest(unittest.TestCase):
    
@@ -16,10 +43,6 @@ class CreateDepositionTest(unittest.TestCase):
         except Exception as e:
             print(r)
             self.fail("Add metadata raised an exception: "+str(e)) 
-
-    def test_bad_token(self):
-        bad_client = Client(True, 'notatoken')
-        with self.assertRaises(Exception): bad_client.create_deposition()
 
 class AddMetadataTest(unittest.TestCase):
    

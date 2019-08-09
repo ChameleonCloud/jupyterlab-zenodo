@@ -117,6 +117,25 @@ class Deposition:
 
 
 class Client:
+    def check_access_token(self):
+        """ Raise an exception if an invalid token is provided
+        
+        Parameters
+        ---------
+        none
+
+        Returns
+        -------
+        void
+        """
+
+        r = requests.get(self.url_base + '/deposit/depositions',
+                         params={'access_token': self.access_token})
+        status = r.status_code
+        if int(status) == 401:
+            raise UserMistake("Invalid access token. To use our default token,"
+                              " leave the 'access token' field blank")
+
     def __init__(self, dev, access_token):
         """ Initialize Zenodo client 
         
@@ -139,6 +158,7 @@ class Client:
             
         self.access_token = access_token
         self.headers = {"Content-Type": "application/json"}
+        self.check_access_token()
 
     def create_deposition(self):
         """ Create new deposition on Zenodo 
@@ -348,3 +368,4 @@ class Client:
         else:
             return doi
  
+
