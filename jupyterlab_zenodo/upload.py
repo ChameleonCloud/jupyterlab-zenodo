@@ -43,7 +43,6 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         - If it returns, it returns a real DOI
     
         """
-
         deposition = Deposition(self.dev, access_token)
         deposition.set_file(path_to_file)
         deposition.set_metadata(metadata)
@@ -67,12 +66,9 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         try:
             upload_data = assemble_upload_data(request_data, self.dev)
             metadata = assemble_metadata(request_data)
-            path_to_file = zip_dir(
-                upload_data['directory_to_zip'],
+            path_to_file = zip_dir(upload_data['directory_to_zip'],
                 upload_data['filename'])
-            doi = self.upload_file(
-                path_to_file, 
-                metadata,
+            doi = self.upload_file(path_to_file, metadata, 
                 upload_data['access_token']) 
 
         except UserMistake as e:
@@ -91,7 +87,8 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             print("doi: "+str(doi))
             self.set_status(201)
             self.write(json.dumps(info))
-            store_record(doi, path_to_file, upload_data['directory_to_zip'], upload_data['access_token'])
+            store_record(doi, path_to_file, upload_data['directory_to_zip'], 
+                upload_data['access_token'])
             self.finish()
 
 

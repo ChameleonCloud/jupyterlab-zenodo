@@ -45,10 +45,6 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
         - Currently, base url is zenodo sandbox
     
         """
-
-        #TODO: remove 'sandbox' before deployment
-        base_url = 'https://sandbox.zenodo.org/api'
-
         # Create new version
         deposition = Deposition(self.dev, access_token, record_id)
         deposition.new_version() 
@@ -70,15 +66,11 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
         try:
             # Try to complete update
             upload_data = get_last_upload(db_dest)
+            new_filepath = zip_dir(upload_data['directory'],
+                upload_data['filepath'].split('/')[-1])
+            doi = self.update_file(new_filepath, get_id(upload_data['doi']), 
+                upload_data['access_token'])
 
-            filepath = upload_data['filepath']
-            directory = upload_data['directory']
-            record_id = get_id(upload_data['doi']) 
-            access_token = upload_data['access_token']
-
-            new_filepath = zip_dir(directory, filepath.split('/')[-1])
-
-            doi = self.update_file(new_filepath, record_id, access_token)
         except UserMistake as e:
             # UserMistake exceptions contain messages for the user
             self.return_error(str(e))
@@ -88,18 +80,11 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
             self.return_error("Something went wrong")
             return
         else:
-            # If nothing has gone wrong, return the doi if it exists
-            if (doi is not None):
-                info = {'status':'success', 'doi':doi}
-                self.set_status(201)
-                self.write(json.dumps(info))
-                store_record(doi, new_filepath, directory, access_token)
-                self.finish()
-            else:
-                info = {'status':'failure', 'doi': None}
-                self.set_status(404)
-                self.write(json.dumps(info))
-                self.finish()
+            self.set_status(201)
+            self.write(json.dumps({'status':'success', 'doi':doi}))
+            store_record(doi, new_filepath, upload_data['directory'],
+                upload_data['access_token'])
+            self.finish()
 
 def process_upload_data(upload_data): 
     """Verify and package data about the last upload
@@ -153,9 +138,9 @@ def get_last_upload(db_dest):
                          "to create a new deposition")
     # If the database location doesn't exist, there are no uploads
     if not os.path.exists(db_dest):
-        raise UserMistake(no_uploads_error)
         print("No db folder")
-        return
+        raise UserMistake(no_uploads_error)
+
     # Connect to database
     conn = sqlite3.connect(db_dest+'zenodo.db')
     c = conn.cursor()
@@ -165,7 +150,6 @@ def get_last_upload(db_dest):
                   " FROM uploads ORDER BY date_uploaded DESC")
     except sqlite3.OperationalError as e:
         raise UserMistake(no_uploads_error)
-        return
      
     # Fetch info, close connection
     data = c.fetchall()
