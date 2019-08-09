@@ -94,7 +94,7 @@ def store_record(doi, filepath, directory, access_token):
 	
     # Create directory if it doesn't exist
     if not os.path.exists(db_dest):
-        cmd = "mkdir" + db_dest
+        cmd = "mkdir " + db_dest
         os.system(cmd)
 
     # Connect to database
@@ -103,7 +103,7 @@ def store_record(doi, filepath, directory, access_token):
 
     # Create uploads table if it doesn't exist
     try:
-        c.execute("CREATE TABLE uploads (date_uploaded, doi, directory, filename, access_token)")
+        c.execute("CREATE TABLE uploads (date_uploaded, doi, directory, filepath, access_token)")
     except sqlite3.OperationalError:
         pass
 

@@ -21,59 +21,6 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
         #TODO: change dev to False before deployment
         self.dev = True
 
-    def get_last_upload(self):
-        """Get information about the last upload
-
-        Parameters
-        ----------
-        none
-
-        Returns
-        -------
-        Dictionary
-            Contains date, doi, directory, filename, and access token
-        """
-    
-        no_uploads_error = ("No previous upload. Press 'Upload to Zenodo' "
-                             "to create a new deposition")
-
-        # If the database location doesn't exist, there are no uploads
-        db_dest = "/work/.zenodo/"
-        if not os.path.exists(db_dest):
-            raise UserMistake(no_uploads_error)
-            return
-
-        # Connect to database
-        conn = sqlite3.connect(db_dest+'zenodo.db')
-        c = conn.cursor()
-
-        # If the table is empty or doesn't exist, there are no uploads
-        try:
-            c.execute("SELECT date_uploaded, doi, directory, filename, "
-                      "access_token FROM uploads ORDER BY date_uploaded DESC")
-        except sqlite3.OperationalError:
-            raise UserMistake(no_uploads_error)
-            return
-     
-
-        # Fetch info, close connection
-        rows = c.fetchall()
-        conn.close()
-
-        # Check that all data is there, fill in appropriately
-        last_upload = rows[0]
-        if any(map(lambda x : x is None, last_upload)):
-            raise Exception("Not enough information in last upload")
-
-        upload_data = {
-            'date': last_upload[0],
-            'doi': last_upload[1],
-            'directory': last_upload[2],
-            'filename': last_upload[3],
-            'access_token': last_upload[4]
-        }
-        return upload_data
-
 
     def update_file(self, path_to_file, record_id, access_token):
         """Upload the given file at the given path to Zenodo
@@ -118,12 +65,13 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
         """
 
         self.check_xsrf_cookie()
+        db_dest = "/work/.zenodo/"
 
         try:
             # Try to complete update
-            upload_data = self.get_last_upload()
+            upload_data = get_last_upload(db_dest)
 
-            filepath = upload_data['filename']
+            filepath = upload_data['filepath']
             directory = upload_data['directory']
             record_id = get_id(upload_data['doi']) 
             access_token = upload_data['access_token']
@@ -136,8 +84,7 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
             self.return_error(str(e))
         except Exception as x:
             # All other exceptions are internal
-            print("Internal error:")
-            print(x)
+            print("Internal error: "+str(x))
             self.return_error("Something went wrong")
             return
         else:
@@ -153,4 +100,80 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
                 self.set_status(404)
                 self.write(json.dumps(info))
                 self.finish()
-        
+
+def process_upload_data(upload_data): 
+    """Verify and package data about the last upload
+
+    Parameters
+    ----------
+    upload_data : list of lists of strings
+        Contains all upload information 
+
+    Returns
+    -------
+    Dictionary
+        Contains date, doi, directory, filepath, and access token
+
+    Notes
+    -----
+    - Raises exception on failure
+    """
+    # Check that all data is there, fill in appropriately
+    last_upload = upload_data[0]
+
+    if len(last_upload) != 5:
+        raise Exception("Missing information in last upload: too few fields")
+    if any(map(lambda x : len(x) == '', last_upload)):
+        raise Exception("Missing information in last upload: empty values")
+
+    upload_data = {
+        'date': last_upload[0],
+        'doi': last_upload[1],
+        'directory': last_upload[2],
+        'filepath': last_upload[3],
+        'access_token': last_upload[4]
+    }
+    return upload_data
+
+
+def get_last_upload(db_dest):
+    """Get information about the last upload
+    Parameters
+    ----------
+    db_dest : string
+        Supposed location of sqlite database with upload information
+
+    Returns
+    -------
+    Dictionary
+        Contains date, doi, directory, filepath, and access token
+    """
+
+    no_uploads_error = ("No previous upload. Press 'Upload to Zenodo' "
+                         "to create a new deposition")
+    # If the database location doesn't exist, there are no uploads
+    if not os.path.exists(db_dest):
+        raise UserMistake(no_uploads_error)
+        print("No db folder")
+        return
+    # Connect to database
+    conn = sqlite3.connect(db_dest+'zenodo.db')
+    c = conn.cursor()
+    # If the table is empty or doesn't exist, there are no uploads
+    try:
+        c.execute("SELECT date_uploaded, doi, directory, filepath, access_token"
+                  " FROM uploads ORDER BY date_uploaded DESC")
+    except sqlite3.OperationalError as e:
+        raise UserMistake(no_uploads_error)
+        return
+     
+    # Fetch info, close connection
+    data = c.fetchall()
+    conn.close()
+
+    if data == []:
+        print("data is empty: "+str(data))
+        raise UserMistake(no_uploads_error)
+
+    return process_upload_data(data)
+
