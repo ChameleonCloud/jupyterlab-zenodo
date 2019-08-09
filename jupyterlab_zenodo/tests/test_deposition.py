@@ -3,7 +3,7 @@ import os
 import requests
 import unittest
 
-from zenodo import Deposition
+from ..zenodo import Deposition
 
 class InitTest(unittest.TestCase):
    

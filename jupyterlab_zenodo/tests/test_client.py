@@ -3,8 +3,8 @@ import os
 import requests
 import unittest
 
-from utils import UserMistake
-from zenodo import Client
+from ..utils import UserMistake
+from ..zenodo import Client
 
 class CreateDepositionTest(unittest.TestCase):
    

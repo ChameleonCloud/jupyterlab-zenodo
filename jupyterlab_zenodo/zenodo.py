@@ -245,11 +245,14 @@ class Client:
         """
         # Organize and upload file
         data = {'filename': path_to_file.split('/')[-1]}
-        files = {'file': open(path_to_file, 'rb')}
+        open_file = open(path_to_file, 'rb')
+        files = {'file': open_file}
         r = requests.post(self.url_base + '/deposit/depositions/%s/files' 
                             % deposition_id,
                           params={'access_token': self.access_token}, data=data,
                           files=files)
+        # Close the file after the request
+        open_file.close()
 
         # Return file id if nothing went wrong
         r_dict = r.json()
@@ -345,5 +348,3 @@ class Client:
         else:
             return doi
  
-
-
