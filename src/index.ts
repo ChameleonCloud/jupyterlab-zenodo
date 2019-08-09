@@ -401,12 +401,14 @@ function addZenodoCommands(
             //item.path gives the name of the directory selected
             let path = item.path;
 
-            //Make widget visible
+            //Make widget visible...
             if (!widget.isAttached){
                 widget.title.label = 'Zenodo Upload'
                 widget.title.closable = true;
                 app.shell.add(widget, 'main');
             }
+            //..and active
+            app.shell.activateById(widget.id);
 
             //Pre-set directory name and hide the relevant form field
             let dir_input = document.getElementById("directory-input") as HTMLInputElement;
@@ -424,18 +426,21 @@ function addZenodoCommands(
 
     //Command to upload any set of files
     app.commands.addCommand(CommandIDs.upload, {
-        label: 'Upload to Zenodo and Chameleon Sharing Portal',
+        //TODO: change back?
+        label: 'Upload to Chameleon Sharing Portal',
         isEnabled: () => true,
         isToggled: () => false, 
         iconClass: 'icon-class',
         execute: () => {
             console.log("uploading");
-            //Make widget visible
+            //Make widget visible...
             if (!widget.isAttached){
                 widget.title.label = 'Zenodo Upload'
                 widget.title.closable = true;
                 app.shell.add(widget, 'main');
             }
+            //..and active
+            app.shell.activateById(widget.id);
             //Show only the submit form
             hide_all();
             let submit_form = document.getElementById("submit-form") as HTMLElement;
@@ -450,12 +455,14 @@ function addZenodoCommands(
         isToggled: () => false, 
         iconClass: 'icon-class',
         execute: () => {
-            //Make widget visible
+            //Make widget visible...
             if (!widget.isAttached){
                 widget.title.label = 'Zenodo Upload'
                 widget.title.closable = true;
                 app.shell.add(widget, 'main');
             }
+            //..and active
+            app.shell.activateById(widget.id);
             //Show only loading text
             hide_all();
             let loading_div = document.getElementById("loading-div") as HTMLElement;

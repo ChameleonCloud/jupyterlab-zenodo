@@ -1,8 +1,4 @@
-input {
-    font-family: var(--jp-ui-font-family);
-    font-size: 14px;
-}
-
+/****** Main widget styles ******/
 h1, h2{
     text-align: center;
 }
@@ -12,9 +8,8 @@ h1, h2{
     font-family: var(--jp-ui-font-family);
 }
 
-#success-div {
-    display: flex;
-    flex-direction: column;
+#zenodo-jupyterlab .p-Widget{
+    overflow-y: scroll;
 }
 
 .basic-btn {
@@ -25,6 +20,24 @@ h1, h2{
     padding: 6px;
 }
 
+/****** Styles for upload form ******/
+input {
+    font-family: var(--jp-ui-font-family);
+    font-size: 14px;
+}
+
+td {
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+th {
+    padding: 10px;
+    text-align: left;
+    font-weight: bold;
+}
+
 .submit-btn:hover{
     background-color: #bdbdbd;
 }
@@ -32,22 +45,7 @@ h1, h2{
 #submit-form p {
     margin-bottom: 10px;
 }
-
-th,td {
-    padding: 10px;
-}
-
-td {
-    display: flex;
-    justify-content: center;
-}
-
-th {
-    text-align: left;
-    font-weight: bold;
-}
-
-
+/* Make non-required fields normal weight */
 #zenodo_token th {
     font-weight: normal;
 }
@@ -56,6 +54,10 @@ th {
     font-weight: normal;
 }
 
-#zenodo-jupyterlab .p-Widget{
-    overflow-y: scroll;
+
+/***** Styles for success page ******/
+#success-div {
+    display: flex;
+    flex-direction: column;
 }
+
