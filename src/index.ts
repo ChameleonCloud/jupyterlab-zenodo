@@ -369,6 +369,26 @@ function activateZenodoPlugin(
     return;
 }
 
+function open_widget(
+    app: JupyterFrontEnd,
+    widget: MainAreaWidget,
+    shown_element: [string, string]
+  ){
+    //Make widget visible...
+    if (!widget.isAttached){
+        widget.title.label = 'Zenodo Upload'
+        widget.title.closable = true;
+        app.shell.add(widget, 'main');
+    }
+    //..and active
+    app.shell.activateById(widget.id);
+    hide_all();
+
+    let elem = document.getElementById(shown_element[0]) as HTMLElement;
+    elem.style.display = shown_element[1];
+}
+
+
 /*
  * Using arguments from 'activate' and the newly created widget, 
  *   create commands for each action and add them to appropriate menus 
@@ -381,7 +401,7 @@ function addZenodoCommands(
     mainMenu: IMainMenu,
     settingRegistry: ISettingRegistry,
     widget: MainAreaWidget
-){
+  ){
     const { tracker } = factory;
 
     //Command to publish from a directory
@@ -401,25 +421,16 @@ function addZenodoCommands(
             //item.path gives the name of the directory selected
             let path = item.path;
 
-            //Make widget visible...
-            if (!widget.isAttached){
-                widget.title.label = 'Zenodo Upload'
-                widget.title.closable = true;
-                app.shell.add(widget, 'main');
-            }
-            //..and active
-            app.shell.activateById(widget.id);
-
             //Pre-set directory name and hide the relevant form field
             let dir_input = document.getElementById("directory-input") as HTMLInputElement;
             dir_input.value = path;
             let dir_row = document.getElementById("directory") as HTMLElement;
             dir_row.style.display = "None";
-            
-            //Show only the submit form
-            hide_all();
-            let submit_form = document.getElementById("submit-form") as HTMLElement;
-            submit_form.style.display = "Block";
+
+            open_widget(app, widget, ["submit-form","Block"]);
+               //Show only the submit form
+            //let submit_form = document.getElementById("submit-form") as HTMLElement;
+            //submit_form.style.display = "Block";
         },
         iconClass: 'jp-MaterialIcon jp-FileUploadIcon',
     });
@@ -433,18 +444,7 @@ function addZenodoCommands(
         iconClass: 'icon-class',
         execute: () => {
             console.log("uploading");
-            //Make widget visible...
-            if (!widget.isAttached){
-                widget.title.label = 'Zenodo Upload'
-                widget.title.closable = true;
-                app.shell.add(widget, 'main');
-            }
-            //..and active
-            app.shell.activateById(widget.id);
-            //Show only the submit form
-            hide_all();
-            let submit_form = document.getElementById("submit-form") as HTMLElement;
-            submit_form.style.display = "Block";
+            open_widget(app, widget, ["submit-form","Block"]);
         },
     
     }); 
@@ -455,18 +455,7 @@ function addZenodoCommands(
         isToggled: () => false, 
         iconClass: 'icon-class',
         execute: () => {
-            //Make widget visible...
-            if (!widget.isAttached){
-                widget.title.label = 'Zenodo Upload'
-                widget.title.closable = true;
-                app.shell.add(widget, 'main');
-            }
-            //..and active
-            app.shell.activateById(widget.id);
-            //Show only loading text
-            hide_all();
-            let loading_div = document.getElementById("loading-div") as HTMLElement;
-            loading_div.style.display = "Flex";
+            open_widget(app, widget, ["loading-div","Flex"]);
 
             //Trigger POST request to /zenodo/update/
             var settings =ServerConnection.makeSettings()
