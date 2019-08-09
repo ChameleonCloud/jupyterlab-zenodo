@@ -5,7 +5,6 @@ import unittest
 
 from ..update import get_last_upload, process_upload_data
 from ..utils import UserMistake
- 
 
 sample_info = ['somedate','somedoi','somedir','somedir/somefile','sometoken']
 

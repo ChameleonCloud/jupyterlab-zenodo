@@ -1,6 +1,5 @@
 from datetime import datetime
 import os
-import requests
 import unittest
 
 from ..zenodo import Deposition

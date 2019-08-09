@@ -29,7 +29,7 @@ def get_id(doi):
     
     """
 
-    if doi is None:
+    if not doi:
         raise Exception("No doi")
     else:
         record_id = doi.split('.')[-1]

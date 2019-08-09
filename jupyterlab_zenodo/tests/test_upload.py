@@ -1,4 +1,3 @@
-import requests
 import unittest
 
 from ..upload import assemble_upload_data, assemble_metadata
