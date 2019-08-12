@@ -82,7 +82,7 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
         else:
             self.set_status(201)
             self.write(json.dumps({'status':'success', 'doi':doi}))
-            store_record(doi, new_filepath, upload_data['directory'],
+            store_record(db_dest, doi, new_filepath, upload_data['directory'],
                 upload_data['access_token'])
             self.finish()
 

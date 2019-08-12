@@ -62,6 +62,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
 
         self.check_xsrf_cookie()
         request_data = json.loads(self.request.body.decode("utf-8"))
+        db_dest = "/work/.zenodo/"
 
         try:
             upload_data = assemble_upload_data(request_data, self.dev)
@@ -87,7 +88,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             print("doi: "+str(doi))
             self.set_status(201)
             self.write(json.dumps(info))
-            store_record(doi, path_to_file, upload_data['directory_to_zip'], 
+            store_record(db_dest, doi, path_to_file, upload_data['directory_to_zip'], 
                 upload_data['access_token'])
             self.finish()
 

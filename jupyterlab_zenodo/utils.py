@@ -50,6 +50,9 @@ def zip_dir(notebook_dir, filename):
     string
         Full path of zipped file
     """  
+    if not os.path.exists(notebook_dir):
+        raise UserMistake("That directory path is not valid. "
+            "To use your work directory, leave the directory field empty")
 
     # Create temporary directory for archive
     temp_dir = tempfile.mkdtemp();
@@ -70,8 +73,8 @@ def zip_dir(notebook_dir, filename):
 
     return filepath
 
-def store_record(doi, filepath, directory, access_token):
-    """Store a record of publication in a local sqlite database
+def store_record(db_dest, doi, filepath, directory, access_token):
+    """Store a record of publication in the sqlite database zenodo.db
 
     Parameters
     ----------
@@ -88,9 +91,9 @@ def store_record(doi, filepath, directory, access_token):
     -------
     void
     """
-    
 
-    db_dest = "/work/.zenodo/"
+    if any(map(lambda x : not x, [doi, filepath, directory, access_token])):
+        raise Exception("Given empty fields")
 	
     # Create directory if it doesn't exist
     if not os.path.exists(db_dest):
