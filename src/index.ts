@@ -336,6 +336,7 @@ function activateZenodoPlugin(
     form_body.appendChild(newInput('Title','title'));
     form_body.appendChild(newInput('Name for compressed file','filename'));
     form_body.appendChild(newInput('Author','author'));
+    form_body.appendChild(newInput('Affiliation','affiliation'));
     form_body.appendChild(newInput('Description','description'));
     form_body.appendChild(newInput('Directory to zip (default is work)','directory'));
     form_body.appendChild(newInput('Access token (optional)','zenodo_token'));

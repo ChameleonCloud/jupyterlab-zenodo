@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 import unittest
 
-from ..zenodo import Deposition
+from jupyterlab_zenodo.zenodo import Deposition
 
 class InitTest(unittest.TestCase):
    
@@ -101,10 +101,7 @@ class ClearFilesTest(unittest.TestCase):
         os.system(cmd)
     
     def test_success(self):
-        try:
-            self.dep.clear_files()
-        except Exception as e:
-            self.fail("clearing failed: "+str(e))
+        self.dep.clear_files()
 
     def tearDown(self):
         filepath = '***REMOVED***test.txt'

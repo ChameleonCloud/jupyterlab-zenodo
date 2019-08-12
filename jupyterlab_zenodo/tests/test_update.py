@@ -3,14 +3,10 @@ import os
 import sqlite3
 import unittest
 
-from ..update import get_last_upload, process_upload_data
-from ..utils import UserMistake
+from jupyterlab_zenodo.update import get_last_upload
+from jupyterlab_zenodo.utils import UserMistake
 
 sample_info = ['somedate','somedoi','somedir','somedir/somefile','sometoken']
-
-class ProcessUploadDataTest(unittest.TestCase):
-    def test_missing_data(self):
-        sample_info = ['somedate','somedoi','somedir','somedir/somefile','sometoken']
 
 class GetLastUploadNoDBTest(unittest.TestCase):
     def setUp(self):
@@ -35,6 +31,22 @@ class GetLastUploadTest(unittest.TestCase):
         conn = sqlite3.connect(self.db_dest+'zenodo.db')
         c = conn.cursor()
         c.execute("CREATE TABLE uploads (date_uploaded, doi, directory, filepath, access_token)")
+
+    def test_missing_data(self):
+        conn = sqlite3.connect(self.db_dest+'zenodo.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO uploads VALUES (?,?,?,?,?)",[
+            self.info['date_uploaded'],
+            "",
+            self.info['directory'],
+            self.info['filepath'],
+            self.info['access_token'],
+        ])
+        conn.commit()
+        c.close()
+
+        with self.assertRaises(Exception):
+            get_last_upload(self.db_dest)
 
     def test_success(self):
         conn = sqlite3.connect(self.db_dest+'zenodo.db')

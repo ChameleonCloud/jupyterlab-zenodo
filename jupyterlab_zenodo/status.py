@@ -1,6 +1,5 @@
 """ JupyterLab Zenodo : Checking status of Zenodo upload """
 
-import json
 import sqlite3
 
 from tornado import gen, web
@@ -51,7 +50,7 @@ class ZenodoStatusHandler(ZenodoBaseHandler):
             info = {'status': 'No publications'}
         else:
             info = {'status': 'Deposition published', 'doi': doi}
-        self.write(json.dumps(info))
+        self.write(info)
         self.finish()
         
         

@@ -2,7 +2,7 @@ import os
 import sqlite3
 import unittest
 
-from ..utils import UserMistake, get_id, zip_dir, store_record
+from jupyterlab_zenodo.utils import UserMistake, get_id, zip_dir, store_record
 
 class GetIdTest(unittest.TestCase):
     def test_good_doi(self):
@@ -64,18 +64,12 @@ class StoreRecordTest(unittest.TestCase):
         self.dest = "***REMOVED***work/.zenodo/"
 
     def test_no_path(self):
-        try:
-            store_record(self.dest, self.doi, self.filepath, self.dir, self.tok)
-        except:
-            self.fail("Something went wrong storing the data")
+        store_record(self.dest, self.doi, self.filepath, self.dir, self.tok)
         os.system("rm -rf "+self.dest)
 
     def test_path_no_db(self):
         os.system("mkdir "+self.dest)
-        try:
-            store_record(self.dest, self.doi, self.filepath, self.dir, self.tok)
-        except:
-            self.fail("Something went wrong storing the data")
+        store_record(self.dest, self.doi, self.filepath, self.dir, self.tok)
         os.system("rm -rf "+self.dest)
 
     def test_existing_db(self):
@@ -86,10 +80,7 @@ class StoreRecordTest(unittest.TestCase):
         c.execute("INSERT INTO uploads VALUES (?,?,?,?,?)",["time","doi", "directory", "filepath", "access_token"])
         conn.commit()
         conn.close()
-        try:
-            store_record(self.dest, self.doi, self.filepath, self.dir, self.tok)
-        except:
-            self.fail("Something went wrong storing the data")
+        store_record(self.dest, self.doi, self.filepath, self.dir, self.tok)
         os.system("rm -rf "+self.dest)
 
     def test_missing_doi(self):

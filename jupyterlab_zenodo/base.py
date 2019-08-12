@@ -1,5 +1,3 @@
-import json
-
 from notebook.base.handlers import APIHandler
 
 
@@ -24,10 +22,7 @@ class ZenodoBaseHandler(APIHandler):
         info = {
             'status':'failure',
             'message': error_message,
-            'doi' : None
         }
         self.set_status(400)
-        self.write(json.dumps(info))
+        self.write(info)
         self.finish()
-        return
-

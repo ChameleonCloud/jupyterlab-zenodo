@@ -5,50 +5,52 @@ import unittest
 
 from unittest.mock import patch
 
-from ..utils import UserMistake
-from ..zenodo import Client
+from jupyterlab_zenodo.__init__ import TEST_API_TOKEN
+from jupyterlab_zenodo.utils import UserMistake
+from jupyterlab_zenodo.zenodo import Client
+
+# API bases for dev and non-dev
+API_BASE_URL_DEV = 'https://sandbox.zenodo.org/api' 
+API_BASE_URL = 'https://zenodo.org/api' 
+
+# File to upload to zenodo in testing - will be overwritten
+SAMPLE_FILE_PATH = '***REMOVED***test.txt'
 
 class CheckAccessTokenTest(unittest.TestCase):
     def temp_init(self, obj, dev, access_token):
         if dev is True:
-            obj.url_base = 'https://sandbox.zenodo.org/api'
+            obj.url_base = API_BASE_URL_DEV
         else:
-            obj.url_base = 'https://zenodo.org/api'
+            obj.url_base = API_BASE_URL
         obj.access_token = access_token
         return None
 
     def setUp(self):
-        self.token = '***REMOVED***'
+        self.token = TEST_API_TOKEN
         #self.client = Client(True, self.token)
     def test_success(self):
         with patch.object(Client, "__init__", lambda x, y, z: self.temp_init(x, y, z)):
             c = Client(True, self.token)
-            try:
-                c.check_access_token()
-            except:
-                self.fail("Access token should be correct")
+            c.check_access_token()
 
     def test_bad_token(self):
         with patch.object(Client, "__init__", lambda x, y, z: self.temp_init(x, y, z)):
             c = Client(True, 'notatoken')
-            with self.assertRaises(UserMistake): c.check_access_token()
+            with self.assertRaises(UserMistake):
+                c.check_access_token()
 
 class CreateDepositionTest(unittest.TestCase):
    
     def test_success(self):
-        token = '***REMOVED***'
+        token = TEST_API_TOKEN
         self.client = Client(True, token)
-        try:
-            self.client.create_deposition()
-        except Exception as e:
-            print(r)
-            self.fail("Add metadata raised an exception: "+str(e)) 
+        self.client.create_deposition()
 
 class AddMetadataTest(unittest.TestCase):
    
     def setUp(self):
-        url_base = 'https://sandbox.zenodo.org/api'
-        good_token = '***REMOVED***'
+        url_base = API_BASE_URL_DEV
+        good_token = TEST_API_TOKEN
 
         r = requests.post(url_base + '/deposit/depositions',
                           params={'access_token': good_token}, json={},
@@ -68,20 +70,19 @@ class AddMetadataTest(unittest.TestCase):
         self.client = Client(True, good_token)
 
     def test_success(self):
-        try:
-            self.client.add_metadata(self.deposition_id, self.good_metadata)
-        except Exception as e:
-            self.fail("Add metadata raised an exception: "+str(e)) 
+        self.client.add_metadata(self.deposition_id, self.good_metadata)
 
     def test_bad_data(self):
-        with self.assertRaises(Exception): self.client.add_metadata(self.deposition_id, {})
+        with self.assertRaises(Exception): 
+            self.client.add_metadata(self.deposition_id, {})
     def test_bad_id(self):
-        with self.assertRaises(Exception): self.client.add_metadata('1010101', self.good_metadata)
+        with self.assertRaises(Exception): 
+            self.client.add_metadata('1010101', self.good_metadata)
         
 class AddFileTest(unittest.TestCase):
     def setUp(self):
-        url_base = 'https://sandbox.zenodo.org/api'
-        good_token = '***REMOVED***'
+        url_base = API_BASE_URL_DEV
+        good_token = TEST_API_TOKEN
 
         r = requests.post(url_base + '/deposit/depositions',
                           params={'access_token': good_token}, json={},
@@ -98,7 +99,7 @@ class AddFileTest(unittest.TestCase):
                          'affiliation': 'Chameleon Cloud'}],
         }  
      
-        self.good_filepath = '***REMOVED***test.txt'
+        self.good_filepath = SAMPLE_FILE_PATH
         self.client = Client(True, good_token)
 
     def test_success(self):
@@ -106,16 +107,18 @@ class AddFileTest(unittest.TestCase):
         self.assertIsNotNone(file_id)
    
     def test_bad_id(self): 
-        with self.assertRaises(Exception): self.client.add_file('1010101', self.good_filepath)
+        with self.assertRaises(Exception): 
+            self.client.add_file('1010101', self.good_filepath)
 
     def test_bad_file(self): 
-        with self.assertRaises(Exception): self.client.add_file(self.deposition_id, 'notafile')
+        with self.assertRaises(Exception): 
+            self.client.add_file(self.deposition_id, 'notafile')
 
 
 class PublishDepositionTest(unittest.TestCase):
     def setUp(self):
-        url_base = 'https://sandbox.zenodo.org/api'
-        good_token = '***REMOVED***'
+        url_base = API_BASE_URL_DEV
+        good_token = TEST_API_TOKEN
 
         r = requests.post(url_base + '/deposit/depositions',
                           params={'access_token': good_token}, json={},
@@ -132,7 +135,7 @@ class PublishDepositionTest(unittest.TestCase):
             'creators': [{'name': 'Some Name', 
                          'affiliation': 'Chameleon Cloud'}],
         }  
-        filepath = '***REMOVED***test.txt'
+        filepath = SAMPLE_FILE_PATH
 
         self.client = Client(True, good_token)
         self.client.add_metadata(self.deposition_id, metadata)
@@ -143,13 +146,14 @@ class PublishDepositionTest(unittest.TestCase):
         self.assertIsNotNone(doi)
 
     def test_bad_id(self):
-        with self.assertRaises(Exception): self.client.publish_deposition('1010101')
+        with self.assertRaises(Exception): 
+            self.client.publish_deposition('1010101')
 
 class NewDepositionVersionTest(unittest.TestCase):
 
     def setUp(self):
-        url_base = 'https://sandbox.zenodo.org/api'
-        good_token = '***REMOVED***'
+        url_base = API_BASE_URL_DEV
+        good_token = TEST_API_TOKEN
 
         r = requests.post(url_base + '/deposit/depositions',
                           params={'access_token': good_token}, json={},
@@ -166,7 +170,7 @@ class NewDepositionVersionTest(unittest.TestCase):
             'creators': [{'name': 'Some Name', 
                          'affiliation': 'Chameleon Cloud'}],
         }  
-        filepath = '***REMOVED***test.txt'
+        filepath = SAMPLE_FILE_PATH
 
         self.client = Client(True, good_token)
         self.client.add_metadata(self.deposition_id, metadata)
@@ -178,12 +182,13 @@ class NewDepositionVersionTest(unittest.TestCase):
         self.assertIsNotNone(new_record_id)
 
     def test_bad_id(self):
-        with self.assertRaises(Exception): self.client.new_deposition_version('1010101')
+        with self.assertRaises(Exception): 
+            self.client.new_deposition_version('1010101')
 
 class PublishNewVersionTest(unittest.TestCase):
     def setUp(self):
-        url_base = 'https://sandbox.zenodo.org/api'
-        good_token = '***REMOVED***'
+        url_base = API_BASE_URL_DEV
+        good_token = TEST_API_TOKEN
 
         r = requests.post(url_base + '/deposit/depositions',
                           params={'access_token': good_token}, json={},
@@ -200,7 +205,7 @@ class PublishNewVersionTest(unittest.TestCase):
             'creators': [{'name': 'Some Name', 
                          'affiliation': 'Chameleon Cloud'}],
         }  
-        filepath = '***REMOVED***test.txt'
+        filepath = SAMPLE_FILE_PATH
 
         self.client = Client(True, good_token)
         self.client.add_metadata(self.deposition_id, metadata)
@@ -209,12 +214,13 @@ class PublishNewVersionTest(unittest.TestCase):
 
     def test_user_error(self):
         new_id = self.client.new_deposition_version(self.deposition_id)
-        with self.assertRaises(UserMistake): self.client.publish_deposition(new_id)
+        with self.assertRaises(UserMistake): 
+            self.client.publish_deposition(new_id)
 
 
 class GetFilesTest(unittest.TestCase):
     def setUp(self):
-        good_token = '***REMOVED***'
+        good_token = TEST_API_TOKEN
         self.client = Client(True, good_token)
 
     def test_success(self):
@@ -223,32 +229,31 @@ class GetFilesTest(unittest.TestCase):
         self.assertNotEqual(len(file_ids),0)
 
     def test_bad_id(self):
-        with self.assertRaises(Exception): self.client.get_deposition_files('1010101')
+        with self.assertRaises(Exception): 
+            self.client.get_deposition_files('1010101')
 
 class DeleteFilesSuccessTest(unittest.TestCase):
     def setUp(self):
-        good_token = '***REMOVED***'
+        good_token = TEST_API_TOKEN
         self.client = Client(True, good_token)
         self.new_id = self.client.new_deposition_version('355162')
         self.file_ids = self.client.get_deposition_files(self.new_id)
-        cmd = "echo "+str(datetime.now())+" > ***REMOVED***test.txt"
+        cmd = "echo "+str(datetime.now())+" > "+SAMPLE_FILE_PATH
         os.system(cmd)
 
     def test_success(self):
-        try:
-            self.client.delete_deposition_files(self.new_id, self.file_ids)
-        except Exception as e:
-            self.fail("deletion failed: "+str(e))        
+        self.client.delete_deposition_files(self.new_id, self.file_ids)
 
     def tearDown(self):
-        filepath = '***REMOVED***test.txt'
+        filepath = SAMPLE_FILE_PATH
         self.client.add_file(self.new_id, filepath)
         self.client.publish_deposition(self.new_id)
 
 class DeleteFilesFailTest(unittest.TestCase):
     def setUp(self):
-        good_token = '***REMOVED***'
+        good_token = TEST_API_TOKEN
         self.client = Client(True, good_token)
 
     def test_bad_id(self):
-        with self.assertRaises(Exception): self.client.delete_deposition_files('1010101',['1'])
+        with self.assertRaises(Exception): 
+            self.client.delete_deposition_files('1010101',['1'])

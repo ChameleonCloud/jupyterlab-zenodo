@@ -68,7 +68,7 @@ def zip_dir(notebook_dir, filename):
 
     for root, dirs, files in os.walk(notebook_dir):
         for afile in files:
-            zipf.write(os.path.join(root,afile));
+            zipf.write(os.path.join(root,afile))
     zipf.close()
 
     return filepath

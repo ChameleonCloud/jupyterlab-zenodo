@@ -1,23 +1,30 @@
 """ JupyterLab Zenodo : Exporting from JupyterLab to Zenodo """
 
 import json
+import logging
 import requests
 
 from tornado import gen, web
 
 from .base import ZenodoBaseHandler
+#from jupyterlab_zenodo import ZenodoConfig
 from .utils import get_id, store_record, UserMistake, zip_dir
 from .zenodo import Deposition
 
+LOG = logging.getLogger(__name__)
+
+ZENODO_MIN_FIELD_LENGTH = 3
+
+#community = "Chameleon Cloud"
+community = None
 
 class ZenodoUploadHandler(ZenodoBaseHandler):
     """
     A handler that uploads your files to Zenodo
     """
-    def initialize(self, notebook_dir):
+    def initialize(self, notebook_dir, dev=False):
         self.notebook_dir = notebook_dir
-        #TODO: change dev to False before deployment
-        self.dev = True
+        self.dev = dev
 
     def upload_file(self, path_to_file, metadata, access_token):
         """Upload the given file at the given path to Zenodo
@@ -78,16 +85,14 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
 
         except Exception as x:
             # All other exceptions are internal
-            print("Internal error: "+str(x))
-            print(x)
+            LOG.exception("There was an error!")
             self.return_error("Something went wrong")
-            return
 
         else:
             info = {'status':'success', 'doi':doi}
-            print("doi: "+str(doi))
+            LOG.info("doi: "+str(doi))
             self.set_status(201)
-            self.write(json.dumps(info))
+            self.write(info)
             store_record(db_dest, doi, path_to_file, upload_data['directory_to_zip'], 
                 upload_data['access_token'])
             self.finish()
@@ -123,17 +128,18 @@ def assemble_upload_data(request_data, dev):
     else:
         #Real version
         our_access_token = '***REMOVED***'
-        # If the user has no access token, use ours
+
+    # If the user has no access token, use ours
     access_token = request_data.get('zenodo_token') or our_access_token
     # If the user hasn't specified a directory, use the notebook directory
     directory_to_zip = request_data.get('directory') or 'work'
-        # Assemble into dictionary to return
-    upload_data = {
+
+     # Assemble into dictionary to return
+    return {
         'access_token' : access_token,
         'directory_to_zip' : directory_to_zip,
         'filename' : filename,
     } 
-    return upload_data 
    
 def assemble_metadata(request_data):
     """Turn metadata into a dictionary for Zenodo upload
@@ -144,8 +150,8 @@ def assemble_metadata(request_data):
     Returns
     -------
     dictionary
-        With title, creators, and description
-        Each more than three characters long
+        With title, creators, afilliation and description
+        Each three or more characters long
 
     Notes
     -----
@@ -155,22 +161,26 @@ def assemble_metadata(request_data):
     title = request_data.get('title','')
     author = request_data.get('author','')
     description = request_data.get('description','')
+    affiliation = request_data.get('affiliation','')
 
     # Zenodo requires each field to be at least 4 characters long
-    if any([len(title) <= 3, len(author) <=3, len(description) <= 3]):
-        msg = ("Title, author, and description fields must all be filled in"
-              " and at least four characters long")
+    if any(map(lambda x : len(x) < ZENODO_MIN_FIELD_LENGTH,
+         [title, author, description, affiliation])):
+        msg = ("Title, author, afilliation, and description fields must all"
+               " be filled in and at least three characters long")
         raise UserMistake(msg)
 
     # Turn list of author strings into list of author dictionaries
     creator_list = []
-    creator_list.append({'name': author, 'affiliation': 'Chameleon Cloud'})
+    creator_list.append({'name': author, 'affiliation': affiliation})
 
     # Put data into dictionary to return
     metadata = {}
     metadata['title'] = title 
     metadata['upload_type'] = 'publication' 
     metadata['publication_type'] = 'workingpaper'
+    if community:
+        metadata['communities'] = [{'identifier': community}]
     metadata['description'] = description 
     metadata['creators'] = creator_list 
     return metadata

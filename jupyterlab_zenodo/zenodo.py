@@ -52,7 +52,8 @@ class Deposition:
         ---------
         metadata : dictionary
             Contains non-empty title, upload_type, publication_type, 
-              description, and creators, satisfying Zenodo's specifications
+              description, communities, and creators, 
+              all satisfying Zenodo's specifications
 
         Returns
         -------
@@ -264,15 +265,13 @@ class Client:
         - Raises an exception if the operation fails
         """
         # Organize and upload file
-        data = {'filename': path_to_file.split('/')[-1]}
-        open_file = open(path_to_file, 'rb')
-        files = {'file': open_file}
-        r = requests.post(self.url_base + '/deposit/depositions/%s/files' 
+        with open(path_to_file, 'rb') as open_file:
+            data = {'filename': path_to_file.split('/')[-1]}
+            files = {'file': open_file}
+            r = requests.post(self.url_base + '/deposit/depositions/%s/files' 
                             % deposition_id,
                           params={'access_token': self.access_token}, data=data,
                           files=files)
-        # Close the file after the request
-        open_file.close()
 
         # Return file id if nothing went wrong
         r_dict = r.json()
@@ -307,12 +306,7 @@ class Client:
                          params={'access_token': self.access_token})
         response_dict = r.json()
 
-        file_ids = []
-        for file_dict in response_dict:
-            file_id = file_dict.get('id')
-            if file_id is not None:
-                file_ids.append(file_id)
-
+        file_ids = [f['id'] for f in response_dict if 'id' in f]
         if file_ids == []:
             raise Exception("Something went wrong getting the last upload: seems like there aren't files: "+str(response_dict))
         else:

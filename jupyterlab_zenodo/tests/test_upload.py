@@ -1,12 +1,13 @@
 import unittest
 
-from ..upload import assemble_upload_data, assemble_metadata
-from ..utils import UserMistake
+from jupyterlab_zenodo.upload import assemble_upload_data, assemble_metadata
+from jupyterlab_zenodo.utils import UserMistake
 
 sample_response = {
     'title': 'a title',
     'author': 'an author',
     'description': 'a description',
+    'affiliation': 'usomewhere',
     'other stuff': 'other',
     'more other stuff': 'other',
     'filename': 'myfile',

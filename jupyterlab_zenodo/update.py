@@ -1,7 +1,7 @@
 """ JupyterLab Zenodo : Updating Zenodo Deposition """
 
 from datetime import datetime
-import json
+import logging
 import os
 import requests
 import sqlite3
@@ -13,13 +13,14 @@ from .base import ZenodoBaseHandler
 from .utils import get_id, store_record, UserMistake, zip_dir
 from .zenodo import Deposition
 
+LOG = logging.getLogger(__name__)
+
 class ZenodoUpdateHandler(ZenodoBaseHandler):
     """
     A handler that updates your files on Zenodo
     """
-    def initialize(self):
-        #TODO: change dev to False before deployment
-        self.dev = True
+    def initialize(self, dev=False):
+        self.dev = dev
 
 
     def update_file(self, path_to_file, record_id, access_token):
@@ -76,50 +77,14 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
             self.return_error(str(e))
         except Exception as x:
             # All other exceptions are internal
-            print("Internal error: "+str(x))
-            self.return_error("Something went wrong")
+            LOG.exception("There was an error!")
             return
         else:
             self.set_status(201)
-            self.write(json.dumps({'status':'success', 'doi':doi}))
+            self.write({'status':'success', 'doi':doi})
             store_record(db_dest, doi, new_filepath, upload_data['directory'],
                 upload_data['access_token'])
             self.finish()
-
-def process_upload_data(upload_data): 
-    """Verify and package data about the last upload
-
-    Parameters
-    ----------
-    upload_data : list of lists of strings
-        Contains all upload information 
-
-    Returns
-    -------
-    Dictionary
-        Contains date, doi, directory, filepath, and access token
-
-    Notes
-    -----
-    - Raises exception on failure
-    """
-    # Check that all data is there, fill in appropriately
-    last_upload = upload_data[0]
-
-    if len(last_upload) != 5:
-        raise Exception("Missing information in last upload: too few fields")
-    if any(map(lambda x : len(x) == '', last_upload)):
-        raise Exception("Missing information in last upload: empty values")
-
-    upload_data = {
-        'date': last_upload[0],
-        'doi': last_upload[1],
-        'directory': last_upload[2],
-        'filepath': last_upload[3],
-        'access_token': last_upload[4]
-    }
-    return upload_data
-
 
 def get_last_upload(db_dest):
     """Get information about the last upload
@@ -138,7 +103,7 @@ def get_last_upload(db_dest):
                          "to create a new deposition")
     # If the database location doesn't exist, there are no uploads
     if not os.path.exists(db_dest):
-        print("No db folder")
+        LOG.warning("No db folder")
         raise UserMistake(no_uploads_error)
 
     # Connect to database
@@ -152,12 +117,16 @@ def get_last_upload(db_dest):
         raise UserMistake(no_uploads_error)
      
     # Fetch info, close connection
-    data = c.fetchall()
+    last_upload = c.fetchone()
     conn.close()
 
-    if data == []:
-        print("data is empty: "+str(data))
+    if last_upload == []:
+        LOG.warn("data is empty: "+str(data))
         raise UserMistake(no_uploads_error)
 
-    return process_upload_data(data)
+    if any(map(lambda x : x == '', last_upload)):
+        raise Exception("Missing information in last upload: empty values")
+
+    labels = ['date','doi','directory','filepath','access_token']
+    return dict(zip(labels, last_upload))
 
