@@ -8,7 +8,8 @@ from tornado import gen, web
 
 from .base import ZenodoBaseHandler
 #from jupyterlab_zenodo import ZenodoConfig
-from .utils import get_id, store_record, UserMistake, zip_dir
+from .database import store_record
+from .utils import get_id, UserMistake, zip_dir
 from .zenodo import Deposition
 
 LOG = logging.getLogger(__name__)
@@ -70,6 +71,12 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         self.check_xsrf_cookie()
         request_data = json.loads(self.request.body.decode("utf-8"))
         db_dest = "/work/.zenodo/"
+
+        #def inner_fn():
+        #    uload_data = ...
+        #
+        #do_zenodo_thing(inner_fn)
+
 
         try:
             upload_data = assemble_upload_data(request_data, self.dev)

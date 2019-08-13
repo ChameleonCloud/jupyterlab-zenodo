@@ -1,9 +1,8 @@
-from datetime import datetime
+""" Helper functions and exceptions for the Zenodo extension """
+
 import os
-import sqlite3
 import tempfile
 import zipfile
-
 
 class UserMistake(Exception):
     """Raised when something went wrong due to user input"""
@@ -73,47 +72,4 @@ def zip_dir(notebook_dir, filename):
 
     return filepath
 
-def store_record(db_dest, doi, filepath, directory, access_token):
-    """Store a record of publication in the sqlite database zenodo.db
-
-    Parameters
-    ----------
-    doi : string
-        Zenodo DOI given to uploaded record
-    filepath : string
-        Full path of zip file that was uploaded
-    directory : string
-        Directory just compressed and uploaded
-    access_token : string
-        Zenodo access token used
-
-    Returns
-    -------
-    void
-    """
-
-    if any(map(lambda x : not x, [doi, filepath, directory, access_token])):
-        raise Exception("Given empty fields")
-	
-    # Create directory if it doesn't exist
-    if not os.path.exists(db_dest):
-        cmd = "mkdir " + db_dest
-        os.system(cmd)
-
-    # Connect to database
-    conn = sqlite3.connect(db_dest+'zenodo.db')
-    c = conn.cursor()
-
-    # Create uploads table if it doesn't exist
-    try:
-        c.execute("CREATE TABLE uploads (date_uploaded, doi, directory, filepath, access_token)")
-    except sqlite3.OperationalError:
-        pass
-
-    # Add data to table
-    c.execute("INSERT INTO uploads VALUES (?,?,?,?,?)",[datetime.now(),doi, directory, filepath, access_token])
-
-    # Commit and close
-    conn.commit()
-    conn.close()
 
