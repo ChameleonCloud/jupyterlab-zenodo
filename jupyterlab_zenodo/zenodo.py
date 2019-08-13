@@ -8,7 +8,7 @@ from .utils import UserMistake
 class Deposition:
     
     def __init__(self, dev, access_token, existing_id=None):
-        """ Initialize new deposition 
+        """ Create new deposition object
         
         Parameters
         ---------
@@ -18,7 +18,6 @@ class Deposition:
             Access token for Zenodo
         existing_id : string
             Optional: provide id of existing deposition
-            If none is provided, a new deposition is created
 
         Returns
         -------
@@ -26,10 +25,29 @@ class Deposition:
         """
         
         self.client = Client(dev, access_token)
-        self.id = existing_id or self.client.create_deposition()
+        if existing_id:
+            self.id = existing_id
 
+    def zenodo_init(self):
+        """ Initializes new deposition on Zenodo
+        
+        Parameters
+        ---------
+        none
+
+        Returns
+        -------
+        void
+
+        Notes
+        -----
+        - Not necessary if id has already been set by existing_id
+        - Sets self.id on success, raises exception on failure
+        """
+        self.id = self.client.create_deposition()
+ 
     def new_version(self):
-        """ Create new version the deposition
+        """ Create new version of the deposition
         
         Parameters
         ----------
@@ -41,7 +59,7 @@ class Deposition:
 
         Notes
         -----
-        - Changes self.id on success, raises Exception on failure
+        - Changes self.id on success, raises exception on failure
         """
         self.id = self.client.new_deposition_version(self.id)
 	
@@ -118,6 +136,9 @@ class Deposition:
 
 
 class Client:
+    #def check_zenodo_response(response):
+                
+
     def check_access_token(self):
         """ Raise an exception if an invalid token is provided
         
@@ -159,7 +180,7 @@ class Client:
             
         self.access_token = access_token
         self.headers = {"Content-Type": "application/json"}
-        self.check_access_token()
+#        self.check_access_token()
 
     def create_deposition(self):
         """ Create new deposition on Zenodo 

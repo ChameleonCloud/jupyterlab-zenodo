@@ -2,23 +2,36 @@ from datetime import datetime
 import os
 import unittest
 
+from jupyterlab_zenodo.__init__ import TEST_API_TOKEN
 from jupyterlab_zenodo.zenodo import Deposition
+
+TEST_FILE = '***REMOVED***test.txt'
+TEST_DEP_ID = '355162'
 
 class InitTest(unittest.TestCase):
    
     def test_success(self):
-        token = '***REMOVED***'
+        token = TEST_API_TOKEN
         dep = Deposition(True, token)
-        self.assertIsNotNone(dep.id)
 
-    def test_bad_token(self):
-        with self.assertRaises(Exception): Deposition(True, 'notatoken')
+    def test_success_existing(self):
+        token = TEST_API_TOKEN
+        dep = Deposition(True, token, TEST_DEP_ID)
+
+class ZenodoInitTest(unittest.TestCase):
+
+    def test_success(self):
+        token = TEST_API_TOKEN
+        dep = Deposition(True, token)
+        dep.zenodo_init()
+        self.assertIsNotNone(dep.id)
 
 class SetMetadataTest(unittest.TestCase):
    
     def setUp(self):
-        token = '***REMOVED***'
+        token = TEST_API_TOKEN
         self.dep = Deposition(True, token)
+        self.dep.zenodo_init()
 
         self.good_metadata = {
             'title': 'Sample Title',
@@ -38,9 +51,10 @@ class SetMetadataTest(unittest.TestCase):
 
 class SetFileTest(unittest.TestCase):
     def setUp(self):
-        token = '***REMOVED***'
+        token = TEST_API_TOKEN
         self.dep = Deposition(True, token)
-        self.good_filepath = '***REMOVED***test.txt'
+        self.dep.zenodo_init()
+        self.good_filepath = TEST_FILE
 
     def test_success(self):
         self.dep.set_file(self.good_filepath)
@@ -52,8 +66,9 @@ class SetFileTest(unittest.TestCase):
 
 class PublishTest(unittest.TestCase):
     def setUp(self):
-        token = '***REMOVED***'
+        token = TEST_API_TOKEN
         self.dep = Deposition(True, token)
+        self.dep.zenodo_init()
         metadata = {
             'title': 'Sample Title',
             'upload_type': 'publication',
@@ -63,7 +78,7 @@ class PublishTest(unittest.TestCase):
                          'affiliation': 'Chameleon Cloud'}],
         }  
         self.dep.set_metadata(metadata)
-        self.dep.set_file('***REMOVED***test.txt')
+        self.dep.set_file(TEST_FILE)
 
 
     def test_success(self):
@@ -72,8 +87,9 @@ class PublishTest(unittest.TestCase):
 
 class NewVersionTest(unittest.TestCase):
     def setUp(self):
-        token = '***REMOVED***'
+        token = TEST_API_TOKEN
         self.dep = Deposition(True, token)
+        self.dep.zenodo_init()
         metadata = {
             'title': 'Sample Title',
             'upload_type': 'publication',
@@ -83,7 +99,7 @@ class NewVersionTest(unittest.TestCase):
                          'affiliation': 'Chameleon Cloud'}],
         }  
         self.dep.set_metadata(metadata)
-        self.dep.set_file('***REMOVED***test.txt')
+        self.dep.set_file(TEST_FILE)
         self.dep.publish()
 
     def test_success(self):
@@ -94,20 +110,18 @@ class NewVersionTest(unittest.TestCase):
 
 class ClearFilesTest(unittest.TestCase):
     def setUp(self):
-        token = '***REMOVED***'
-        self.dep = Deposition(True, token,'355162')
+        token = TEST_API_TOKEN
+        self.dep = Deposition(True, token, TEST_DEP_ID)
         self.dep.new_version()
-        cmd = "echo "+str(datetime.now())+" > ***REMOVED***test.txt"
+        cmd = "echo "+str(datetime.now())+" > "+TEST_FILE
         os.system(cmd)
     
     def test_success(self):
         self.dep.clear_files()
 
     def tearDown(self):
-        filepath = '***REMOVED***test.txt'
+        filepath = TEST_FILE 
         self.dep.set_file(filepath)
         self.dep.publish()
-
-
 
 

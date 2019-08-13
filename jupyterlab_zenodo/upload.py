@@ -52,6 +52,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
     
         """
         deposition = Deposition(self.dev, access_token)
+        deposition.zenodo_init()
         deposition.set_file(path_to_file)
         deposition.set_metadata(metadata)
         deposition.publish()
