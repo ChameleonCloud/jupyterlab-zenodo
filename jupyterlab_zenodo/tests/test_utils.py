@@ -1,5 +1,7 @@
 import os
+import shutil
 import sqlite3
+import tempfile
 import unittest
 
 from jupyterlab_zenodo.utils import UserMistake, get_id, zip_dir
@@ -14,13 +16,11 @@ class GetIdTest(unittest.TestCase):
 
 class ZipDirTest(unittest.TestCase):
     def setUp(self):
-        self.dir = "***REMOVED***directory_of_things/"
-        os.system("mkdir "+self.dir)
-        self.loc = "***REMOVED***work/"
+        self.dir = tempfile.mkdtemp()
+        self.loc = tempfile.mkdtemp()
         
     def test_empty(self):
         filepath = zip_dir(self.dir, "myfile")
-        os.system("rm -rf "+self.dir)
 
         self.assertTrue(os.path.exists(filepath))
 
@@ -48,10 +48,11 @@ class ZipDirTest(unittest.TestCase):
         self.assertTrue(os.path.exists(filepath))
 
     def test_bad_dir(self):
-        bad_dir = "***REMOVED***not_a_directory"
+        bad_dir = self.dir+"not_a_directory"
         self.assertFalse(os.path.exists(bad_dir))
         with self.assertRaises(UserMistake): zip_dir(bad_dir,"myfile")
 
     def tearDown(self):
-        os.system("rm -rf "+self.dir)
+        shutil.rmtree(self.dir)
+        shutil.rmtree(self.loc)
 

@@ -1,12 +1,19 @@
 from datetime import datetime
 import os
+import tempfile
 import unittest
 
 from jupyterlab_zenodo.__init__ import TEST_API_TOKEN
 from jupyterlab_zenodo.zenodo import Deposition
 
-TEST_FILE = '***REMOVED***test.txt'
 TEST_DEP_ID = '355162'
+
+def setUpModule():
+    global test_file
+    global test_filename
+    test_file = tempfile.NamedTemporaryFile()
+    test_file.write(b'Hello world')
+    test_filename = test_file.name
 
 class InitTest(unittest.TestCase):
    
@@ -54,7 +61,7 @@ class SetFileTest(unittest.TestCase):
         token = TEST_API_TOKEN
         self.dep = Deposition(True, token)
         self.dep.zenodo_init()
-        self.good_filepath = TEST_FILE
+        self.good_filepath = test_filename
 
     def test_success(self):
         self.dep.set_file(self.good_filepath)
@@ -78,7 +85,7 @@ class PublishTest(unittest.TestCase):
                          'affiliation': 'Chameleon Cloud'}],
         }  
         self.dep.set_metadata(metadata)
-        self.dep.set_file(TEST_FILE)
+        self.dep.set_file(test_filename)
 
 
     def test_success(self):
@@ -99,7 +106,7 @@ class NewVersionTest(unittest.TestCase):
                          'affiliation': 'Chameleon Cloud'}],
         }  
         self.dep.set_metadata(metadata)
-        self.dep.set_file(TEST_FILE)
+        self.dep.set_file(test_filename)
         self.dep.publish()
 
     def test_success(self):
@@ -113,15 +120,17 @@ class ClearFilesTest(unittest.TestCase):
         token = TEST_API_TOKEN
         self.dep = Deposition(True, token, TEST_DEP_ID)
         self.dep.new_version()
-        cmd = "echo "+str(datetime.now())+" > "+TEST_FILE
+        cmd = "echo "+str(datetime.now())+" > "+test_filename
         os.system(cmd)
     
     def test_success(self):
         self.dep.clear_files()
 
     def tearDown(self):
-        filepath = TEST_FILE 
+        filepath = test_filename 
         self.dep.set_file(filepath)
         self.dep.publish()
 
 
+def tearDownModule():
+    test_file.close()

@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 import requests
+import tempfile
 import unittest
 
 from jupyterlab_zenodo.__init__ import TEST_API_TOKEN
@@ -11,8 +12,12 @@ from jupyterlab_zenodo.zenodo import Client
 API_BASE_URL_DEV = 'https://sandbox.zenodo.org/api' 
 API_BASE_URL = 'https://zenodo.org/api' 
 
-# File to upload to zenodo in testing - will be overwritten
-SAMPLE_FILE_PATH = '***REMOVED***test.txt'
+def setUpModule():
+    global test_file
+    global test_filename
+    test_file = tempfile.NamedTemporaryFile()
+    test_file.write(b'Hello world')
+    test_filename = test_file.name
 
 class CreateDepositionTest(unittest.TestCase):
     def test_success(self):
@@ -79,7 +84,7 @@ class AddFileTest(unittest.TestCase):
                          'affiliation': 'Chameleon Cloud'}],
         }  
      
-        self.good_filepath = SAMPLE_FILE_PATH
+        self.good_filepath = test_filename
         self.client = Client(True, good_token)
 
     def test_success(self):
@@ -115,7 +120,7 @@ class PublishDepositionTest(unittest.TestCase):
             'creators': [{'name': 'Some Name', 
                          'affiliation': 'Chameleon Cloud'}],
         }  
-        filepath = SAMPLE_FILE_PATH
+        filepath = test_filename
 
         self.client = Client(True, good_token)
         self.client.add_metadata(self.deposition_id, metadata)
@@ -150,7 +155,7 @@ class NewDepositionVersionTest(unittest.TestCase):
             'creators': [{'name': 'Some Name', 
                          'affiliation': 'Chameleon Cloud'}],
         }  
-        filepath = SAMPLE_FILE_PATH
+        filepath = test_filename
 
         self.client = Client(True, good_token)
         self.client.add_metadata(self.deposition_id, metadata)
@@ -185,7 +190,7 @@ class PublishNewVersionTest(unittest.TestCase):
             'creators': [{'name': 'Some Name', 
                          'affiliation': 'Chameleon Cloud'}],
         }  
-        filepath = SAMPLE_FILE_PATH
+        filepath = test_filename
 
         self.client = Client(True, good_token)
         self.client.add_metadata(self.deposition_id, metadata)
@@ -218,14 +223,14 @@ class DeleteFilesSuccessTest(unittest.TestCase):
         self.client = Client(True, good_token)
         self.new_id = self.client.new_deposition_version('355162')
         self.file_ids = self.client.get_deposition_files(self.new_id)
-        cmd = "echo "+str(datetime.now())+" > "+SAMPLE_FILE_PATH
+        cmd = "echo "+str(datetime.now())+" > "+test_filename
         os.system(cmd)
 
     def test_success(self):
         self.client.delete_deposition_files(self.new_id, self.file_ids)
 
     def tearDown(self):
-        filepath = SAMPLE_FILE_PATH
+        filepath = test_filename
         self.client.add_file(self.new_id, filepath)
         self.client.publish_deposition(self.new_id)
 
@@ -237,3 +242,6 @@ class DeleteFilesFailTest(unittest.TestCase):
     def test_bad_id(self):
         with self.assertRaises(Exception): 
             self.client.delete_deposition_files('1010101',['1'])
+
+def tearDownModule():
+    test_file.close()
