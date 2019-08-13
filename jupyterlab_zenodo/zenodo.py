@@ -8,6 +8,8 @@ from .utils import UserMistake
 
 LOG = logging.getLogger(__name__)
 
+ZENODO_NO_FILE_CHANGE_CODE = 10
+
 class Deposition:
     
     def __init__(self, dev, access_token, existing_id=None):
@@ -189,7 +191,8 @@ class Client:
         # If it's not a known code, return the generic exception
         elif status == 400:
             errors = info.get('errors',{})
-            if any([err.get('code', 0) == 10 for err in errors]):    
+            code = ZENODO_NO_FILE_CHANGE_CODE
+            if any([err.get('code', 0) == code for err in errors]):    
                raise UserMistake("You need to update some of your files"
                        " before trying to update your deposition on Zenodo")
             else: 
