@@ -1,9 +1,12 @@
 """ A module for creating and editing depositions on Zenodo """
 
 import json
+import logging
 import requests
 
 from .utils import UserMistake
+
+LOG = logging.getLogger(__name__)
 
 class Deposition:
     
@@ -136,27 +139,70 @@ class Deposition:
 
 
 class Client:
-    #def check_zenodo_response(response):
-                
 
-    def check_access_token(self):
-        """ Raise an exception if an invalid token is provided
+    def process_zenodo_response(self, response, message, field=None):
+        """ Process a response from a request to the Zenodo API
         
         Parameters
         ---------
-        none
+        response : Response
+            Response from zenodo request
+        message : string
+            Message to include with exception
+        field : string (optional)
+            If present, return this field on success 
 
         Returns
         -------
-        void
+        if field is provided: response.json()[field] 
+        otherwise: response.json()
         """
+        # Check the response status
+        status = response.status_code
 
-        r = requests.get(self.url_base + '/deposit/depositions',
-                         params={'access_token': self.access_token})
-        status = r.status_code
-        if int(status) == 401:
+        # Successful response with no body
+        if status == 204:
+            # Make sure nothing was expected
+            if field:
+                raise Exception(message + "\nExpected a response body")
+            else:
+                return {}
+
+        # Retrieve response body, include in exception messages
+        info = response.json()
+        exception_message = message + "\nResponse: " + str(info)
+        
+        # On success, return the requested field if present
+        # (If no field was requested, return the whole dictionary)
+        if status < 400:
+            if field:
+                data = info.get(field)
+                if data:
+                    return data
+                else:
+                    LOG.warning("This probably shouldn't happen")
+                    raise Exception(message) 
+            else:
+                return info
+
+        # On a 400 error, check the error code
+        # If it's not a known code, return the generic exception
+        elif status == 400:
+            errors = info.get('errors',{})
+            if any([err.get('code', 0) == 10 for err in errors]):    
+               raise UserMistake("You need to update some of your files"
+                       " before trying to update your deposition on Zenodo")
+            else: 
+                raise Exception(exception_message)
+
+        # A 401 error means unauthorized access
+        elif status == 401:
             raise UserMistake("Invalid access token. To use our default token,"
                               " leave the 'access token' field blank")
+        # For all other errors, return the generic error exception
+        else:
+            raise Exception(exception_message)
+
 
     def __init__(self, dev, access_token):
         """ Initialize Zenodo client 
@@ -195,17 +241,15 @@ class Client:
             id of newly created deposition
         """
 	
+        err_msg = "Issue creating a new deposition"
+
         r = requests.post(self.url_base + '/deposit/depositions',
                           params={'access_token': self.access_token}, json={},
                           headers=self.headers)
-        # retrieve deposition id
-        r_dict = r.json()
-        deposition_id = r_dict.get('id')
-        if deposition_id is None:
-            raise Exception("Issue creating a new deposition")
-        else:
-            return deposition_id
 
+        # Return deposition id if nothing went wrong
+        return self.process_zenodo_response(r, err_msg, 'id')
+    
     def new_deposition_version(self, deposition_id):
         """ Create new version of a published deposition on Zenodo 
         
@@ -219,17 +263,17 @@ class Client:
         string
             Id of newly created deposition draft
         """
+        err_msg = "Issue creating a new deposition version"
         r = requests.post((self.url_base + '/deposit/depositions/' + str(deposition_id)
                      + '/actions/newversion'),
                      params={'access_token': self.access_token})
 
-        response_dict = r.json()
-        new_record_loc = response_dict.get('links',{}).get('latest_draft')
+        # Return new record id if nothing went wrong
+        links = self.process_zenodo_response(r, err_msg, 'links')
 
-        if new_record_loc is None:
-            raise Exception("Something went wrong getting the last upload")
-
+        new_record_loc = links['latest_draft']
         new_record_id = new_record_loc.split('/')[-1]
+
         return new_record_id
 
          
@@ -255,15 +299,15 @@ class Client:
         """
         
         # Add metadata 
+        err_msg = "Issue with the metadata uploading"
         r = requests.put(self.url_base + '/deposit/depositions/%s' 
                             % deposition_id,
                          params={'access_token': self.access_token}, 
                          data=json.dumps({'metadata': metadata}),
                          headers=self.headers)
+
         # Make sure nothing went wrong
-        r_dict = r.json()
-        if int(r_dict.get('status','0')) > 399:
-            raise Exception("Something went wrong with the metadata upload: "+str(r_dict))
+        self.process_zenodo_response(r, err_msg)
      
 
     def add_file(self, deposition_id, path_to_file):
@@ -286,6 +330,8 @@ class Client:
         - Raises an exception if the operation fails
         """
         # Organize and upload file
+        err_msg = "Something went wrong with the file upload"
+
         with open(path_to_file, 'rb') as open_file:
             data = {'filename': path_to_file.split('/')[-1]}
             files = {'file': open_file}
@@ -295,13 +341,7 @@ class Client:
                           files=files)
 
         # Return file id if nothing went wrong
-        r_dict = r.json()
-        file_id = r_dict.get('id')
-
-        if file_id is None:
-            raise Exception("Something went wrong with the file upload")
-        else:
-            return file_id
+        return self.process_zenodo_response(r, err_msg, 'id')
 
     def get_deposition_files(self, deposition_id):
         """Get the file id of a deposition
@@ -321,31 +361,51 @@ class Client:
         - Raises an exception if the operation fails
         """
 
+        err_msg = "Something went wrong retrieving files"
         # Get file information
         r = requests.get((self.url_base + '/deposit/depositions/' 
                          + deposition_id + '/files'),
                          params={'access_token': self.access_token})
-        response_dict = r.json()
 
+        # Make sure nothing went wrong
+        response_dict = self.process_zenodo_response(r, err_msg)
+
+        # Extract file ids, return if there are any
         file_ids = [f['id'] for f in response_dict if 'id' in f]
         if file_ids == []:
-            raise Exception("Something went wrong getting the last upload: seems like there aren't files: "+str(response_dict))
+            raise Exception("Something went wrong getting the last upload:"
+                            " seems like there aren't files: "+str(response_dict))
         else:
             return file_ids
 
     def delete_deposition_files(self, deposition_id, file_ids):
+        """Delete files from a deposition
+    
+        Parameters
+        ----------
+        deposition_id : string
+            Zenodo id of the existing deposition
+        file_ids : list of strings
+            Ids of files to delete    
+
+        Returns
+        -------
+        void
+    
+        Notes
+        -----
+        - Raises an exception if the operation fails
+        """
+
+
         # Delete the file
+        err_msg = "Something went wrong deleting files"
         for file_id in file_ids:
             r = requests.delete(self.url_base + '/deposit/depositions/'
                             + deposition_id + '/files/' + file_id, 
                             params={'access_token': self.access_token})
-            try:
-                r.json()
-            except:
-                pass
-            else:
-                raise Exception("Something went wrong deleting the files " + r.status())
- 
+            self.process_zenodo_response(r, err_msg)
+
 
     def publish_deposition(self, deposition_id):
         """Publish existing deposition
@@ -365,22 +425,13 @@ class Client:
         - Raises an exception if the operation fails
         """
 
+        err_msg = "Something went wrong publishing the deposition"
+
         # Publish deposition
         r = requests.post(self.url_base + '/deposit/depositions/%s/actions/publish' 
                             % deposition_id,
                           params={'access_token': self.access_token})
     
-        # Get doi 
-        r_dict = r.json()
-        doi = r_dict.get('doi') 
+        return self.process_zenodo_response(r, err_msg, 'doi')
 
-        if doi is None:
-            if r_dict.get('errors',[{}])[0].get('code',0) == 10:
-                raise UserMistake("You need to update some of your files"
-                        " before trying to update your deposition on Zenodo")
-            else:
-                raise Exception("Something went wrong publishing the deposition.\nResponse: "+str(r_dict))
-        else:
-            return doi
- 
 

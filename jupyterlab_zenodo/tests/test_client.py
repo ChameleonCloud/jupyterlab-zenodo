@@ -3,8 +3,6 @@ import os
 import requests
 import unittest
 
-from unittest.mock import patch
-
 from jupyterlab_zenodo.__init__ import TEST_API_TOKEN
 from jupyterlab_zenodo.utils import UserMistake
 from jupyterlab_zenodo.zenodo import Client
@@ -16,35 +14,17 @@ API_BASE_URL = 'https://zenodo.org/api'
 # File to upload to zenodo in testing - will be overwritten
 SAMPLE_FILE_PATH = '***REMOVED***test.txt'
 
-class CheckAccessTokenTest(unittest.TestCase):
-    def temp_init(self, obj, dev, access_token):
-        if dev is True:
-            obj.url_base = API_BASE_URL_DEV
-        else:
-            obj.url_base = API_BASE_URL
-        obj.access_token = access_token
-        return None
-
-    def setUp(self):
-        self.token = TEST_API_TOKEN
-        #self.client = Client(True, self.token)
-    def test_success(self):
-        with patch.object(Client, "__init__", lambda x, y, z: self.temp_init(x, y, z)):
-            c = Client(True, self.token)
-            c.check_access_token()
-
-    def test_bad_token(self):
-        with patch.object(Client, "__init__", lambda x, y, z: self.temp_init(x, y, z)):
-            c = Client(True, 'notatoken')
-            with self.assertRaises(UserMistake):
-                c.check_access_token()
-
 class CreateDepositionTest(unittest.TestCase):
-   
     def test_success(self):
         token = TEST_API_TOKEN
         self.client = Client(True, token)
         self.client.create_deposition()
+
+    def test_bad_token(self):
+        token = 'notatoken'
+        self.client = Client(True, token)
+        with self.assertRaises(UserMistake):
+            self.client.create_deposition()
 
 class AddMetadataTest(unittest.TestCase):
    
