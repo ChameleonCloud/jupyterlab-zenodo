@@ -10,7 +10,6 @@ sample_response = {
     'affiliation': 'usomewhere',
     'other stuff': 'other',
     'more other stuff': 'other',
-    'filename': 'myfile',
     'directory': 'my_directory',
     'zenodo_token': 'sometoken',
 }
@@ -20,13 +19,10 @@ class AssembleUploadDataTest(unittest.TestCase):
         self.response = sample_response.copy()
         self.access_token = '***REMOVED***'
 
-    def test_no_filename(self):
-        self.response.pop('filename')
-        with self.assertRaises(UserMistake): assemble_upload_data(self.response, True)
-
-    def test_zerolength_filename(self):
-        self.response['filename'] = ''
-        with self.assertRaises(UserMistake): assemble_upload_data(self.response, True)
+    def test_zerolength_dir(self):
+        self.response['directory'] = ''
+        data = assemble_upload_data(self.response, True)
+        self.assertEqual(data['directory_to_zip'],'work')
 
     def test_no_dir(self):
         self.response.pop('directory')
@@ -38,11 +34,15 @@ class AssembleUploadDataTest(unittest.TestCase):
         data = assemble_upload_data(self.response, True)
         self.assertEqual(data['access_token'],self.access_token)
 
+    def test_zerolength_tok(self):
+        self.response['zenodo_token'] = ''
+        data = assemble_upload_data(self.response, True)
+        self.assertEqual(data['access_token'],self.access_token)
+
     def test_all_good(self):
         data = assemble_upload_data(self.response, True)
         self.assertEqual(data['access_token'],self.response['zenodo_token'])
         self.assertEqual(data['directory_to_zip'],self.response['directory'])
-        self.assertEqual(data['filename'],self.response['filename'])
     
 
 class AssembleMetadataTest(unittest.TestCase):

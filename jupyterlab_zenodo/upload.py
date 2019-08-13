@@ -4,6 +4,7 @@ import json
 import logging
 import requests
 
+from slugify import slugify
 from tornado import gen, web
 
 from .base import ZenodoBaseHandler
@@ -82,8 +83,12 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         try:
             upload_data = assemble_upload_data(request_data, self.dev)
             metadata = assemble_metadata(request_data)
+
+            # Use title to build a file name
+            filename = slugify(metadata['title'])
+
             path_to_file = zip_dir(upload_data['directory_to_zip'],
-                upload_data['filename'])
+                filename)
             doi = self.upload_file(path_to_file, metadata, 
                 upload_data['access_token']) 
 
@@ -101,13 +106,13 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             LOG.info("doi: "+str(doi))
             self.set_status(201)
             self.write(info)
-            store_record(db_dest, doi, path_to_file, upload_data['directory_to_zip'], 
+            store_record(doi, path_to_file, upload_data['directory_to_zip'], 
                 upload_data['access_token'])
             self.finish()
 
 
 def assemble_upload_data(request_data, dev):
-    """Gather and validate filename, directory, and access token for upload
+    """Gather and validate directory and access token for upload
     Parameters
     ----------
     request_data : dictionary
@@ -118,18 +123,13 @@ def assemble_upload_data(request_data, dev):
     Returns
     -------
     dictionary
-        With access_token, directory_to_zip, and filename, all non-empty
+        With access_token and directory_to_zip, and filename, all non-empty
 
     Notes
     -----
     - Raises an exception if data is invalid
     """
-    # Make sure a filename has been provided
-    filename = request_data.get('filename','')
 
-    if len(filename) < 1:
-        raise UserMistake("File name must be provided")
-        return
     if dev:
         #Sandbox version:
         our_access_token = '***REMOVED***'
@@ -146,7 +146,6 @@ def assemble_upload_data(request_data, dev):
     return {
         'access_token' : access_token,
         'directory_to_zip' : directory_to_zip,
-        'filename' : filename,
     } 
    
 def assemble_metadata(request_data):
@@ -164,7 +163,7 @@ def assemble_metadata(request_data):
     Notes
     -----
     - Raises an exception if data is invalid
-        """
+    """
     # Get basic metadata from form response
     title = request_data.get('title','')
     author = request_data.get('author','')

@@ -334,7 +334,6 @@ function activateZenodoPlugin(
     let form_table = document.createElement('table')
     let form_body = document.createElement('tbody')
     form_body.appendChild(newInput('Title','title'));
-    form_body.appendChild(newInput('Name for compressed file','filename'));
     form_body.appendChild(newInput('Author','author'));
     form_body.appendChild(newInput('Affiliation','affiliation'));
     form_body.appendChild(newInput('Description','description'));

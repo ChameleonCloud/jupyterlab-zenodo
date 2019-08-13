@@ -31,6 +31,7 @@ setup_args = dict(
     zip_safe = False,
     install_requires = [
         'notebook>=4.3.0',
+        'python-slugify'
     ]
 )
 

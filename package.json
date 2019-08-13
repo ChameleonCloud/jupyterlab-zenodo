@@ -33,10 +33,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "build:test": "cd test && ./build-tests.sh",
     "clean": "rimraf lib",
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
-    "test": "cd test && ./run-tests.sh",
+    "test": "make tests",
     "watch": "tsc -w"
   },
   "lint-staged": {
