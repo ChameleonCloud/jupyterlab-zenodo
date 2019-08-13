@@ -11,6 +11,15 @@ class GetIdTest(unittest.TestCase):
         dep_id = get_id('10.5281/zenodo.3357455')
         self.assertEqual(dep_id, '3357455') 
 
+    def invalid_doi(self):
+        with self.assertRaises(Exception): get_id('notadoi')
+
+    def num_invalid_doi(self):
+        with self.assertRaises(Exception): get_id('127381273')
+
+    def non_zenodo_doi(self):
+        with self.assertRaises(Exception): get_id('11111/notzenodo.123123')
+
     def test_empty_doi(self):
         with self.assertRaises(Exception): get_id('')
 

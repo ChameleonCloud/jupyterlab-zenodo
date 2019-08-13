@@ -2,6 +2,7 @@
 
 from datetime import datetime
 import os
+import re
 import tempfile
 import zipfile
 
@@ -31,6 +32,8 @@ def get_id(doi):
 
     if not doi:
         raise Exception("No doi")
+    elif not re.match("10\.[0-9]+\/zenodo\.[0-9]+$", doi):
+        raise Exception("Doi is invalid (wrong format)")
     else:
         record_id = doi.split('.')[-1]
         return record_id
