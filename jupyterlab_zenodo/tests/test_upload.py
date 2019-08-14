@@ -37,6 +37,11 @@ class AssembleUploadDataTest(unittest.TestCase):
         data = assemble_upload_data(self.response, True, 'regular_tok', self.access_token)
         self.assertEqual(data['access_token'],self.access_token)
 
+    def test_no_tok_no_default(self):
+        self.response.pop('zenodo_token')
+        with self.assertRaises(UserMistake):
+            assemble_upload_data(self.response, True, None, None)
+
     def test_zerolength_tok(self):
         self.response['zenodo_token'] = ''
         data = assemble_upload_data(self.response, True, 'regular_tok', self.access_token)

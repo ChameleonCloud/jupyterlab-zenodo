@@ -338,7 +338,7 @@ function activateZenodoPlugin(
     form_body.appendChild(newInput('Affiliation','affiliation'));
     form_body.appendChild(newInput('Description','description'));
     form_body.appendChild(newInput('Directory to zip (default is work)','directory'));
-    form_body.appendChild(newInput('Access token (optional)','zenodo_token'));
+    form_body.appendChild(newInput('Access token','zenodo_token'));
     // Submit button
     let submit_row = document.createElement('tr')
     let submit_label = document.createElement('th')

@@ -71,12 +71,6 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         request_data = json.loads(self.request.body.decode("utf-8"))
         db_dest = "/work/.zenodo/"
 
-        #def inner_fn():
-        #    uload_data = ...
-        #
-        #do_zenodo_thing(inner_fn)
-
-
         try:
             upload_data = assemble_upload_data(request_data, self.dev,
                 self.access_token, self.dev_access_token)
@@ -137,6 +131,12 @@ def assemble_upload_data(request_data, dev, tok, dev_tok):
 
     # If the user has no access token, use ours
     access_token = request_data.get('zenodo_token') or our_access_token
+
+    # If they provided no access token and there are no defaults, ask again
+    if not access_token:
+        raise UserMistake("There are no Zenodo access tokens in this JupyterLab"
+                          " environment. Please provide one")
+        
     # If the user hasn't specified a directory, use the notebook directory
     directory_to_zip = request_data.get('directory') or 'work'
 
