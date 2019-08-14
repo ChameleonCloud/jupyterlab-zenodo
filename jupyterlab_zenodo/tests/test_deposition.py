@@ -3,7 +3,7 @@ import os
 import tempfile
 import unittest
 
-from jupyterlab_zenodo.__init__ import TEST_API_TOKEN
+from jupyterlab_zenodo.test_init import TEST_API_TOKEN
 from jupyterlab_zenodo.zenodo import Deposition
 
 TEST_DEP_ID = '355162'

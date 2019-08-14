@@ -8,7 +8,6 @@ from slugify import slugify
 from tornado import gen, web
 
 from .base import ZenodoBaseHandler
-#from jupyterlab_zenodo import ZenodoConfig
 from .database import store_record
 from .utils import get_id, UserMistake, zip_dir
 from .zenodo import Deposition
@@ -24,10 +23,6 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
     """
     A handler that uploads your files to Zenodo
     """
-    def initialize(self, notebook_dir, dev=False):
-        self.notebook_dir = notebook_dir
-        self.dev = dev
-
     def upload_file(self, path_to_file, metadata, access_token):
         """Upload the given file at the given path to Zenodo
            Add included metadata
@@ -70,6 +65,8 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         Returns dictionary with status (success or failure) and doi (if successful)
         """
 
+        #c = ZenodoConfig(config=self.config)
+        #print("tok: "+c.access_token)
         self.check_xsrf_cookie()
         request_data = json.loads(self.request.body.decode("utf-8"))
         db_dest = "/work/.zenodo/"
@@ -81,7 +78,8 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
 
 
         try:
-            upload_data = assemble_upload_data(request_data, self.dev)
+            upload_data = assemble_upload_data(request_data, self.dev,
+                self.access_token, self.dev_access_token)
             metadata = assemble_metadata(request_data)
 
             # Use title to build a file name
@@ -111,7 +109,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             self.finish()
 
 
-def assemble_upload_data(request_data, dev):
+def assemble_upload_data(request_data, dev, tok, dev_tok):
     """Gather and validate directory and access token for upload
     Parameters
     ----------
@@ -132,10 +130,10 @@ def assemble_upload_data(request_data, dev):
 
     if dev:
         #Sandbox version:
-        our_access_token = '***REMOVED***'
+        our_access_token = dev_tok
     else:
         #Real version
-        our_access_token = '***REMOVED***'
+        our_access_token = tok
 
     # If the user has no access token, use ours
     access_token = request_data.get('zenodo_token') or our_access_token

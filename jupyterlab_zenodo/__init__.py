@@ -4,18 +4,13 @@ import logging
 
 from notebook.utils import url_path_join
 
-from ._version import __version__
+from .status import ZenodoStatusHandler
 from .upload import ZenodoUploadHandler
 from .update import ZenodoUpdateHandler
-from .status import ZenodoStatusHandler
+from ._version import __version__
 
-#TODO: make this configurable
-DEV = True
 
 LOG = logging.getLogger(__name__)
-
-# API token for the dev environment for testing
-TEST_API_TOKEN = '***REMOVED***'
 
 def _jupyter_server_extension_paths():
     return [{
@@ -39,8 +34,10 @@ def load_jupyter_server_extension(nb_server_app):
 
     handlers = [
         (upload_endpoint, ZenodoUploadHandler, 
-            {"notebook_dir": nb_server_app.notebook_dir, 'dev': DEV}),
-        (update_endpoint, ZenodoUpdateHandler, {'dev': DEV}),
-        (status_endpoint, ZenodoStatusHandler, {})
+            {"notebook_dir": nb_server_app.notebook_dir}),
+        (update_endpoint, ZenodoUpdateHandler,
+            {"notebook_dir": nb_server_app.notebook_dir}),
+        (status_endpoint, ZenodoStatusHandler,
+            {"notebook_dir": nb_server_app.notebook_dir}),
     ]
     web_app.add_handlers('.*$', handlers)

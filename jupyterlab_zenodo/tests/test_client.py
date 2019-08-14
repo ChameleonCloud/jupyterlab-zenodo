@@ -4,7 +4,7 @@ import requests
 import tempfile
 import unittest
 
-from jupyterlab_zenodo.__init__ import TEST_API_TOKEN
+from jupyterlab_zenodo.test_init import TEST_API_TOKEN
 from jupyterlab_zenodo.utils import UserMistake
 from jupyterlab_zenodo.zenodo import Client
 

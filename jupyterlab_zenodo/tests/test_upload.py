@@ -1,5 +1,6 @@
 import unittest
 
+from jupyterlab_zenodo.test_init import TEST_API_TOKEN
 from jupyterlab_zenodo.upload import assemble_upload_data, assemble_metadata
 from jupyterlab_zenodo.utils import UserMistake
 
@@ -17,32 +18,34 @@ sample_response = {
 class AssembleUploadDataTest(unittest.TestCase):
     def setUp(self):
         self.response = sample_response.copy()
-        self.access_token = '***REMOVED***'
+        self.access_token = TEST_API_TOKEN
 
     def test_zerolength_dir(self):
         self.response['directory'] = ''
-        data = assemble_upload_data(self.response, True)
+        data = assemble_upload_data(self.response, True, 'regular_tok', self.access_token)
         self.assertEqual(data['directory_to_zip'],'work')
+        self.assertEqual(data['access_token'],'sometoken')
 
     def test_no_dir(self):
         self.response.pop('directory')
-        data = assemble_upload_data(self.response, True)
+        data = assemble_upload_data(self.response, True, 'regular_tok', self.access_token)
         self.assertEqual(data['directory_to_zip'],'work')
+        self.assertEqual(data['access_token'],'sometoken')
 
     def test_no_tok(self):
         self.response.pop('zenodo_token')
-        data = assemble_upload_data(self.response, True)
+        data = assemble_upload_data(self.response, True, 'regular_tok', self.access_token)
         self.assertEqual(data['access_token'],self.access_token)
 
     def test_zerolength_tok(self):
         self.response['zenodo_token'] = ''
-        data = assemble_upload_data(self.response, True)
+        data = assemble_upload_data(self.response, True, 'regular_tok', self.access_token)
         self.assertEqual(data['access_token'],self.access_token)
 
     def test_all_good(self):
-        data = assemble_upload_data(self.response, True)
-        self.assertEqual(data['access_token'],self.response['zenodo_token'])
+        data = assemble_upload_data(self.response, True, 'regular_tok', self.access_token)
         self.assertEqual(data['directory_to_zip'],self.response['directory'])
+        self.assertEqual(data['access_token'],'sometoken')
     
 
 class AssembleMetadataTest(unittest.TestCase):

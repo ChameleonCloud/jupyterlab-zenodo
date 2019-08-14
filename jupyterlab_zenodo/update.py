@@ -17,9 +17,6 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
     """
     A handler that updates your files on Zenodo
     """
-    def initialize(self, dev=False):
-        self.dev = dev
-
 
     def update_file(self, path_to_file, record_id, access_token):
         """Upload the given file at the given path to Zenodo

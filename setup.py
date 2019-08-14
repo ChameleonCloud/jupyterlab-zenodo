@@ -12,7 +12,7 @@ setup_args = dict(
     url              = 'https://www.chameleoncloud.org',
     license          = 'BSD',
     platforms        = 'Linux, Mac OS X, Windows',
-    keywords         = ['jupyter', 'jupyterlab', 'zenodo'],
+    keywords         = ['jupyter', 'jupyterlab', 'openstack', 'zenodo'],
     classifiers      = [
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
@@ -31,7 +31,6 @@ setup_args = dict(
     zip_safe = False,
     install_requires = [
         'notebook>=4.3.0',
-        'python-slugify'
     ]
 )
 
