@@ -60,7 +60,7 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
 
         try:
             # Try to complete update
-            upload_data = get_last_upload()
+            upload_data = get_last_upload(self.db_dest, self.db_name)
             new_filepath = zip_dir(upload_data['directory'],
                 upload_data['filepath'].split('/')[-1])
             doi = self.update_file(new_filepath, get_id(upload_data['doi']), 
@@ -75,9 +75,9 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
             return
         else:
             self.set_status(201)
-            self.write({'status':'success', 'doi':doi})
+            self.write({'status':'success', 'doi':doi, 'dev':self.dev})
             store_record(doi, new_filepath, upload_data['directory'],
-                upload_data['access_token'])
+                upload_data['access_token'], self.db_dest, self.db_name)
             self.finish()
 
 

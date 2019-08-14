@@ -13,7 +13,7 @@ class ZenodoStatusHandler(ZenodoBaseHandler):
     @web.authenticated
     @gen.coroutine
     def get(self, path=''):
-        doi = check_status()
+        doi = check_status(self.db_dest, self.db_name)
         if doi is None:
             info = {'status': 'No publications'}
         else:

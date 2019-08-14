@@ -49,7 +49,7 @@ class AddMetadataTest(unittest.TestCase):
             'publication_type': 'workingpaper',
             'description': 'This is a description',
             'creators': [{'name': 'Some Name', 
-                         'affiliation': 'Chameleon Cloud'}],
+                         'affiliation': 'Some Place'}],
         }  
      
         self.client = Client(True, good_token)
@@ -81,7 +81,7 @@ class AddFileTest(unittest.TestCase):
             'publication_type': 'workingpaper',
             'description': 'This is a description',
             'creators': [{'name': 'Some Name', 
-                         'affiliation': 'Chameleon Cloud'}],
+                         'affiliation': 'Some Place'}],
         }  
      
         self.good_filepath = test_filename
@@ -118,7 +118,7 @@ class PublishDepositionTest(unittest.TestCase):
             'publication_type': 'workingpaper',
             'description': 'This is a description',
             'creators': [{'name': 'Some Name', 
-                         'affiliation': 'Chameleon Cloud'}],
+                         'affiliation': 'Some Place'}],
         }  
         filepath = test_filename
 
@@ -153,7 +153,7 @@ class NewDepositionVersionTest(unittest.TestCase):
             'publication_type': 'workingpaper',
             'description': 'This is a description',
             'creators': [{'name': 'Some Name', 
-                         'affiliation': 'Chameleon Cloud'}],
+                         'affiliation': 'Some Place'}],
         }  
         filepath = test_filename
 
@@ -188,7 +188,7 @@ class PublishNewVersionTest(unittest.TestCase):
             'publication_type': 'workingpaper',
             'description': 'This is a description',
             'creators': [{'name': 'Some Name', 
-                         'affiliation': 'Chameleon Cloud'}],
+                         'affiliation': 'Some Place'}],
         }  
         filepath = test_filename
 

@@ -46,7 +46,7 @@ class SetMetadataTest(unittest.TestCase):
             'publication_type': 'workingpaper',
             'description': 'This is a description',
             'creators': [{'name': 'Some Name', 
-                         'affiliation': 'Chameleon Cloud'}],
+                         'affiliation': 'Some Place'}],
         }  
 
     def test_success(self):
@@ -82,7 +82,7 @@ class PublishTest(unittest.TestCase):
             'publication_type': 'workingpaper',
             'description': 'This is a description',
             'creators': [{'name': 'Some Name', 
-                         'affiliation': 'Chameleon Cloud'}],
+                         'affiliation': 'Some Place'}],
         }  
         self.dep.set_metadata(metadata)
         self.dep.set_file(test_filename)
@@ -103,7 +103,7 @@ class NewVersionTest(unittest.TestCase):
             'publication_type': 'workingpaper',
             'description': 'This is a description',
             'creators': [{'name': 'Some Name', 
-                         'affiliation': 'Chameleon Cloud'}],
+                         'affiliation': 'Some Place'}],
         }  
         self.dep.set_metadata(metadata)
         self.dep.set_file(test_filename)

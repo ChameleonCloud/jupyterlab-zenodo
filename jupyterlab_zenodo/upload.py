@@ -17,9 +17,6 @@ LOG = logging.getLogger(__name__)
 
 ZENODO_MIN_FIELD_LENGTH = 3
 
-#community = "Chameleon Cloud"
-community = None
-
 class ZenodoUploadHandler(ZenodoBaseHandler):
     """
     A handler that uploads your files to Zenodo
@@ -70,12 +67,11 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         #print("tok: "+c.access_token)
         self.check_xsrf_cookie()
         request_data = json.loads(self.request.body.decode("utf-8"))
-        db_dest = "/work/.zenodo/"
 
         try:
             upload_data = assemble_upload_data(request_data, self.dev,
                 self.access_token, self.dev_access_token)
-            metadata = assemble_metadata(request_data)
+            metadata = assemble_metadata(request_data, self.community)
 
             # Use title to build a file name
             filename = slugify(metadata['title'])
@@ -95,7 +91,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             self.return_error("Something went wrong")
 
         else:
-            info = {'status':'success', 'doi':doi}
+            info = {'status':'success', 'doi':doi, 'dev':self.dev}
             LOG.info("doi: "+str(doi))
 
             # If a redirect was specified in configuration, add doi as
@@ -109,7 +105,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             self.set_status(201)
             self.write(info)
             store_record(doi, path_to_file, upload_data['directory_to_zip'], 
-                upload_data['access_token'])
+                upload_data['access_token'], self.db_dest, self.db_name)
             self.finish()
 
 
@@ -156,7 +152,7 @@ def assemble_upload_data(request_data, dev, tok, dev_tok):
         'directory_to_zip' : directory_to_zip,
     } 
    
-def assemble_metadata(request_data):
+def assemble_metadata(request_data, community):
     """Turn metadata into a dictionary for Zenodo upload
         Parameters
     ----------

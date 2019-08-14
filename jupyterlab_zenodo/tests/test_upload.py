@@ -59,30 +59,38 @@ class AssembleMetadataTest(unittest.TestCase):
 
     def test_no_title(self):
         self.response.pop('title')
-        with self.assertRaises(UserMistake): assemble_metadata(self.response)
+        with self.assertRaises(UserMistake): assemble_metadata(self.response, None)
         
     def test_no_authors(self):
         self.response.pop('author')
-        with self.assertRaises(UserMistake): assemble_metadata(self.response)
+        with self.assertRaises(UserMistake): assemble_metadata(self.response, None)
 
     def test_no_description(self):
         self.response.pop('description')
-        with self.assertRaises(UserMistake): assemble_metadata(self.response)
+        with self.assertRaises(UserMistake): assemble_metadata(self.response, None)
 
     def test_short_title(self):
         self.response['title'] = 'j'
-        with self.assertRaises(UserMistake): assemble_metadata(self.response)
+        with self.assertRaises(UserMistake): assemble_metadata(self.response, None)
 
     def test_short_authors(self):
         self.response['author'] = 'j'
-        with self.assertRaises(UserMistake): assemble_metadata(self.response)
+        with self.assertRaises(UserMistake): assemble_metadata(self.response, None)
 
     def test_short_description(self):
         self.response['description'] = 'j'
-        with self.assertRaises(UserMistake): assemble_metadata(self.response)
+        with self.assertRaises(UserMistake): assemble_metadata(self.response, None)
+
+    def test_with_community(self):
+        metadata = assemble_metadata(self.response, 'Chameleon')
+        self.assertEqual(metadata['title'],self.response['title'])
+        self.assertEqual(metadata['creators'][0]['name'],self.response['author'])
+        self.assertEqual(metadata['description'],self.response['description'])
+        self.assertEqual(metadata['upload_type'],'publication')
+        self.assertEqual(metadata['publication_type'],'workingpaper')
 
     def test_success(self):
-        metadata = assemble_metadata(self.response)
+        metadata = assemble_metadata(self.response, None)
         self.assertEqual(metadata['title'],self.response['title'])
         self.assertEqual(metadata['creators'][0]['name'],self.response['author'])
         self.assertEqual(metadata['description'],self.response['description'])

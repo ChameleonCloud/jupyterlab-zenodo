@@ -6,15 +6,10 @@ import sqlite3
 
 from .utils import UserMistake
 
-# Defaults for database
-DB_LOC = "/work/.zenodo/"
-DB_NAME = "zenodo.db"
-
 LOG = logging.getLogger(__name__)
 
-def store_record(doi, filepath, directory, access_token, 
-                 db_loc=DB_LOC, db_name=DB_NAME):
-    """Store a record of publication in the sqlite database zenodo.db
+def store_record(doi, filepath, directory, access_token, db_loc, db_name):
+    """Store a record of publication in the sqlite database db_name
 
     Parameters
     ----------
@@ -58,7 +53,7 @@ def store_record(doi, filepath, directory, access_token,
     conn.commit()
     conn.close()
 
-def check_status(db_loc=DB_LOC, db_name=DB_NAME):
+def check_status(db_loc, db_name):
     """Look in a local sqlite database to see Zenodo upload status
     Parameters
     ---------
@@ -86,7 +81,7 @@ def check_status(db_loc=DB_LOC, db_name=DB_NAME):
         return row[0]
 
 
-def get_last_upload(db_loc=DB_LOC, db_name=DB_NAME):
+def get_last_upload(db_loc, db_name):
     """Get information about the last upload
     Parameters
     ----------

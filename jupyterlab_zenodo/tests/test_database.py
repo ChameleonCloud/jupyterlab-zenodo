@@ -9,6 +9,9 @@ from jupyterlab_zenodo.utils import UserMistake
 
 sample_info = ['somedate','somedoi','somedir','somedir/somefile','sometoken']
 
+DB_DEST = '/work/.zenodo/'
+DB_NAME = 'zenodo.db'
+
 class StoreRecordTest(unittest.TestCase):
     def setUp(self):
         self.doi = "some/do.i"
@@ -19,10 +22,7 @@ class StoreRecordTest(unittest.TestCase):
 
     def test_no_path(self):
         not_a_dir = self.test_dir + "new/"
-        store_record(self.doi, self.filepath, self.dir, self.tok, not_a_dir)
-
-    def test_path_no_db(self):
-        store_record(self.doi, self.filepath, self.dir, self.tok, self.test_dir)
+        store_record(self.doi, self.filepath, self.dir, self.tok, not_a_dir, DB_NAME)
 
     def test_existing_db(self):
         name = 'zenodo.db'
@@ -57,7 +57,7 @@ class GetLastUploadNoDBTest(unittest.TestCase):
     def setUp(self):
         self.db_dest = "/not_a_directory"+str(datetime.now())
     def test_fail(self):
-        with self.assertRaises(UserMistake): get_last_upload(self.db_dest)
+        with self.assertRaises(UserMistake): get_last_upload(self.db_dest, DB_NAME)
 
 class GetLastUploadTest(unittest.TestCase):
     def setUp(self):

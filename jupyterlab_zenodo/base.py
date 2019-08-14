@@ -13,6 +13,9 @@ class ZenodoBaseHandler(APIHandler):
         self.access_token = c.access_token
         self.dev_access_token = c.dev_access_token
         self.upload_redirect = c.upload_redirect_url
+        self.db_dest = c.database_location
+        self.db_name = c.database_name
+        self.community = c.community
 
 
     def return_error(self, error_message):
