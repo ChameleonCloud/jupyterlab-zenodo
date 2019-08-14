@@ -3,6 +3,7 @@
 import json
 import logging
 import requests
+from urllib.parse import urlparse, urlencode
 
 from slugify import slugify
 from tornado import gen, web
@@ -96,6 +97,15 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         else:
             info = {'status':'success', 'doi':doi}
             LOG.info("doi: "+str(doi))
+
+            # If a redirect was specified in configuration, add doi as
+            #   a query variable and send full url in response 
+            if self.upload_redirect:
+                params = {'doi':doi}
+                url = self.upload_redirect
+                url += ('&' if urlparse(url).query else '?') + urlencode(params)
+                info['redirect'] = url
+
             self.set_status(201)
             self.write(info)
             store_record(doi, path_to_file, upload_data['directory_to_zip'], 

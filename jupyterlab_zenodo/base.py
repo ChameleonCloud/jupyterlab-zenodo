@@ -12,6 +12,7 @@ class ZenodoBaseHandler(APIHandler):
         self.dev = c.dev
         self.access_token = c.access_token
         self.dev_access_token = c.dev_access_token
+        self.upload_redirect = c.upload_redirect_url
 
 
     def return_error(self, error_message):

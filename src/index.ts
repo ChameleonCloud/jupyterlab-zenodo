@@ -135,20 +135,13 @@ function handleUploadResponse(
     //On success...
     } else {
         return response.json().then(data => {
-            //Redirect to upload to Chameleon's portal
-            let doi = data.doi;
-            window.location.href = "http://127.0.0.1:7000/portal/upload/"+doi;
-            //TODO: change URL before deployment
-
-            /*
-            Instead of the above, we can show a success screen with a link to Chameleon
-            show_success(doi);
-            var portal_button = document.getElementById("portal-button") 
-                                as HTMLLinkElement;
-            portal_button.target="_blank";
-            portal_button.href = "http://localhost:7000/portal/upload/"+doi;
-            portal_button.style.display = "None"
-            */
+            //Redirect to wherever the configuratoin file wants
+            if (data.redirect) {
+                window.location.href = data.redirect
+            } else {
+                //If no redirect was specified, we can show a success screen with a link to Zenodo
+                show_success_div(data.doi);
+            }
             return;
         });
     }
@@ -178,9 +171,6 @@ function handleUpdateResponse(
         return response.json().then(data => {
             let doi = data.doi;
             show_success_div(doi);
-            var portal_button = document.getElementById("portal-button") as HTMLLinkElement;
-            portal_button.style.display = "None"
-            //alert("Your deposition was successfully updated");
         });
     }
 }
@@ -295,17 +285,9 @@ function activateZenodoPlugin(
     zenodo_button.id = "zenodo-button";
     zenodo_button.classList.add("basic-btn");
     let td_zenodo = document.createElement("td");
-    //Button to add to Chameleon's portal
-    let portal_button = document.createElement("a"); 
-    portal_button.innerHTML = "Upload to the Chameleon sharing portal";
-    portal_button.id = "portal-button";
-    portal_button.classList.add("basic-btn");
-    let td_portal = document.createElement("td");
     //Attach all elements to main
     td_zenodo.appendChild(zenodo_button);
-    td_portal.appendChild(portal_button);
     tr.appendChild(td_zenodo);
-    tr.appendChild(td_portal);
     success_div.appendChild(tr);
     main.appendChild(success_div);
 
