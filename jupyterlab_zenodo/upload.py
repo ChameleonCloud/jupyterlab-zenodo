@@ -127,8 +127,10 @@ def assemble_upload_data(request_data, dev, tok, dev_tok):
 
     # If they provided no access token and there are no defaults, ask again
     if not access_token:
-        raise UserMistake("There are no Zenodo access tokens in this "
-                          "JupyterLab environment. Please provide one")
+        raise UserMistake("There are no default Zenodo access tokens in this "
+                          "JupyterLab environment, so you must provide your own"
+                          ". To create one, go to https://zenodo.org"
+                          "/account/settings/applications/tokens/new/")
 
     # If the user hasn't specified a directory, use the notebook directory
     directory_to_zip = request_data.get('directory') or 'work'

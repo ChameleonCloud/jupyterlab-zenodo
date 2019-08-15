@@ -206,7 +206,9 @@ class Client:
         # A 401 error means unauthorized access
         elif status == 401:
             raise UserMistake("Invalid access token. To use our default token,"
-                              " leave the 'access token' field blank")
+                              " leave the 'access token' field blank. Or, go "
+                              "to https://zenodo.org/account/settings/"
+                              "applications/tokens/new/ to create one")
         # For all other errors, return the generic error exception
         else:
             raise Exception(exception_message)
