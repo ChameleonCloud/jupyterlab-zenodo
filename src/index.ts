@@ -68,7 +68,8 @@ namespace CommandIDs {
  * @returns void
  */
 function show_success_div(
-    doi : string
+    doi : string,
+    dev : boolean
   ){
     //Close the loading text
     var loading = document.getElementById("loading-div") as HTMLElement;
@@ -80,8 +81,12 @@ function show_success_div(
     //Set up link
     var zenodo_button = document.getElementById("zenodo-button") as HTMLLinkElement;
     zenodo_button.target="_blank";
-    zenodo_button.href = "https://sandbox.zenodo.org/record/"+record_id;
-    //TODO: delete 'sandbox' before Zenodo
+    
+    if (dev){
+        zenodo_button.href = "https://sandbox.zenodo.org/record/"+record_id;
+    } else {
+        zenodo_button.href = "https://zenodo.org/record/"+record_id;
+    }
 
     //Show success text
     var success = document.getElementById("success-div") as HTMLElement;
@@ -140,7 +145,7 @@ function handleUploadResponse(
                 window.location.href = data.redirect
             } else {
                 //If no redirect was specified, we can show a success screen with a link to Zenodo
-                show_success_div(data.doi);
+                show_success_div(data.doi, data.dev);
             }
             return;
         });
@@ -170,7 +175,7 @@ function handleUpdateResponse(
     } else {
         return response.json().then(data => {
             let doi = data.doi;
-            show_success_div(doi);
+            show_success_div(doi, data.dev);
         });
     }
 }
@@ -419,8 +424,7 @@ function addZenodoCommands(
 
     //Command to upload any set of files
     app.commands.addCommand(CommandIDs.upload, {
-        //TODO: change back?
-        label: 'Upload to Chameleon Sharing Portal',
+        label: 'Upload to Zenodo',
         isEnabled: () => true,
         isToggled: () => false, 
         iconClass: 'icon-class',
