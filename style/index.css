@@ -3,6 +3,29 @@ h1, h2{
     text-align: center;
 }
 
+h2 {
+    padding: 0px
+}
+
+h3 {
+    text-align: left;
+}
+
+.link{
+    text-decoration: underline;
+    color: blue;
+}
+
+.link:active{
+    text-decoration: underline;
+    color: red;
+}
+
+.link:visited{
+    text-decoration: underline;
+    color: purple;
+}
+
 #zenodo-upload-main {
     padding: 15px;
     font-family: var(--jp-ui-font-family);
@@ -20,8 +43,13 @@ h1, h2{
     padding: 6px;
 }
 
+.basic-btn:hover{
+    background-color: #bdbdbd;
+}
+
+
 /****** Styles for upload form ******/
-input {
+textarea {
     font-family: var(--jp-ui-font-family);
     font-size: 14px;
 }
@@ -33,25 +61,29 @@ td {
 }
 
 th {
+    font-weight: normal;
+}
+
+.label {
     padding: 10px;
     text-align: left;
+}
+
+.required{
     font-weight: bold;
 }
 
-.submit-btn:hover{
-    background-color: #bdbdbd;
+.hover {
+    color: grey;
+    text-decoration: underline;
+}
+
+.hover:hover{
+    color: blue;
 }
 
 #submit-form p {
     margin-bottom: 10px;
-}
-/* Make non-required fields normal weight */
-#zenodo_token th {
-    font-weight: normal;
-}
-
-#directory th {
-    font-weight: normal;
 }
 
 
@@ -61,3 +93,7 @@ th {
     flex-direction: column;
 }
 
+#info-area {
+    padding-left: 20px;
+    padding-right: 20px;
+}

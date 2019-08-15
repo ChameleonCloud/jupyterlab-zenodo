@@ -71,6 +71,13 @@ function show_success_div(
     doi : string,
     dev : boolean
   ){
+    // Determine the appropriate URL
+    var url_base;
+    if (dev){
+        url_base = "https://sandbox.zenodo.org/";
+    } else {
+        url_base = "https://zenodo.org/";
+    }
     //Close the loading text
     var loading = document.getElementById("loading-div") as HTMLElement;
     loading.style.display = "None";
@@ -81,12 +88,19 @@ function show_success_div(
     //Set up link
     var zenodo_button = document.getElementById("zenodo-button") as HTMLLinkElement;
     zenodo_button.target="_blank";
+    var info_area = document.getElementById("info-area") as HTMLElement;
+    info_area.innerHTML = "<h3> How is my code shared? </h3>"
+                          + "Your code is now publicly accessible on"
+                          + " <a class='link' href='"+url_base+"'>Zenodo</a> "
+                          + "as a Zip file. It has been assigned a DOI"
+                          + " (digital object identifier): " + doi + "."
+                          + "<br>"
+                          + "<h3> What if my code changes? </h3>"
+                          + "If you make changes to your files, you can create"
+                          + " a new version on Zenodo (which will be linked to the first)"
+                          + " by clicking 'Update on Zenodo' in the share menu";
     
-    if (dev){
-        zenodo_button.href = "https://sandbox.zenodo.org/record/"+record_id;
-    } else {
-        zenodo_button.href = "https://zenodo.org/record/"+record_id;
-    }
+    zenodo_button.href = "https://sandbox.zenodo.org/record/"+record_id;
 
     //Show success text
     var success = document.getElementById("success-div") as HTMLElement;
@@ -181,7 +195,7 @@ function handleUpdateResponse(
 }
  
 /**
- * Gather data from form and make a POSt request to /zenodo/upload/
+ * Gather data from form and make a POST request to /zenodo/upload/
  *
  * @returns void
  */
@@ -223,7 +237,9 @@ function sendFormData(){
  */
 function newInput(
     label: string,
-    id: string
+    id: string,
+    is_long: boolean,
+    required: boolean
   ): HTMLElement {
     //Set up row
     let input_row = document.createElement('tr');
@@ -232,11 +248,25 @@ function newInput(
     //Use label to give user instructions
     let label_cell = document.createElement('th')
     label_cell.innerHTML = label + ": ";
+    label_cell.classList.add('label')
+
+    if (required){
+        label_cell.classList.add('required')
+    }
 
     //Add input cell
     let input_cell = document.createElement('td');
-    let input = document.createElement('input');
-    input.type = 'text';
+    let input = document.createElement('textarea');
+    //input.type = 'text';
+    //NEW
+    if (is_long){
+        input.rows = 4
+    } else {
+        input.rows = 1 
+        input.style.resize="none"
+    }
+    input.cols = 30
+     
     input.name = id;
     input.id = id+'-input';
     input_cell.appendChild(input); 
@@ -283,7 +313,12 @@ function activateZenodoPlugin(
     success_div.style.display = "None";
     success_div.id = 'success-div';
     success_div.innerHTML = "<h1> Congratulations, your files have been uploaded to Zenodo! </h1>";
-    let tr = document.createElement("tr");
+    let tr1 = document.createElement("tr");
+    let tr2 = document.createElement("tr");
+    //Info about zenodo
+    let td_info = document.createElement("td");
+    let info_div = document.createElement("div");
+    info_div.id = "info-area"
     //Button to view on Zenodo
     let zenodo_button = document.createElement("a"); 
     zenodo_button.innerHTML = "View on Zenodo";
@@ -292,8 +327,11 @@ function activateZenodoPlugin(
     let td_zenodo = document.createElement("td");
     //Attach all elements to main
     td_zenodo.appendChild(zenodo_button);
-    tr.appendChild(td_zenodo);
-    success_div.appendChild(tr);
+    td_info.appendChild(info_div);
+    tr1.appendChild(td_zenodo);
+    tr2.appendChild(td_info);
+    success_div.appendChild(tr1);
+    success_div.appendChild(tr2);
     main.appendChild(success_div);
 
     // Set up and append space for general errors
@@ -305,34 +343,57 @@ function activateZenodoPlugin(
     // Set up and append form to upload to Zenodo
     let upload_form = document.createElement('form');
     upload_form.id = 'submit-form';
-    // Headers
-    let header = document.createElement('h2');
-    header.innerHTML = "Submission Details"
-    let subheader = document.createElement('p');
-    subheader.innerHTML = "Please fill out the bolded fields and then click 'Submit' to upload to Zenodo"
-    upload_form.appendChild(header);
-    upload_form.appendChild(subheader);
-    // Error messages
-    let form_error = document.createElement('p');
-    form_error.id = "form-error-div";
-    form_error.style.color = "red";
-    upload_form.appendChild(form_error);
-    // The actual form
     let form_table = document.createElement('table')
     let form_body = document.createElement('tbody')
-    form_body.appendChild(newInput('Title','title'));
-    form_body.appendChild(newInput('Author','author'));
-    form_body.appendChild(newInput('Affiliation','affiliation'));
-    form_body.appendChild(newInput('Description','description'));
-    form_body.appendChild(newInput('Directory to zip (default is work)','directory'));
-    form_body.appendChild(newInput('Access token','zenodo_token'));
+    // Headers
+    let header_row = document.createElement('tr')
+    let header_data = document.createElement('th')
+    header_data.colSpan = 2
+    let header = document.createElement('h2');
+    header.innerHTML = "Final Submission Details"
+    header_data.appendChild(header)
+    header_row.appendChild(header_data)
+    form_body.appendChild(header_row);
+    let subheader_row = document.createElement('tr')
+    let subheader_data = document.createElement('th')
+    subheader_data.colSpan = 2
+    let subheader = document.createElement('div');
+    subheader.innerHTML = 
+        "<p> Please fill out the bolded fields and then click 'Submit'"
+        + " to publish to Zenodo.<br><span style='font-weight:bold'>"
+        + " Note: </span> This will make your code publicly accessible on"
+        + " <a class='link' href='http://zenodo.org'>zenodo.org<a> "
+    subheader_data.appendChild(subheader)
+    subheader_row.appendChild(subheader_data)
+    form_body.appendChild(subheader_row);
+    // Error messages
+    let form_error_row = document.createElement('tr')
+    let form_error_data = document.createElement('th')
+    form_error_data.colSpan = 2
+    let form_error = document.createElement('div');
+    form_error.id = "form-error-div";
+    form_error.style.color = "red";
+    form_error_data.appendChild(form_error);
+    form_error_row.appendChild(form_error_data);
+    form_body.appendChild(form_error_row);
+    // The actual form
+    form_body.appendChild(newInput('Title','title', false, true));
+    form_body.appendChild(newInput('Author','author', false, true));
+    form_body.appendChild(newInput('Affiliation','affiliation', false, true));
+    form_body.appendChild(newInput('Description','description', true, true));
+    form_body.appendChild(newInput('Directory to publish (default is work)',
+                                   'directory', false, false));
+    let access_token = newInput('Access token <span class="hover">(?)</span>',
+                                'zenodo_token', false, false);
+    access_token.title = "Developer access token for Zenodo's API (optional if this environment has a default)"
+    form_body.appendChild(access_token)
     // Submit button
     let submit_row = document.createElement('tr')
     let submit_label = document.createElement('th')
     let submit_cell = document.createElement('td')
     let submit_button = document.createElement('input');
     submit_button.type = 'submit';
-    submit_button.value = 'Submit';
+    submit_button.value = 'Publish';
     submit_button.classList.add("basic-btn");
     upload_form.addEventListener('submit', function (event) {
         event.preventDefault();
@@ -424,7 +485,7 @@ function addZenodoCommands(
 
     //Command to upload any set of files
     app.commands.addCommand(CommandIDs.upload, {
-        label: 'Upload to Zenodo',
+        label: 'Publish to Zenodo',
         isEnabled: () => true,
         isToggled: () => false, 
         iconClass: 'icon-class',
