@@ -17,6 +17,7 @@ LOG = logging.getLogger(__name__)
 
 ZENODO_MIN_FIELD_LENGTH = 3
 
+
 class ZenodoUploadHandler(ZenodoBaseHandler):
     """
     A handler that uploads your files to Zenodo
@@ -38,12 +39,11 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         -------
         string
             Doi of successfully uploaded deposition
-                
+
         Notes
         -----
         - Raises an exception if something goes wrong
         - If it returns, it returns a real DOI
-    
         """
         deposition = Deposition(self.dev, access_token)
         deposition.zenodo_init()
@@ -52,7 +52,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         deposition.publish()
 
         return deposition.doi
-   
+
     @web.authenticated
     @gen.coroutine
     def post(self, path=''):
@@ -60,26 +60,26 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         """
         Takes in a a file prefix string, and metadata
         Zips notebook_dir to filename.zip, uploads to Zenodo
-        Returns dictionary with status (success or failure) and doi (if successful)
+        Returns dictionary with status (success or failure)
+           and doi (if successful)
         """
-
-        #c = ZenodoConfig(config=self.config)
-        #print("tok: "+c.access_token)
         self.check_xsrf_cookie()
         request_data = json.loads(self.request.body.decode("utf-8"))
 
         try:
-            upload_data = assemble_upload_data(request_data, self.dev,
-                self.access_token, self.dev_access_token)
+            upload_data = assemble_upload_data(
+                            request_data, self.dev,
+                            self.access_token, self.dev_access_token
+                          )
             metadata = assemble_metadata(request_data, self.community)
 
             # Use title to build a file name
             filename = slugify(metadata['title'])
 
             path_to_file = zip_dir(upload_data['directory_to_zip'],
-                filename)
-            doi = self.upload_file(path_to_file, metadata, 
-                upload_data['access_token']) 
+                                   filename)
+            doi = self.upload_file(path_to_file, metadata,
+                                   upload_data['access_token'])
 
         except UserMistake as e:
             # UserMistake exceptions contain messages for the user
@@ -91,21 +91,21 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             self.return_error("Something went wrong")
 
         else:
-            info = {'status':'success', 'doi':doi, 'dev':self.dev}
+            info = {'status': 'success', 'doi': doi, 'dev': self.dev}
             LOG.info("doi: "+str(doi))
 
             # If a redirect was specified in configuration, add doi as
-            #   a query variable and send full url in response 
+            #   a query variable and send full url in response
             if self.upload_redirect:
-                params = {'doi':doi}
+                args = {'doi': doi}
                 url = self.upload_redirect
-                url += ('&' if urlparse(url).query else '?') + urlencode(params)
+                url += ('&' if urlparse(url).query else '?') + urlencode(args)
                 info['redirect'] = url
 
             self.set_status(201)
             self.write(info)
-            store_record(doi, path_to_file, upload_data['directory_to_zip'], 
-                upload_data['access_token'], self.db_dest, self.db_name)
+            store_record(doi, path_to_file, upload_data['directory_to_zip'],
+                         upload_data['access_token'], self.db_dest, self.db_name)
             self.finish()
 
 
@@ -129,10 +129,10 @@ def assemble_upload_data(request_data, dev, tok, dev_tok):
     """
 
     if dev:
-        #Sandbox version:
+        # Sandbox version:
         our_access_token = dev_tok
     else:
-        #Real version
+        # Real version
         our_access_token = tok
 
     # If the user has no access token, use ours
@@ -140,18 +140,19 @@ def assemble_upload_data(request_data, dev, tok, dev_tok):
 
     # If they provided no access token and there are no defaults, ask again
     if not access_token:
-        raise UserMistake("There are no Zenodo access tokens in this JupyterLab"
-                          " environment. Please provide one")
-        
+        raise UserMistake("There are no Zenodo access tokens in this "
+                          "JupyterLab environment. Please provide one")
+
     # If the user hasn't specified a directory, use the notebook directory
     directory_to_zip = request_data.get('directory') or 'work'
 
-     # Assemble into dictionary to return
+    # Assemble into dictionary to return
     return {
-        'access_token' : access_token,
-        'directory_to_zip' : directory_to_zip,
-    } 
-   
+        'access_token': access_token,
+        'directory_to_zip': directory_to_zip,
+    }
+
+
 def assemble_metadata(request_data, community):
     """Turn metadata into a dictionary for Zenodo upload
         Parameters
@@ -169,14 +170,14 @@ def assemble_metadata(request_data, community):
     - Raises an exception if data is invalid
     """
     # Get basic metadata from form response
-    title = request_data.get('title','')
-    author = request_data.get('author','')
-    description = request_data.get('description','')
-    affiliation = request_data.get('affiliation','')
+    title = request_data.get('title', '')
+    author = request_data.get('author', '')
+    description = request_data.get('description', '')
+    affiliation = request_data.get('affiliation', '')
 
     # Zenodo requires each field to be at least 4 characters long
-    if any(map(lambda x : len(x) < ZENODO_MIN_FIELD_LENGTH,
-         [title, author, description, affiliation])):
+    if any(map(lambda x: len(x) < ZENODO_MIN_FIELD_LENGTH,
+           [title, author, description, affiliation])):
         msg = ("Title, author, afilliation, and description fields must all"
                " be filled in and at least three characters long")
         raise UserMistake(msg)
@@ -187,12 +188,11 @@ def assemble_metadata(request_data, community):
 
     # Put data into dictionary to return
     metadata = {}
-    metadata['title'] = title 
-    metadata['upload_type'] = 'publication' 
+    metadata['title'] = title
+    metadata['upload_type'] = 'publication'
     metadata['publication_type'] = 'workingpaper'
     if community:
         metadata['communities'] = [{'identifier': community}]
-    metadata['description'] = description 
-    metadata['creators'] = creator_list 
+    metadata['description'] = description
+    metadata['creators'] = creator_list
     return metadata
-

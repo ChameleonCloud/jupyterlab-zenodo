@@ -9,13 +9,14 @@ from .upload import ZenodoUploadHandler
 from .update import ZenodoUpdateHandler
 from ._version import __version__
 
-
 LOG = logging.getLogger(__name__)
+
 
 def _jupyter_server_extension_paths():
     return [{
         'module': 'jupyterlab_zenodo'
     }]
+
 
 def load_jupyter_server_extension(nb_server_app):
     """
@@ -33,7 +34,7 @@ def load_jupyter_server_extension(nb_server_app):
     update_endpoint = url_path_join(base_endpoint, 'update')
 
     handlers = [
-        (upload_endpoint, ZenodoUploadHandler, 
+        (upload_endpoint, ZenodoUploadHandler,
             {"notebook_dir": nb_server_app.notebook_dir}),
         (update_endpoint, ZenodoUpdateHandler,
             {"notebook_dir": nb_server_app.notebook_dir}),

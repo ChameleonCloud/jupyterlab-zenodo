@@ -2,6 +2,7 @@ from notebook.base.handlers import APIHandler
 
 from .config import ZenodoConfig
 
+
 class ZenodoBaseHandler(APIHandler):
     """
     A base handler for the Zenodo extension
@@ -17,7 +18,6 @@ class ZenodoBaseHandler(APIHandler):
         self.db_name = c.database_name
         self.community = c.community
 
-
     def return_error(self, error_message):
         """Set 400 status and error message, return from request
 
@@ -32,8 +32,8 @@ class ZenodoBaseHandler(APIHandler):
         """
 
         info = {
-            'status':'failure',
-            'message': error_message,
+            'status': 'failure',
+            'message':  error_message,
         }
         self.set_status(400)
         self.write(info)

@@ -5,11 +5,11 @@ from tornado import gen, web
 from .base import ZenodoBaseHandler
 from .database import check_status
 
+
 class ZenodoStatusHandler(ZenodoBaseHandler):
     """
     A handler that checks to see if anything has been uploaded
     """
-
     @web.authenticated
     @gen.coroutine
     def get(self, path=''):
@@ -20,5 +20,3 @@ class ZenodoStatusHandler(ZenodoBaseHandler):
             info = {'status': 'Deposition published', 'doi': doi}
         self.write(info)
         self.finish()
-        
-        
