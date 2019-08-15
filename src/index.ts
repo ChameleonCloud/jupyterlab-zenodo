@@ -98,7 +98,7 @@ function show_success_div(
                           + "<h3> What if my code changes? </h3>"
                           + "If you make changes to your files, you can create"
                           + " a new version on Zenodo (which will be linked to the first)"
-                          + " by clicking 'Update on Zenodo' in the share menu";
+                          + " by clicking 'Update Zenodo Deposition' in the share menu.";
     
     zenodo_button.href = "https://sandbox.zenodo.org/record/"+record_id;
 
@@ -247,12 +247,7 @@ function newInput(
 
     //Use label to give user instructions
     let label_cell = document.createElement('th')
-    label_cell.innerHTML = label + ": ";
     label_cell.classList.add('label')
-
-    if (required){
-        label_cell.classList.add('required')
-    }
 
     //Add input cell
     let input_cell = document.createElement('td');
@@ -266,7 +261,16 @@ function newInput(
         input.style.resize="none"
     }
     input.cols = 30
-     
+
+    let star = "<span style='color:red'>* </span>";
+    if (required){
+        label_cell.classList.add('required');
+        input.required = true;
+        label_cell.innerHTML = star + label + ": ";
+    } else{
+        label_cell.innerHTML = label + ": ";
+    }
+    
     input.name = id;
     input.id = id+'-input';
     input_cell.appendChild(input); 
@@ -359,7 +363,7 @@ function activateZenodoPlugin(
     subheader_data.colSpan = 2
     let subheader = document.createElement('div');
     subheader.innerHTML = 
-        "<p> Please fill out the bolded fields and then click 'Submit'"
+        "<p> Please fill out the starred fields and then click 'Publish'"
         + " to publish to Zenodo.<br><span style='font-weight:bold'>"
         + " Note: </span> This will make your code publicly accessible on"
         + " <a class='link' href='http://zenodo.org'>zenodo.org<a> "
@@ -381,7 +385,7 @@ function activateZenodoPlugin(
     form_body.appendChild(newInput('Author','author', false, true));
     form_body.appendChild(newInput('Affiliation','affiliation', false, true));
     form_body.appendChild(newInput('Description','description', true, true));
-    form_body.appendChild(newInput('Directory to publish (default is work)',
+    form_body.appendChild(newInput('Directory to publish (default is "work")',
                                    'directory', false, false));
     let access_token = newInput('Access token <span class="hover">(?)</span>',
                                 'zenodo_token', false, false);
