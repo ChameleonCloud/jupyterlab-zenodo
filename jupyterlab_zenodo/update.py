@@ -72,8 +72,8 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
             LOG.exception("There was an error!")
             return
         else:
-            self.set_status(201)
-            self.write({'status': 'success', 'doi': doi, 'dev': self.dev})
+            # Record the deposition creation and return success
             store_record(doi, new_filepath, upload_data['directory'],
-                         upload_data['access_token'], self.db_dest, self.db_name)
-            self.finish()
+                         upload_data['access_token'], self.db_dest,
+                         self.db_name)
+            self.return_creation_success(doi)

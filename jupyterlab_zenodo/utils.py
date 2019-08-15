@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 import re
 import tempfile
+from urllib.parse import urlparse, urlencode
 import zipfile
 
 
@@ -77,3 +78,27 @@ def zip_dir(notebook_dir, filename):
     zipf.close()
 
     return filepath
+
+
+def add_query_parameter(url, params):
+    """Add query parameters to an existing url
+
+    Parameters
+    ----------
+    url : string
+        Url to add to
+    params : dict
+        Labels and values to add to url
+
+    Returns
+    -------
+    string
+        Updated url
+    """
+    if not params:
+        raise Exception("No query arguments given")
+    if not url:
+        raise Exception("Empty url")
+
+    url += ('&' if urlparse(url).query else '?') + urlencode(params)
+    return url

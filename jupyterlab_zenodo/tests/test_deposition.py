@@ -8,6 +8,7 @@ from jupyterlab_zenodo.zenodo import Deposition
 
 TEST_DEP_ID = '355162'
 
+
 def setUpModule():
     global test_file
     global test_filename
@@ -15,8 +16,8 @@ def setUpModule():
     test_file.write(b'Hello world')
     test_filename = test_file.name
 
+
 class InitTest(unittest.TestCase):
-   
     def test_success(self):
         token = TEST_API_TOKEN
         dep = Deposition(True, token)
@@ -25,16 +26,16 @@ class InitTest(unittest.TestCase):
         token = TEST_API_TOKEN
         dep = Deposition(True, token, TEST_DEP_ID)
 
-class ZenodoInitTest(unittest.TestCase):
 
+class ZenodoInitTest(unittest.TestCase):
     def test_success(self):
         token = TEST_API_TOKEN
         dep = Deposition(True, token)
         dep.zenodo_init()
         self.assertIsNotNone(dep.id)
 
+
 class SetMetadataTest(unittest.TestCase):
-   
     def setUp(self):
         token = TEST_API_TOKEN
         self.dep = Deposition(True, token)
@@ -45,16 +46,18 @@ class SetMetadataTest(unittest.TestCase):
             'upload_type': 'publication',
             'publication_type': 'workingpaper',
             'description': 'This is a description',
-            'creators': [{'name': 'Some Name', 
+            'creators': [{'name': 'Some Name',
                          'affiliation': 'Some Place'}],
-        }  
+        }
 
     def test_success(self):
         self.dep.set_metadata(self.good_metadata)
         self.assertIsNotNone(self.dep.metadata)
 
     def test_bad_data(self):
-        with self.assertRaises(Exception): self.dep.set_metadata({})
+        with self.assertRaises(Exception):
+            self.dep.set_metadata({})
+
 
 class SetFileTest(unittest.TestCase):
     def setUp(self):
@@ -68,7 +71,8 @@ class SetFileTest(unittest.TestCase):
         self.assertIsNotNone(self.dep.file_id)
 
     def test_bad_data(self):
-        with self.assertRaises(Exception): self.dep.set_file('notafile')
+        with self.assertRaises(Exception):
+            self.dep.set_file('notafile')
 
 
 class PublishTest(unittest.TestCase):
@@ -81,16 +85,16 @@ class PublishTest(unittest.TestCase):
             'upload_type': 'publication',
             'publication_type': 'workingpaper',
             'description': 'This is a description',
-            'creators': [{'name': 'Some Name', 
+            'creators': [{'name': 'Some Name',
                          'affiliation': 'Some Place'}],
-        }  
+        }
         self.dep.set_metadata(metadata)
         self.dep.set_file(test_filename)
-
 
     def test_success(self):
         self.dep.publish()
         self.assertIsNotNone(self.dep.doi)
+
 
 class NewVersionTest(unittest.TestCase):
     def setUp(self):
@@ -102,9 +106,9 @@ class NewVersionTest(unittest.TestCase):
             'upload_type': 'publication',
             'publication_type': 'workingpaper',
             'description': 'This is a description',
-            'creators': [{'name': 'Some Name', 
+            'creators': [{'name': 'Some Name',
                          'affiliation': 'Some Place'}],
-        }  
+        }
         self.dep.set_metadata(metadata)
         self.dep.set_file(test_filename)
         self.dep.publish()
@@ -115,6 +119,7 @@ class NewVersionTest(unittest.TestCase):
         new_id = self.dep.id
         self.assertNotEqual(old_id, new_id)
 
+
 class ClearFilesTest(unittest.TestCase):
     def setUp(self):
         token = TEST_API_TOKEN
@@ -122,12 +127,12 @@ class ClearFilesTest(unittest.TestCase):
         self.dep.new_version()
         cmd = "echo "+str(datetime.now())+" > "+test_filename
         os.system(cmd)
-    
+
     def test_success(self):
         self.dep.clear_files()
 
     def tearDown(self):
-        filepath = test_filename 
+        filepath = test_filename
         self.dep.set_file(filepath)
         self.dep.publish()
 

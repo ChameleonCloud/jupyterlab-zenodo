@@ -13,10 +13,33 @@ class ZenodoBaseHandler(APIHandler):
         self.dev = c.dev
         self.access_token = c.access_token
         self.dev_access_token = c.dev_access_token
-        self.upload_redirect = c.upload_redirect_url
+        self.redirect = c.upload_redirect_url
         self.db_dest = c.database_location
         self.db_name = c.database_name
         self.community = c.community
+
+    def return_creation_success(self, doi):
+        """Package and return doi and upload_redirct (if applicable)
+        Parameters
+        ----------
+        doi : string
+            DOI of successfully created deposition
+
+        Returns
+        -------
+        none
+        """
+        info = {'status': 'success', 'doi': doi, 'dev': self.dev}
+
+        # If a redirect was specified in configuration, add doi as
+        #   a query variable and send full url in the response
+        if self.redirect:
+            info['redirect'] = add_query_parameter({'doi': doi}, self.redirect)
+
+        # Return info with a 201 status
+        self.set_status(201)
+        self.write(info)
+        self.finish()
 
     def return_error(self, error_message):
         """Set 400 status and error message, return from request

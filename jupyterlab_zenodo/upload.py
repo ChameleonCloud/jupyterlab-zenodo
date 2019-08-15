@@ -3,7 +3,6 @@
 import json
 import logging
 import requests
-from urllib.parse import urlparse, urlencode
 
 from slugify import slugify
 from tornado import gen, web
@@ -56,7 +55,6 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
     @web.authenticated
     @gen.coroutine
     def post(self, path=''):
-
         """
         Takes in a a file prefix string, and metadata
         Zips notebook_dir to filename.zip, uploads to Zenodo
@@ -91,22 +89,11 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             self.return_error("Something went wrong")
 
         else:
-            info = {'status': 'success', 'doi': doi, 'dev': self.dev}
-            LOG.info("doi: "+str(doi))
-
-            # If a redirect was specified in configuration, add doi as
-            #   a query variable and send full url in response
-            if self.upload_redirect:
-                args = {'doi': doi}
-                url = self.upload_redirect
-                url += ('&' if urlparse(url).query else '?') + urlencode(args)
-                info['redirect'] = url
-
-            self.set_status(201)
-            self.write(info)
+            # Record the upload and return success
             store_record(doi, path_to_file, upload_data['directory_to_zip'],
-                         upload_data['access_token'], self.db_dest, self.db_name)
-            self.finish()
+                         upload_data['access_token'], self.db_dest,
+                         self.db_name)
+            self.return_creation_success(doi)
 
 
 def assemble_upload_data(request_data, dev, tok, dev_tok):
