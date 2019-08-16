@@ -160,20 +160,26 @@ def assemble_metadata(request_data, community):
     """
     # Get basic metadata from form response
     title = request_data.get('title', '')
-    author = request_data.get('author', '')
+    authors = request_data.get('author', '')
+    affiliations = request_data.get('affiliation', '')
     description = request_data.get('description', '')
-    affiliation = request_data.get('affiliation', '')
 
     # Zenodo requires each field to be at least 4 characters long
     if any(map(lambda x: len(x) < ZENODO_MIN_FIELD_LENGTH,
-           [title, author, description, affiliation])):
+           [title, authors, description, affiliations])):
         msg = ("Title, author, afilliation, and description fields must all"
                " be filled in and at least three characters long")
         raise UserMistake(msg)
 
-    # Turn list of author strings into list of author dictionaries
-    creator_list = []
-    creator_list.append({'name': author, 'affiliation': affiliation})
+    # Turn lists of author and affiliation strings
+    # into a list of author dictionaries
+    author_list = [a.strip() for a in authors.split(',')]
+    affiliation_list = [a.strip() for a in affiliations.split(',')]
+    if len(author_list) != len(affiliation_list):
+        raise UserMistake("Please list an affiliation for each author separated"
+                          " by commas, even if there are repeats")
+    creator_list = [{'name':name, 'affiliation':place} for
+                    (name, place) in zip(author_list, affiliation_list)]
 
     # Put data into dictionary to return
     metadata = {}

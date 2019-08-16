@@ -1,6 +1,7 @@
 from notebook.base.handlers import APIHandler
 
 from .config import ZenodoConfig
+from .utils import add_query_parameter
 
 
 class ZenodoBaseHandler(APIHandler):
@@ -34,7 +35,7 @@ class ZenodoBaseHandler(APIHandler):
         # If a redirect was specified in configuration, add doi as
         #   a query variable and send full url in the response
         if self.redirect:
-            info['redirect'] = add_query_parameter({'doi': doi}, self.redirect)
+            info['redirect'] = add_query_parameter(self.redirect, {'doi': doi})
 
         # Return info with a 201 status
         self.set_status(201)

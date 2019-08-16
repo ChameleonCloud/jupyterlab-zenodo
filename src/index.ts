@@ -25,6 +25,8 @@ import { ServerConnection } from '@jupyterlab/services';
 
 import { URLExt } from '@jupyterlab/coreutils';
 
+const UPLOAD_LABEL = 'Upload to Chameleon';
+
 const zenodoPluginId = '@jupyterlab/zenodo:plugin';
 
 /**
@@ -252,8 +254,6 @@ function newInput(
     //Add input cell
     let input_cell = document.createElement('td');
     let input = document.createElement('textarea');
-    //input.type = 'text';
-    //NEW
     if (is_long){
         input.rows = 4
     } else {
@@ -382,7 +382,9 @@ function activateZenodoPlugin(
     form_body.appendChild(form_error_row);
     // The actual form
     form_body.appendChild(newInput('Title','title', false, true));
-    form_body.appendChild(newInput('Author','author', false, true));
+    let authors = newInput('Author(s) <span class="hover">(Multiple?)</span>','author', false, true);
+    authors.title = "If you have more than one author, enter their names and (below) their affiliations separated by commas"
+    form_body.appendChild(authors)
     form_body.appendChild(newInput('Affiliation','affiliation', false, true));
     form_body.appendChild(newInput('Description','description', true, true));
     form_body.appendChild(newInput('Directory to publish (default is "work")',
@@ -489,7 +491,7 @@ function addZenodoCommands(
 
     //Command to upload any set of files
     app.commands.addCommand(CommandIDs.upload, {
-        label: 'Publish to Zenodo',
+        label: UPLOAD_LABEL,
         isEnabled: () => true,
         isToggled: () => false, 
         iconClass: 'icon-class',

@@ -63,6 +63,32 @@ class AssembleMetadataTest(unittest.TestCase):
     def setUp(self):
         self.response = sample_response.copy()
 
+    def test_many_authors_with_spaces(self):
+        self.response['author'] = 'Person One, Person Two,    Person Three    '
+        self.response['affiliation'] = 'Place one,\n    Place two  ,  Place three '
+        combined = [
+            {'name':'Person One', 'affiliation': 'Place one'},
+            {'name':'Person Two', 'affiliation': 'Place two'},
+            {'name':'Person Three', 'affiliation': 'Place three'}]
+        data = assemble_metadata(self.response, None)
+        self.assertEqual(data['creators'],combined)
+ 
+    def test_many_authors(self):
+        self.response['author'] = 'Person One,Person Two,Person Three'
+        self.response['affiliation'] = 'Place one,Place two,Place three'
+        combined = [
+            {'name':'Person One', 'affiliation': 'Place one'},
+            {'name':'Person Two', 'affiliation': 'Place two'},
+            {'name':'Person Three', 'affiliation': 'Place three'}]
+        data = assemble_metadata(self.response, None)
+        self.assertEqual(data['creators'],combined)
+        
+    def test_many_authors_one_place(self):
+        self.response['author'] = 'Person One,Person Two,Person Three'
+        with self.assertRaises(UserMistake):
+            data = assemble_metadata(self.response, None)
+
+
     def test_no_title(self):
         self.response.pop('title')
         with self.assertRaises(UserMistake):

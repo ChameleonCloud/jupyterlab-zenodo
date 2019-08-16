@@ -76,6 +76,7 @@ th {
 .hover {
     color: grey;
     text-decoration: underline;
+    font-weight: normal;
 }
 
 .hover:hover{
