@@ -47,22 +47,13 @@
   "dependencies": {
     "@jupyterlab/application": "^1.0.0",
     "@jupyterlab/apputils": "*",
-    "@jupyterlab/codeeditor": "*",
     "@jupyterlab/coreutils": "*",
-    "@jupyterlab/docmanager": "*",
-    "@jupyterlab/docregistry": "*",
     "@jupyterlab/filebrowser": "*",
     "@jupyterlab/fileeditor": "*",
     "@jupyterlab/mainmenu": "*",
     "@jupyterlab/services": "*",
     "@phosphor/coreutils": "*",
-    "@phosphor/disposable": "*",
-    "@phosphor/domutils": "*",
-    "@phosphor/messaging": "*",
-    "@phosphor/widgets": "*",
-    "pdfjs-dist": "^2.0.943",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6"
+    "@phosphor/widgets": "*"
   },
   "devDependencies": {
     "@types/react": "^16.8.22",
