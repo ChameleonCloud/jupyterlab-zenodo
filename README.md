@@ -17,7 +17,7 @@ jupyter serverextension enable --py jupyterlab_zenodo
 
 To install the lab extension:
 ```bash
-jupyter labextension install @jupyterlab/zenodo
+jupyter labextension install @chameleoncloud/jupyterlab_zenodo
 ```
 
 ## Customization
@@ -58,4 +58,3 @@ Indicate that you're in a development environment and provide a default sandbox 
 c.ZenodoConfig.dev = True
 c.ZenodoConfig.dev_access_token = '<your sandbox token>'
 ```
-

@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/zenodo",
+  "name": "@chameleoncloud/jupyterlab_zenodo",
   "version": "1.0.0",
   "description": "JupyterLab extension for uploading to Zenodo",
   "keywords": [
