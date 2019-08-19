@@ -47,7 +47,7 @@ c.ZenodoConfig.community = '<your community>'
 c.ZenodoConfig.database_location = '<database-location>'
 ```
 ```python
-c.ZenodoConfig.community = '<database_name>'
+c.ZenodoConfig.database_name = '<database_name>'
 ```
 
 ## Development
