@@ -1,6 +1,6 @@
 {
   "name": "@chameleoncloud/jupyterlab_zenodo",
-  "version": "1.0.0",
+  "version": "0.0.2",
   "description": "JupyterLab extension for uploading to Zenodo",
   "keywords": [
     "jupyter",
