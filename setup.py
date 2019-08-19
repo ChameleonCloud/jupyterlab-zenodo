@@ -13,7 +13,7 @@ README = (HERE / "README.md").read_text()
 
 setup_args = dict(
     name             = 'jupyterlab_zenodo',
-    description      = 'A Jupyter Notebook server extension which enables uploading projects to Zenodo in a single click',
+    description      = 'A Jupyter Notebook extension which enables uploading to Zenodo from JupyterLab',
     version          = '0.0.1',
     author           = 'University of Chicago',
     author_email     = 'dev@chameleoncloud.org',
