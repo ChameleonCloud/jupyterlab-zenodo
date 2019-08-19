@@ -25,7 +25,7 @@ import { ServerConnection } from '@jupyterlab/services';
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-const UPLOAD_LABEL = 'Upload to Chameleon';
+const UPLOAD_LABEL = 'Upload to Zenodo';
 
 const zenodoPluginId = '@jupyterlab/zenodo:plugin';
 
