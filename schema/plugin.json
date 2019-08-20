@@ -1,0 +1,15 @@
+{
+  "jupyter.lab.setting-icon-class": "jp-TextEditorIcon",
+  "jupyter.lab.setting-icon-label": "Zenodo",
+  "title": "Zenodo Extension",
+  "description": "Zenodo extension settings.",
+  "properties": {
+    "uploadTitle": {
+        "type": "string",
+        "title": "Title for upload command",
+        "default": "Publish to Zenodo"
+     }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

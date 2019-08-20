@@ -1,6 +1,6 @@
 {
   "name": "@chameleoncloud/jupyterlab_zenodo",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "JupyterLab extension for uploading to Zenodo",
   "keywords": [
     "jupyter",
@@ -23,7 +23,8 @@
     "lib/*/*.js",
     "lib/*.d.ts",
     "lib/*.js",
-    "style/**/*.*"
+    "style/**/*.*",
+    "schema/*.json"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -81,6 +82,7 @@
           "name": "jupyterlab_zenodo"
         }
       }
-    }
+    },
+    "schemaDir": "schema"
   }
 }

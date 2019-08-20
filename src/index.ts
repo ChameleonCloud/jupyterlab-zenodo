@@ -25,9 +25,7 @@ import { ServerConnection } from '@jupyterlab/services';
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-const UPLOAD_LABEL = 'Upload to Zenodo';
-
-const zenodoPluginId = '@jupyterlab/zenodo:plugin';
+const zenodoPluginId = '@chameleoncloud/jupyterlab_zenodo:plugin';
 
 /**
  * The JupyterFrontEnd plugin for the Zenodo extension.
@@ -61,6 +59,33 @@ namespace CommandIDs {
      */
     export const publish_directory = 'zenodo:publish-directory';
 }
+
+/*
+const onSettingsUpdated = async (settings: ISettingRegistry.ISettings) => {
+    const baseUrl = settings.get('baseUrl').composite as
+        | string
+        | null
+        | undefined;
+    const accessToken = settings.get('accessToken').composite as
+        | string
+        | null
+        | undefined;
+    drive.baseUrl = baseUrl || DEFAULT_GITHUB_BASE_URL;
+    if (accessToken) {
+        let proceed = true;
+        if (shouldWarn) {
+            proceed = await Private.showWarning();
+        }
+        if (!proceed) {
+            settings.remove('accessToken');
+        } else {
+            drive.accessToken = accessToken;
+        }
+    } else {
+      drive.accessToken = null;
+    }
+};
+*/
 
 /**
  * Show a success 'page' with a link to Zenodo, hide other widget content
@@ -418,8 +443,22 @@ function activateZenodoPlugin(
     // Add main upload div to widget
     content.node.appendChild(main);
 
-    // Add commands to the extension
-    addZenodoCommands(app, palette, editorTracker, factory, mainMenu, settingRegistry, widget);
+    //Retrive settings
+    Promise.all([settingRegistry.load(zenodoPluginId), app.restored])
+        .then(([settings]) => {
+            //Set the label for the upload command
+            var upload_label = settings.get('uploadTitle').composite as string
+
+            // Add commands to the extension, including the 'upload' command
+            addZenodoCommands(app, palette, editorTracker, factory,
+                              mainMenu, settingRegistry, widget,
+                              upload_label);
+    })
+    .catch((reason: Error) => {
+        //If something went wrong, log the error
+        console.error(reason.message);
+    });
+ 
     return;
 }
 
@@ -454,8 +493,10 @@ function addZenodoCommands(
     factory: IFileBrowserFactory,
     mainMenu: IMainMenu,
     settingRegistry: ISettingRegistry,
-    widget: MainAreaWidget
+    widget: MainAreaWidget,
+    upload_label : string
   ){
+    console.log("adding commands");
     const { tracker } = factory;
 
     //Command to publish from a directory
@@ -491,7 +532,7 @@ function addZenodoCommands(
 
     //Command to upload any set of files
     app.commands.addCommand(CommandIDs.upload, {
-        label: UPLOAD_LABEL,
+        label: upload_label,
         isEnabled: () => true,
         isToggled: () => false, 
         iconClass: 'icon-class',
