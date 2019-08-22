@@ -58,3 +58,9 @@ Indicate that you're in a development environment and provide a default sandbox 
 c.ZenodoConfig.dev = True
 c.ZenodoConfig.dev_access_token = '<your sandbox token>'
 ```
+
+## Testing
+The server side of this extension comes with a set of integration tests. They can be used as follows:
+1. [Create a Zenodo sandbox access token](https://sandbox.zenodo.org/account/settings/applications/tokens/new/)
+2. Assign the value TEST_API_TOKEN in `jupyterlab_zenodo/test_init.py` to your access token (as a string)
+3. Run `make tests` from the root in your terminal
