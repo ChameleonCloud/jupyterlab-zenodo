@@ -1,41 +1,46 @@
 /****** Main widget styles ******/
-h1, h2{
+/* Headings */
+#zenodo-upload-main h1, h2{
     text-align: center;
 }
 
-h2 {
+#zenodo-upload-main h2 {
     padding: 0px
 }
 
-h3 {
+#zenodo-upload-main h3 {
     text-align: left;
 }
 
-.link{
+/* Override link styles */
+#zenodo-upload-main .link{
     text-decoration: underline;
     color: blue;
 }
 
-.link:active{
+#zenodo-upload-main .link:active{
     text-decoration: underline;
     color: red;
 }
 
-.link:visited{
+#zenodo-upload-main .link:visited{
     text-decoration: underline;
     color: purple;
 }
 
+/* Padding for body */
 #zenodo-upload-main {
     padding: 15px;
     font-family: var(--jp-ui-font-family);
 }
 
+/* Widget overflow rules */
 #zenodo-jupyterlab .p-Widget{
     overflow-y: scroll;
 }
 
-.basic-btn {
+/* Button styles */
+#zenodo-upload-main .basic-btn {
     background-color: #ededed; 
     border: 1px solid transparent;
     border-color: grey;
@@ -43,52 +48,58 @@ h3 {
     padding: 6px;
 }
 
-.basic-btn:hover{
+#zenodo-upload-main .basic-btn:hover{
     background-color: #bdbdbd;
 }
 
 
 /****** Styles for upload form ******/
-textarea {
+/* Style form elements */
+#zenodo-upload-main textarea {
     font-family: var(--jp-ui-font-family);
     font-size: 14px;
 }
 
-td {
+#zenodo-upload-main td {
     padding: 10px;
     display: flex;
     justify-content: left;
 }
 
-th {
+#zenodo-upload-main th {
     font-weight: normal;
 }
 
-.label {
+/* Form labels are right-aligned */
+#zenodo-upload-main .label {
     padding: 10px;
     text-align: right;
 }
 
-.required{
+/* Required questions are bold */
+#zenodo-upload-main .required{
     font-weight: bold;
 }
 
-.hover {
+/* Hover elements for clarification on form */
+#zenodo-upload-main .hover {
     color: grey;
     text-decoration: underline;
     font-weight: normal;
 }
 
-.hover:hover{
+#zenodo-upload-main .hover:hover{
     color: blue;
 }
 
-#submit-form p {
+/* Bottom margin for paragraphs */
+#zenodo-upload-main #submit-form p {
     margin-bottom: 10px;
 }
 
 
 /***** Styles for success page ******/
+/* Center success content */
 #success-div {
     display: flex;
     flex-direction: column;
@@ -98,6 +109,7 @@ th {
     justify-content: center;
 }
 
+/* Pad the info area */
 #info-area {
     padding-left: 20px;
     padding-right: 20px;
