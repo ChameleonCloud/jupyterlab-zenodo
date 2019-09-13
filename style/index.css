@@ -1,116 +1,115 @@
 /****** Main widget styles ******/
 /* Headings */
-#zenodo-upload-main h1, h2{
-    text-align: center;
+#zenodo-upload-main h1,
+#zenodo-upload-main h2 {
+  text-align: center;
 }
 
 #zenodo-upload-main h2 {
-    padding: 0px
+  padding: 0px
 }
 
 #zenodo-upload-main h3 {
-    text-align: left;
+  text-align: left;
 }
 
 /* Override link styles */
-#zenodo-upload-main .link{
-    text-decoration: underline;
-    color: blue;
+#zenodo-upload-main .link {
+  text-decoration: underline;
+  color: blue;
 }
 
-#zenodo-upload-main .link:active{
-    text-decoration: underline;
-    color: red;
+#zenodo-upload-main .link:active {
+  text-decoration: underline;
+  color: red;
 }
 
-#zenodo-upload-main .link:visited{
-    text-decoration: underline;
-    color: purple;
+#zenodo-upload-main .link:visited {
+  text-decoration: underline;
+  color: purple;
 }
 
 /* Padding for body */
 #zenodo-upload-main {
-    padding: 15px;
-    font-family: var(--jp-ui-font-family);
+  padding: 15px;
+  font-family: var(--jp-ui-font-family);
 }
 
 /* Widget overflow rules */
-#zenodo-jupyterlab .p-Widget{
-    overflow-y: scroll;
+#zenodo-jupyterlab .p-Widget {
+  overflow-y: scroll;
 }
 
 /* Button styles */
 #zenodo-upload-main .basic-btn {
-    background-color: #ededed; 
-    border: 1px solid transparent;
-    border-color: grey;
-    border-radius: 4px;
-    padding: 6px;
+  background-color: #ededed;
+  border: 1px solid transparent;
+  border-color: grey;
+  border-radius: 4px;
+  padding: 6px;
 }
 
-#zenodo-upload-main .basic-btn:hover{
-    background-color: #bdbdbd;
+#zenodo-upload-main .basic-btn:hover {
+  background-color: #bdbdbd;
 }
-
 
 /****** Styles for upload form ******/
 /* Style form elements */
 #zenodo-upload-main textarea {
-    font-family: var(--jp-ui-font-family);
-    font-size: 14px;
+  font-family: var(--jp-ui-font-family);
+  font-size: 14px;
 }
 
 #zenodo-upload-main td {
-    padding: 10px;
-    display: flex;
-    justify-content: left;
+  padding: 10px;
+  display: flex;
+  justify-content: left;
 }
 
 #zenodo-upload-main th {
-    font-weight: normal;
+  font-weight: normal;
 }
 
 /* Form labels are right-aligned */
 #zenodo-upload-main .label {
-    padding: 10px;
-    text-align: right;
+  padding: 10px;
+  text-align: right;
 }
 
 /* Required questions are bold */
-#zenodo-upload-main .required{
-    font-weight: bold;
+#zenodo-upload-main .required {
+  font-weight: bold;
 }
 
 /* Hover elements for clarification on form */
 #zenodo-upload-main .hover {
-    color: grey;
-    text-decoration: underline;
-    font-weight: normal;
+  color: grey;
+  text-decoration: underline;
+  font-weight: normal;
 }
 
-#zenodo-upload-main .hover:hover{
-    color: blue;
+#zenodo-upload-main .hover:hover {
+  color: blue;
 }
 
 /* Bottom margin for paragraphs */
 #zenodo-upload-main #submit-form p {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
-
 
 /***** Styles for success page ******/
 /* Center success content */
 #success-div {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
-#success-div td{
-    justify-content: center;
+#success-div td {
+  justify-content: center;
 }
 
 /* Pad the info area */
 #info-area {
-    padding-left: 20px;
-    padding-right: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
