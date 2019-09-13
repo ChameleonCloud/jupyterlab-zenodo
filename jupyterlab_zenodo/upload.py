@@ -65,10 +65,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
         request_data = json.loads(self.request.body.decode("utf-8"))
 
         try:
-            upload_data = assemble_upload_data(
-                            request_data, self.dev,
-                            self.access_token, self.dev_access_token
-                          )
+            upload_data = assemble_upload_data(request_data, self.access_token)
             metadata = assemble_metadata(request_data, self.community)
 
             # Use title to build a file name
@@ -96,14 +93,12 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             self.return_creation_success(doi)
 
 
-def assemble_upload_data(request_data, dev, tok, dev_tok):
+def assemble_upload_data(request_data, tok):
     """Gather and validate directory and access token for upload
     Parameters
     ----------
     request_data : dictionary
         Contains the information sent with the POST request
-    dev : boolean
-        True if in development mode, false in deployment
 
     Returns
     -------
@@ -115,15 +110,8 @@ def assemble_upload_data(request_data, dev, tok, dev_tok):
     - Raises an exception if data is invalid
     """
 
-    if dev:
-        # Sandbox version:
-        our_access_token = dev_tok
-    else:
-        # Real version
-        our_access_token = tok
-
     # If the user has no access token, use ours
-    access_token = request_data.get('zenodo_token') or our_access_token
+    access_token = request_data.get('zenodo_token') or tok
 
     # If they provided no access token and there are no defaults, ask again
     if not access_token:

@@ -23,38 +23,33 @@ class AssembleUploadDataTest(unittest.TestCase):
 
     def test_zerolength_dir(self):
         self.response['directory'] = ''
-        data = assemble_upload_data(self.response, True, 'regular_tok',
-                                    self.access_token)
+        data = assemble_upload_data(self.response, self.access_token)
         self.assertEqual(data['directory_to_zip'], 'work')
         self.assertEqual(data['access_token'], 'sometoken')
 
     def test_no_dir(self):
         self.response.pop('directory')
-        data = assemble_upload_data(self.response, True, 'regular_tok',
-                                    self.access_token)
+        data = assemble_upload_data(self.response, self.access_token)
         self.assertEqual(data['directory_to_zip'], 'work')
         self.assertEqual(data['access_token'], 'sometoken')
 
     def test_no_tok(self):
         self.response.pop('zenodo_token')
-        data = assemble_upload_data(self.response, True, 'regular_tok',
-                                    self.access_token)
+        data = assemble_upload_data(self.response, self.access_token)
         self.assertEqual(data['access_token'], self.access_token)
 
     def test_no_tok_no_default(self):
         self.response.pop('zenodo_token')
         with self.assertRaises(UserMistake):
-            assemble_upload_data(self.response, True, None, None)
+            assemble_upload_data(self.response, None)
 
     def test_zerolength_tok(self):
         self.response['zenodo_token'] = ''
-        data = assemble_upload_data(self.response, True, 'regular_tok',
-                                    self.access_token)
+        data = assemble_upload_data(self.response, self.access_token)
         self.assertEqual(data['access_token'], self.access_token)
 
     def test_all_good(self):
-        data = assemble_upload_data(self.response, True, 'regular_tok',
-                                    self.access_token)
+        data = assemble_upload_data(self.response, self.access_token)
         self.assertEqual(data['directory_to_zip'], self.response['directory'])
         self.assertEqual(data['access_token'], 'sometoken')
 
@@ -72,7 +67,7 @@ class AssembleMetadataTest(unittest.TestCase):
             {'name':'Person Three', 'affiliation': 'Place three'}]
         data = assemble_metadata(self.response, None)
         self.assertEqual(data['creators'],combined)
- 
+
     def test_many_authors(self):
         self.response['author'] = 'Person One,Person Two,Person Three'
         self.response['affiliation'] = 'Place one,Place two,Place three'
@@ -82,7 +77,7 @@ class AssembleMetadataTest(unittest.TestCase):
             {'name':'Person Three', 'affiliation': 'Place three'}]
         data = assemble_metadata(self.response, None)
         self.assertEqual(data['creators'],combined)
-        
+
     def test_many_authors_one_place(self):
         self.response['author'] = 'Person One,Person Two,Person Three'
         with self.assertRaises(UserMistake):

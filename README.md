@@ -51,12 +51,12 @@ c.ZenodoConfig.database_name = '<database_name>'
 ```
 
 ## Development
-To work with the extension without publishing directly to Zenodo, use Zenodo sandbox. 
+To work with the extension without publishing directly to Zenodo, use Zenodo sandbox.
 Indicate that you're in a development environment and provide a default sandbox token in `jupyter_notebook_config.py`:
 
 ```python
 c.ZenodoConfig.dev = True
-c.ZenodoConfig.dev_access_token = '<your sandbox token>'
+c.ZenodoConfig.access_token = '<your sandbox token>'
 ```
 
 ## Testing

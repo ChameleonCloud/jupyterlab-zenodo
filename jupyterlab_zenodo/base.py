@@ -13,7 +13,6 @@ class ZenodoBaseHandler(APIHandler):
         c = ZenodoConfig(config=self.config)
         self.dev = c.dev
         self.access_token = c.access_token
-        self.dev_access_token = c.dev_access_token
         self.redirect = c.upload_redirect_url
         self.db_dest = c.database_location
         self.db_name = c.database_name

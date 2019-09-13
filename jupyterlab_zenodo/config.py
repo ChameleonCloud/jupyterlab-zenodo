@@ -11,8 +11,6 @@ class ZenodoConfig(Configurable):
     """
     access_token = Unicode(config=True,
         help='The default Zenodo access token to provide.')
-    dev_access_token = Unicode(config=True,
-        help='The default Zenodo development access token to provide.')
     dev = Bool(default_value=False, config=True,
         help='Set this to True to publish to Zenodo sandbox while testing')
     upload_redirect_url = Unicode(config=True,
