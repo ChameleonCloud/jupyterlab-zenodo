@@ -4,7 +4,6 @@ Setup module for the jupyterlab_zenodo extension
 
 import pathlib
 from setuptools import setup, find_packages
-from jupyterlab_zenodo._version import __version__
 
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
@@ -15,7 +14,7 @@ README = (HERE / "README.md").read_text()
 setup_args = dict(
     name             = 'jupyterlab_zenodo',
     description      = 'A Jupyter Notebook extension which enables uploading to Zenodo from JupyterLab',
-    version          = __version__,
+    version          = '0.1.3',
     author           = 'University of Chicago',
     author_email     = 'dev@chameleoncloud.org',
     url              = 'https://github.com/chameleoncloud/jupyterlab-zenodo',
