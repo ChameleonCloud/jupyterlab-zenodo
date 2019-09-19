@@ -27,34 +27,21 @@ def store_record(doi, filepath, directory, access_token, db_loc, db_name):
     -------
     void
     """
-    LOG.info("Database: "+db_loc+db_name)
-
     if any(map(lambda x: not x, [doi, filepath, directory, access_token])):
         raise Exception("Given empty fields")
 
-    # Create directory if it doesn't exist
-    if not os.path.exists(db_loc):
-        cmd = "mkdir " + db_loc
-        os.system(cmd)
-
     # Connect to database
-    conn = sqlite3.connect(db_loc+db_name)
-    c = conn.cursor()
+    with Connection(db_loc, db_name) as c:
+        # Create uploads table if it doesn't exist
+        try:
+            c.execute("CREATE TABLE uploads (date_uploaded, doi, directory,"
+                    " filepath, access_token)")
+        except sqlite3.OperationalError:
+            pass
 
-    # Create uploads table if it doesn't exist
-    try:
-        c.execute("CREATE TABLE uploads (date_uploaded, doi, directory,"
-                  " filepath, access_token)")
-    except sqlite3.OperationalError:
-        pass
-
-    # Add data to table
-    c.execute("INSERT INTO uploads VALUES (?,?,?,?,?)",
-              [datetime.now(), doi, directory, filepath, access_token])
-
-    # Commit and close
-    conn.commit()
-    conn.close()
+        # Add data to table
+        c.execute("INSERT INTO uploads VALUES (?,?,?,?,?)",
+                [datetime.now(), doi, directory, filepath, access_token])
 
 
 def check_status(db_loc, db_name):
@@ -70,19 +57,15 @@ def check_status(db_loc, db_name):
     Notes:
     none
     """
-    LOG.info("Database: "+db_loc+db_name)
-
-    conn = sqlite3.connect(db_loc+db_name)
-    c = conn.cursor()
-
-    # Get last upload if it exists, otherwise return none
-    try:
-        c.execute("SELECT doi FROM uploads ORDER BY date_uploaded DESC")
-    except sqlite3.OperationalError as e:
-        return None
-    else:
-        row = c.fetchone()
-        return row[0]
+    with Connection(db_loc, db_name) as c:
+        # Get last upload if it exists, otherwise return none
+        try:
+            c.execute("SELECT doi FROM uploads ORDER BY date_uploaded DESC")
+        except sqlite3.OperationalError:
+            return None
+        else:
+            row = c.fetchone()
+            return row[0]
 
 
 def get_last_upload(db_loc, db_name):
@@ -97,32 +80,21 @@ def get_last_upload(db_loc, db_name):
     Dictionary
         Contains date, doi, directory, filepath, and access token
     """
-    LOG.info("Database: "+db_loc+db_name)
-
     no_uploads_error = ("No previous upload. Press 'Upload to Zenodo' "
                         "to create a new deposition")
-    # If the database location doesn't exist, there are no uploads
-    if not os.path.exists(db_loc):
-        LOG.warning("No db folder")
-        raise UserMistake(no_uploads_error)
 
-    # Connect to database
-    conn = sqlite3.connect(db_loc+db_name)
-    c = conn.cursor()
-
-    # If the table is empty or doesn't exist, there are no uploads
-    try:
-        c.execute("SELECT date_uploaded, doi, directory, filepath, "
-                  "access_token FROM uploads ORDER BY date_uploaded DESC")
-    except sqlite3.OperationalError as e:
-        raise UserMistake(no_uploads_error)
-
-    # Fetch info, close connection
-    last_upload = c.fetchone()
-    conn.close()
+    with Connection(db_loc, db_name) as c:
+        # If the table is empty or doesn't exist, there are no uploads
+        try:
+            c.execute("SELECT date_uploaded, doi, directory, filepath, "
+                    "access_token FROM uploads ORDER BY date_uploaded DESC")
+        except sqlite3.OperationalError:
+            raise UserMistake(no_uploads_error)
+        else:
+            # Fetch info, close connection
+            last_upload = c.fetchone()
 
     if last_upload == []:
-        LOG.warn("data is empty: "+str(data))
         raise UserMistake(no_uploads_error)
 
     if any(map(lambda x: x == '', last_upload)):
@@ -130,3 +102,23 @@ def get_last_upload(db_loc, db_name):
 
     labels = ['date', 'doi', 'directory', 'filepath', 'access_token']
     return dict(zip(labels, last_upload))
+
+
+class Connection(object):
+    """
+    A simple context manager for a sqlite connection, which handles
+    the automatic disconnect/commit of the current transaction
+    """
+    def __init__(self, db_path, db_name):
+        # If the database location doesn't exist, there are no uploads
+        if not os.path.exists(db_path):
+            os.mkdir(db_path, 0o644)
+        # Connect to database
+        self.connection = sqlite3.connect(os.path.join(db_path, db_name))
+
+    def __enter__(self):
+        return self.connection.cursor()
+
+    def __exit__(self, type, value, traceback):
+        self.connection.commit()
+        self.connection.close()
