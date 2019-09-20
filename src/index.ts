@@ -418,7 +418,7 @@ function activateZenodoPlugin(
   formBody.appendChild(newInput('Description', 'description', true, true));
   formBody.appendChild(
     newInput(
-      'Directory to publish (default is "work")',
+      'Directory to publish (default is "/work")',
       'directory',
       false,
       false
@@ -588,14 +588,8 @@ function addZenodoCommands(
 
   // Create sharing menu with 'upload' and 'update' commands
   const menu = new Menu({ commands: app.commands });
-
-  menu.addItem({
-    command: CommandIDs.upload
-  });
-  menu.addItem({
-    command: CommandIDs.update
-  });
-
+  menu.addItem({ command: CommandIDs.upload });
+  menu.addItem({ command: CommandIDs.update });
   menu.title.label = 'Share';
   mainMenu.addMenu(menu, { rank: 20 });
 
@@ -604,11 +598,9 @@ function addZenodoCommands(
   palette.addItem({ command: CommandIDs.update, category: 'Sharing' });
 
   // Add context menu for directories with 'publish directory' command
-  const selectorItem = '.jp-DirListing-item[data-isdir=true]';
-
   app.contextMenu.addItem({
     command: CommandIDs.publishDirectory,
-    selector: selectorItem,
+    selector: '.jp-DirListing-item[data-isdir=true]',
     rank: 4
   });
 }
@@ -616,5 +608,8 @@ function addZenodoCommands(
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [zenodoPlugin];
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  zenodoPlugin
+];
+
 export default plugins;
