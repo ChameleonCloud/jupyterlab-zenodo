@@ -19,6 +19,8 @@ import { ServerConnection } from '@jupyterlab/services';
 
 import { URLExt } from '@jupyterlab/coreutils';
 
+import { fileBrowserFactory } from './filebrowser';
+
 const zenodoPluginId = '@chameleoncloud/jupyterlab_zenodo:plugin';
 
 /**
@@ -609,6 +611,7 @@ function addZenodoCommands(
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  fileBrowserFactory,
   zenodoPlugin
 ];
 
