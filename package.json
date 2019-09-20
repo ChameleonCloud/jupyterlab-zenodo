@@ -46,13 +46,14 @@
     ]
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.0.0",
+    "@jupyterlab/application": "^1.1.0",
     "@jupyterlab/apputils": "*",
     "@jupyterlab/coreutils": "*",
     "@jupyterlab/filebrowser": "*",
     "@jupyterlab/fileeditor": "*",
     "@jupyterlab/mainmenu": "*",
     "@jupyterlab/services": "*",
+    "@jupyterlab/ui-components": "*",
     "@phosphor/coreutils": "*",
     "@phosphor/widgets": "*"
   },
@@ -66,7 +67,7 @@
     "tslint": "^5.18.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
-    "typescript": "^3.5.2"
+    "typescript": "~3.5.1"
   },
   "resolutions": {
     "@types/react": "~16.4.13"
