@@ -2,7 +2,7 @@
 
 import json
 import logging
-from os import path
+import os
 import re
 import requests
 
@@ -70,7 +70,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             upload_data = assemble_upload_data(request_data, self.access_token)
             metadata = assemble_metadata(request_data, self.community)
 
-            directory = path.join(self.notebook_dir, upload_data['directory_to_zip'])
+            directory = os.path.join(self.notebook_dir, upload_data['directory_to_zip'])
             archive = zip_dir(directory)
             doi = self.upload_file(archive, metadata, upload_data['access_token'])
 
