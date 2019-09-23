@@ -11,13 +11,13 @@ import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { IEditorTracker } from '@jupyterlab/fileeditor';
-
 import { Widget, Menu } from '@phosphor/widgets';
 
 import { fileBrowserFactory } from './filebrowser';
 
-import { ZenodoRegistry, IZenodoRegistry, ZenodoPost } from './registry';
+import { IZenodoRegistry, ZenodoPost } from './tokens';
+
+import { ZenodoRegistry } from './registry';
 
 const zenodoPluginId = '@chameleoncloud/jupyterlab_zenodo:plugin';
 
@@ -28,13 +28,24 @@ const zenodoPlugin: JupyterFrontEndPlugin<void> = {
   id: zenodoPluginId,
   requires: [
     ICommandPalette,
-    IEditorTracker,
     IFileBrowserFactory,
     IMainMenu,
-    ISettingRegistry
+    ISettingRegistry,
+    IZenodoRegistry
   ],
   activate: activateZenodoPlugin,
   autoStart: true
+};
+
+const zenodoRegistryPlugin: JupyterFrontEndPlugin<IZenodoRegistry> = {
+  id: '@chameleoncloud/jupyterlab_zenodo:registry',
+  provides: IZenodoRegistry,
+  requires: [],
+  activate(app: JupyterFrontEnd) {
+    const zenodoRegistry = new ZenodoRegistry();
+
+    return zenodoRegistry.getDepositions().then(() => zenodoRegistry);
+  }
 };
 
 namespace CommandIDs {
@@ -250,13 +261,11 @@ function newInput(
 function activateZenodoPlugin(
   app: JupyterFrontEnd,
   palette: ICommandPalette,
-  editorTracker: IEditorTracker,
   factory: IFileBrowserFactory,
   mainMenu: IMainMenu,
-  settingRegistry: ISettingRegistry
+  settingRegistry: ISettingRegistry,
+  zenodoRegistry: IZenodoRegistry
 ): void {
-  const zenodoRegistry = new ZenodoRegistry();
-
   // Set up widget (UI)
   const content = new Widget();
   const widget = new MainAreaWidget({ content });
@@ -539,6 +548,7 @@ function addZenodoCommands(
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   fileBrowserFactory,
+  zenodoRegistryPlugin,
   zenodoPlugin
 ];
 

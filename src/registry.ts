@@ -2,32 +2,7 @@ import { ServerConnection } from '@jupyterlab/services';
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-export class ZenodoRecord {
-  readonly doi: string;
-
-  readonly path: string;
-}
-
-export class ZenodoPost {
-  readonly title: string;
-
-  readonly author: string;
-
-  readonly affiliation: string;
-
-  readonly description: string;
-
-  readonly directory?: string;
-
-  readonly zenodoToken?: string;
-}
-
-export interface IZenodoRegistry {
-  updateDeposition(path: string): Promise<ZenodoRecord>;
-  createDeposition(path: string, post: ZenodoPost): Promise<ZenodoRecord>;
-  getDepositions(): Promise<ZenodoRecord[]>;
-  hasDepositionSync(path: string): boolean;
-}
+import { IZenodoRegistry, ZenodoPost, ZenodoRecord } from './tokens';
 
 export class ZenodoRegistry implements IZenodoRegistry {
   async updateDeposition(path: string) {
@@ -109,6 +84,7 @@ namespace Private {
     res: Response
   ): Promise<ZenodoRecord[]> {
     const { records } = await res.json();
+    console.log(records);
     if (!records || !Array.isArray(records)) {
       throw Error('Malformed response');
     }

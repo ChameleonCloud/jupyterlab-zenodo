@@ -22,7 +22,7 @@ import { Contents } from '@jupyterlab/services';
 
 import { IIconRegistry } from '@jupyterlab/ui-components';
 
-import { ZenodoRegistry, IZenodoRegistry } from './registry';
+import { IZenodoRegistry } from './tokens';
 
 class ZenodoFileBrowserModel extends FileBrowserModel {}
 
@@ -53,9 +53,9 @@ function activateFactory(
   app: JupyterFrontEnd,
   icoReg: IIconRegistry,
   docManager: IDocumentManager,
-  state: IStateDB
+  state: IStateDB,
+  zenodoRegistry: IZenodoRegistry
 ): IFileBrowserFactory {
-  const zenodoRegistry = new ZenodoRegistry();
   const { commands } = app;
   const tracker = new WidgetTracker<FileBrowser>({ namespace: 'filebrowser' });
   const createFileBrowser = (
@@ -102,5 +102,5 @@ export const fileBrowserFactory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
   id: '@chameleoncloud/jupyterlab_zenodo:file-browser-factory',
   provides: IFileBrowserFactory,
-  requires: [IIconRegistry, IDocumentManager, IStateDB]
+  requires: [IIconRegistry, IDocumentManager, IStateDB, IZenodoRegistry]
 };
