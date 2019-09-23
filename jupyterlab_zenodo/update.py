@@ -1,6 +1,7 @@
 """ JupyterLab Zenodo : Updating Zenodo Deposition """
 
 import logging
+from os import path
 import requests
 
 from notebook.base.handlers import APIHandler
@@ -59,9 +60,9 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
         try:
             # Try to complete update
             upload_data = get_last_upload(self.db_dest, self.db_name)
-            new_filepath = zip_dir(upload_data['directory'],
-                                   upload_data['filepath'].split('/')[-1])
-            doi = self.update_file(new_filepath, get_id(upload_data['doi']),
+            directory = path.join(self.notebook_dir, upload_data['directory'])
+            archive = zip_dir(directory)
+            doi = self.update_file(archive, get_id(upload_data['doi']),
                                    upload_data['access_token'])
 
         except UserMistake as e:

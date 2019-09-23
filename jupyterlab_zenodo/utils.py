@@ -41,41 +41,31 @@ def get_id(doi):
         return record_id
 
 
-def zip_dir(notebook_dir, filename):
-    """Create zip file filename from notebook_dir
+def zip_dir(directory):
+    """Create zip file filename from directory
 
     Parameters
     ----------
-    notebook_dir : string
+    directory : string
         Explicit path to directory to be zipped
-    filename : string
-        Intended name of archive to zip to
 
     Returns
     -------
     string
         Full path of zipped file
     """
-    if not os.path.exists(notebook_dir):
+    if not os.path.exists(directory):
         raise UserMistake("That directory path is not valid. To use your"
                           " work directory, leave the directory field empty")
 
     # Create temporary directory for archive
     temp_dir = tempfile.mkdtemp()
+    filepath = os.path.join(temp_dir, 'archive.zip')
 
-    # Filename should end in .zip
-    if filename[-4:] != '.zip':
-        filename = filename+'.zip'
-
-    # Zip everything in notebook_dir to temp_dir/filename
-    filepath = temp_dir + "/" + filename
-
-    zipf = zipfile.ZipFile(filepath, 'w', zipfile.ZIP_DEFLATED)
-
-    for root, dirs, files in os.walk(notebook_dir):
-        for afile in files:
-            zipf.write(os.path.join(root, afile))
-    zipf.close()
+    with zipfile.ZipFile(filepath, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(directory):
+            for afile in files:
+                zipf.write(os.path.join(root, afile))
 
     return filepath
 

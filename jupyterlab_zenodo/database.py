@@ -72,7 +72,7 @@ def get_last_upload(db_loc, db_name):
     Returns
     -------
     Dictionary
-        Contains date, doi, directory, filepath, and access token
+        Contains date, doi, directory
     """
     no_uploads_error = ("No previous upload. Press 'Upload to Zenodo' "
                         "to create a new deposition")

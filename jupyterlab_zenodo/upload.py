@@ -2,6 +2,8 @@
 
 import json
 import logging
+from os import path
+import re
 import requests
 
 from slugify import slugify
@@ -54,7 +56,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
 
     @web.authenticated
     @gen.coroutine
-    def post(self, path=''):
+    def post(self, path='', notebook_dir=None):
         """
         Takes in a a file prefix string, and metadata
         Zips notebook_dir to filename.zip, uploads to Zenodo
@@ -62,19 +64,15 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
            and doi (if successful)
         """
         self.check_xsrf_cookie()
-        request_data = json.loads(self.request.body.decode("utf-8"))
+        request_data = json.loads(self.request.body.decode('utf-8'))
 
         try:
             upload_data = assemble_upload_data(request_data, self.access_token)
             metadata = assemble_metadata(request_data, self.community)
 
-            # Use title to build a file name
-            filename = slugify(metadata['title'])
-
-            path_to_file = zip_dir(upload_data['directory_to_zip'],
-                                   filename)
-            doi = self.upload_file(path_to_file, metadata,
-                                   upload_data['access_token'])
+            directory = path.join(self.notebook_dir, upload_data['directory_to_zip'])
+            archive = zip_dir(directory)
+            doi = self.upload_file(archive, metadata, upload_data['access_token'])
 
         except UserMistake as e:
             # UserMistake exceptions contain messages for the user
@@ -109,7 +107,7 @@ def assemble_upload_data(request_data, tok):
     """
 
     # If the user has no access token, use ours
-    access_token = request_data.get('zenodo_token') or tok
+    access_token = request_data.get('zenodo_token', tok)
 
     # If they provided no access token and there are no defaults, ask again
     if not access_token:
@@ -118,13 +116,14 @@ def assemble_upload_data(request_data, tok):
                           ". To create one, go to https://zenodo.org"
                           "/account/settings/applications/tokens/new/")
 
-    # If the user hasn't specified a directory, use the notebook directory
-    directory_to_zip = request_data.get('directory') or 'work'
+    directory = request_data.get('directory', '').strip()
+    # Strip leading path components
+    directory = re.sub(r'^[\.\/]+', '', directory)
 
     # Assemble into dictionary to return
     return {
         'access_token': access_token,
-        'directory_to_zip': directory_to_zip,
+        'directory_to_zip': directory,
     }
 
 
