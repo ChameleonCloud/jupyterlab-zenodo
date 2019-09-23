@@ -22,16 +22,7 @@ import { Contents } from '@jupyterlab/services';
 
 import { IIconRegistry } from '@jupyterlab/ui-components';
 
-export interface IZenodoRegistry {
-  getDOIForPath(path: string): string | null;
-}
-
-class ZenodoRegistry implements IZenodoRegistry {
-  getDOIForPath(path: string) {
-    // TODO
-    return (new Date()).getMilliseconds().toString();
-  }
-}
+import { ZenodoRegistry, IZenodoRegistry } from './registry';
 
 class ZenodoFileBrowserModel extends FileBrowserModel {}
 
@@ -48,9 +39,8 @@ class ZenodoDirListingRenderer extends DirListing.Renderer {
   ): void {
     super.updateItemNode(node, model, fileType);
 
-    const doi = this._zenodoReg.getDOIForPath(model.path);
-    if (doi) {
-      node.setAttribute('data-doi', doi);
+    if (this._zenodoReg.hasDepositionSync(model.path)) {
+      node.setAttribute('data-has-doi', 'yes');
     } else {
       delete node.dataset.doi;
     }
@@ -65,6 +55,7 @@ function activateFactory(
   docManager: IDocumentManager,
   state: IStateDB
 ): IFileBrowserFactory {
+  const zenodoRegistry = new ZenodoRegistry();
   const { commands } = app;
   const tracker = new WidgetTracker<FileBrowser>({ namespace: 'filebrowser' });
   const createFileBrowser = (
@@ -78,8 +69,7 @@ function activateFactory(
       refreshInterval: options.refreshInterval,
       state: options.state === null ? null : options.state || state
     });
-    const zenodoReg = new ZenodoRegistry();
-    const renderer = new ZenodoDirListingRenderer(icoReg, zenodoReg);
+    const renderer = new ZenodoDirListingRenderer(icoReg, zenodoRegistry);
     const widget = new FileBrowser({
       id,
       model,

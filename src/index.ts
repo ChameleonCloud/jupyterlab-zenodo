@@ -15,11 +15,9 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { Widget, Menu } from '@phosphor/widgets';
 
-import { ServerConnection } from '@jupyterlab/services';
-
-import { URLExt } from '@jupyterlab/coreutils';
-
 import { fileBrowserFactory } from './filebrowser';
+
+import { ZenodoRegistry, IZenodoRegistry, ZenodoPost } from './registry';
 
 const zenodoPluginId = '@chameleoncloud/jupyterlab_zenodo:plugin';
 
@@ -90,7 +88,7 @@ const onSettingsUpdated = async (settings: ISettingRegistry.ISettings) => {
  *
  * @returns void
  */
-function showSuccessDiv(doi: string, dev: boolean) {
+function showSuccessDiv(doi: string, dev?: boolean) {
   // Determine the appropriate URL
   let urlBase;
   if (dev) {
@@ -152,69 +150,12 @@ function hideAll() {
   return;
 }
 
-/**
- * Show error or success message depending on response from an upload request
- *
- * @param response - the response from the POST request
- *
- * @returns void
- */
-function handleUploadResponse(response: Response) {
+function handleErrorResponse(e: Error) {
   let loading = document.getElementById('loading-div') as HTMLElement;
-
-  // On error...
-  if (response.status > 299) {
-    return response.json().then(data => {
-      // Hide the loading text
-      loading.style.display = 'None';
-
-      // Show the form again, along with the error from the response data
-      let form = document.getElementById('submit-form') as HTMLElement;
-      form.style.display = 'Block';
-      let error = document.getElementById('form-error-div') as HTMLElement;
-      error.innerHTML = 'Error: ' + data.message + '. Please try again.';
-      return;
-    });
-
-    // On success...
-  } else {
-    return response.json().then(data => {
-      // Redirect to wherever the configuratoin file wants
-      if (data.redirect) {
-        window.location.href = data.redirect;
-      } else {
-        // If no redirect was specified, we can show a success screen with a link to Zenodo
-        showSuccessDiv(data.doi, data.dev);
-      }
-      return;
-    });
-  }
-}
-
-/**
- * Show error or success message depending on response from request
- *
- * @param response - the response from the POST request
- *
- * @returns void
- */
-function handleUpdateResponse(response: Response) {
-  console.log('status', response.status);
-  let loading = document.getElementById('loading-div') as HTMLElement;
-
-  if (response.status > 299) {
-    return response.json().then(data => {
-      let error = document.getElementById('outer-error-div') as HTMLElement;
-      loading.style.display = 'None';
-      error.style.display = 'Block';
-      error.innerHTML = 'Error: ' + data.message + '. Please try again.';
-    });
-  } else {
-    return response.json().then(data => {
-      let doi = data.doi;
-      showSuccessDiv(doi, data.dev);
-    });
-  }
+  let error = document.getElementById('outer-error-div') as HTMLElement;
+  loading.style.display = 'None';
+  error.style.display = 'Block';
+  error.innerHTML = 'Error: ' + e.message + '. Please try again.';
 }
 
 /**
@@ -222,7 +163,7 @@ function handleUpdateResponse(response: Response) {
  *
  * @returns void
  */
-function sendFormData() {
+function sendFormData(zenodoRegistry: IZenodoRegistry) {
   // Hide form
   let form = document.getElementById('submit-form') as HTMLFormElement;
   form.style.display = 'None';
@@ -232,25 +173,21 @@ function sendFormData() {
   loading.style.display = 'Block';
 
   // Convert form data to JSON
-  let formData = new FormData(form);
-  let formbody: { [key: string]: string } = {};
-  formData.forEach(function(value, key) {
-    formbody[key] = value.toString();
-  });
-  let body = JSON.stringify(formbody);
+  const formData = new FormData(form);
+  const zenodoPost: ZenodoPost = {
+    title: formData.get('title') as string,
+    author: formData.get('author') as string,
+    affiliation: formData.get('affiliation') as string,
+    description: formData.get('description') as string,
+    directory: formData.get('directory') as string,
+    zenodoToken: formData.get('zenodo_token') as string
+  };
 
   // Send a POST request with data
-  let settings = ServerConnection.makeSettings();
-  const parts = [settings.baseUrl, 'zenodo', 'upload'];
-  const fullURL = URLExt.join.apply(URLExt, parts);
-  console.log('about to connect');
-  ServerConnection.makeRequest(
-    fullURL,
-    { method: 'POST', body },
-    settings
-  ).then(response => {
-    handleUploadResponse(response);
-  });
+  zenodoRegistry
+    .createDeposition(zenodoPost.directory || '/', zenodoPost)
+    .then(({ doi }) => showSuccessDiv(doi, false))
+    .catch(handleErrorResponse);
 }
 
 /**
@@ -318,6 +255,8 @@ function activateZenodoPlugin(
   mainMenu: IMainMenu,
   settingRegistry: ISettingRegistry
 ): void {
+  const zenodoRegistry = new ZenodoRegistry();
+
   // Set up widget (UI)
   const content = new Widget();
   const widget = new MainAreaWidget({ content });
@@ -445,7 +384,7 @@ function activateZenodoPlugin(
   submitButton.classList.add('basic-btn');
   uploadForm.addEventListener('submit', function(event) {
     event.preventDefault();
-    sendFormData();
+    sendFormData(zenodoRegistry);
   });
   submitCell.appendChild(submitButton);
   submitRow.appendChild(submitLabel);
@@ -461,7 +400,11 @@ function activateZenodoPlugin(
   content.node.appendChild(main);
 
   // Retrive settings
-  Promise.all([settingRegistry.load(zenodoPluginId), app.restored])
+  Promise.all([
+    settingRegistry.load(zenodoPluginId),
+    app.restored,
+    zenodoRegistry.getDepositions()
+  ])
     .then(([settings]) => {
       // Set the label for the upload command
       let uploadLabel = settings.get('uploadTitle').composite as string;
@@ -470,11 +413,10 @@ function activateZenodoPlugin(
       addZenodoCommands(
         app,
         palette,
-        editorTracker,
         factory,
         mainMenu,
-        settingRegistry,
         widget,
+        zenodoRegistry,
         uploadLabel
       );
     })
@@ -512,11 +454,10 @@ function openWidget(
 function addZenodoCommands(
   app: JupyterFrontEnd,
   palette: ICommandPalette,
-  editorTracker: IEditorTracker,
   factory: IFileBrowserFactory,
   mainMenu: IMainMenu,
-  settingRegistry: ISettingRegistry,
   widget: MainAreaWidget,
+  zenodoRegistry: IZenodoRegistry,
   uploadLabel: string
 ) {
   console.log('adding commands');
@@ -536,21 +477,11 @@ function addZenodoCommands(
       if (!item) {
         return;
       }
-      // item.path gives the name of the directory selected
-      let path = item.path;
 
-      // Pre-set directory name and hide the relevant form field
-      let dirInput = document.getElementById(
-        'directory-input'
-      ) as HTMLInputElement;
-      dirInput.value = path;
-      let dirRow = document.getElementById('directory') as HTMLElement;
-      dirRow.style.display = 'None';
-
-      openWidget(app, widget, ['submit-form', 'Block']);
-      // Show only the submit form
-      // let submitForm = document.getElementById("submit-form") as HTMLElement;
-      // submitForm.style.display = "Block";
+      zenodoRegistry
+        .updateDeposition(item.path)
+        .then(({ doi }) => showSuccessDiv(doi))
+        .catch(handleErrorResponse);
     },
     iconClass: 'jp-MaterialIcon jp-FileUploadIcon'
   });
@@ -562,7 +493,6 @@ function addZenodoCommands(
     isToggled: () => false,
     iconClass: 'icon-class',
     execute: () => {
-      console.log('uploading');
       openWidget(app, widget, ['submit-form', 'Block']);
     }
   });
@@ -574,17 +504,14 @@ function addZenodoCommands(
     iconClass: 'icon-class',
     execute: () => {
       openWidget(app, widget, ['loading-div', 'Flex']);
-
-      // Trigger POST request to /zenodo/update/
-      let settings = ServerConnection.makeSettings();
-      const parts = [settings.baseUrl, 'zenodo', 'update'];
-      const fullURL = URLExt.join.apply(URLExt, parts);
-
-      ServerConnection.makeRequest(fullURL, { method: 'POST' }, settings).then(
-        response => {
-          handleUpdateResponse(response);
+      // Just update the first one we find
+      // TODO: this should either be smarter, or perhaps not exist
+      // as functionality? Need to deal with multiple depositions.
+      zenodoRegistry.getDepositions().then(([record]) => {
+        if (record) {
+          zenodoRegistry.updateDeposition(record.path);
         }
-      );
+      });
     }
   });
 
