@@ -9,39 +9,34 @@ from .utils import UserMistake
 LOG = logging.getLogger(__name__)
 
 
-def store_record(doi, filepath, directory, access_token, db_loc, db_name):
+def store_record(doi, directory, db_loc, db_name):
     """Store a record of publication in the sqlite database db_name
 
     Parameters
     ----------
     doi : string
         Zenodo DOI given to uploaded record
-    filepath : string
-        Full path of zip file that was uploaded
     directory : string
         Directory just compressed and uploaded
-    access_token : string
-        Zenodo access token used
 
     Returns
     -------
     void
     """
-    if any(map(lambda x: not x, [doi, filepath, directory, access_token])):
+    if any(map(lambda x: not x, [doi, directory])):
         raise Exception("Given empty fields")
 
     # Connect to database
     with Connection(db_loc, db_name) as c:
         # Create uploads table if it doesn't exist
         try:
-            c.execute("CREATE TABLE uploads (date_uploaded, doi, directory,"
-                    " filepath, access_token)")
+            c.execute("CREATE TABLE uploads (date_uploaded, doi, directory)")
         except sqlite3.OperationalError:
             pass
 
         # Add data to table
-        c.execute("INSERT INTO uploads VALUES (?,?,?,?,?)",
-                [datetime.now(), doi, directory, filepath, access_token])
+        c.execute("INSERT INTO uploads VALUES (?,?,?)",
+                [datetime.now(), doi, directory])
 
 
 def check_status(db_loc, db_name):
@@ -51,8 +46,8 @@ def check_status(db_loc, db_name):
     none
     Returns
     -------
-    string
-        Empty if no record, otherwise contains most recent upload doi
+    list
+        Empty if no records, otherwise contains DOI and path tuples
 
     Notes:
     none
@@ -60,12 +55,11 @@ def check_status(db_loc, db_name):
     with Connection(db_loc, db_name) as c:
         # Get last upload if it exists, otherwise return none
         try:
-            c.execute("SELECT doi FROM uploads ORDER BY date_uploaded DESC")
+            c.execute("SELECT path, doi FROM uploads ORDER BY date_uploaded DESC")
         except sqlite3.OperationalError:
-            return None
+            return []
         else:
-            row = c.fetchone()
-            return row[0]
+            return [dict(zip(('path', 'doi'), row)) for row in c.fetchall()]
 
 
 def get_last_upload(db_loc, db_name):
@@ -86,8 +80,8 @@ def get_last_upload(db_loc, db_name):
     with Connection(db_loc, db_name) as c:
         # If the table is empty or doesn't exist, there are no uploads
         try:
-            c.execute("SELECT date_uploaded, doi, directory, filepath, "
-                    "access_token FROM uploads ORDER BY date_uploaded DESC")
+            c.execute("SELECT date_uploaded, doi, directory "
+                      "FROM uploads ORDER BY date_uploaded DESC")
         except sqlite3.OperationalError:
             raise UserMistake(no_uploads_error)
         else:
@@ -100,7 +94,7 @@ def get_last_upload(db_loc, db_name):
     if any(map(lambda x: x == '', last_upload)):
         raise Exception("Missing information in last upload: empty values")
 
-    labels = ['date', 'doi', 'directory', 'filepath', 'access_token']
+    labels = ['date', 'doi', 'directory']
     return dict(zip(labels, last_upload))
 
 

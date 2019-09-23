@@ -87,9 +87,7 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
 
         else:
             # Record the upload and return success
-            store_record(doi, path_to_file, upload_data['directory_to_zip'],
-                         upload_data['access_token'], self.db_dest,
-                         self.db_name)
+            store_record(doi, upload_data['directory_to_zip'], self.db_dest, self.db_name)
             self.return_creation_success(doi)
 
 

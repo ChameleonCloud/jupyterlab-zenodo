@@ -14,15 +14,11 @@ class ZenodoStatusHandler(ZenodoBaseHandler):
     @gen.coroutine
     def get(self, path=''):
         try:
-            doi = check_status(self.db_dest, self.db_name)
+            records = check_status(self.db_dest, self.db_name)
         except Exception as x:
             # All other exceptions are internal
-            LOG.exception("There was an error!")
+            self.log.exception("There was an error!")
             self.return_error("Something went wrong")
         else:
-            if doi is None:
-                info = {'status': 'No publications'}
-            else:
-                info = {'status': 'Deposition published', 'doi': doi}
-            self.write(info)
+            self.write(dict(records=records))
             self.finish()

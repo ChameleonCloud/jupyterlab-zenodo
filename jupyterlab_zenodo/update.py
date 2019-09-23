@@ -73,7 +73,5 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
             return
         else:
             # Record the deposition creation and return success
-            store_record(doi, new_filepath, upload_data['directory'],
-                         upload_data['access_token'], self.db_dest,
-                         self.db_name)
+            store_record(doi, upload_data['directory'], self.db_dest, self.db_name)
             self.return_creation_success(doi)
