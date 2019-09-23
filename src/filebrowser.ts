@@ -39,8 +39,11 @@ class ZenodoDirListingRenderer extends DirListing.Renderer {
   ): void {
     super.updateItemNode(node, model, fileType);
 
-    if (this._zenodoReg.hasDepositionSync(model.path)) {
-      node.setAttribute('data-has-doi', 'yes');
+    const record = this._zenodoReg.getDepositionSync(model.path);
+
+    if (record) {
+      node.setAttribute('data-doi', record.doi);
+      node.title = `${model.path} (Published as ${record.doi})`;
     } else {
       delete node.dataset.doi;
     }

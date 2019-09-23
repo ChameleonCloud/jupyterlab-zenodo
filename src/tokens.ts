@@ -31,4 +31,5 @@ export interface IZenodoRegistry {
   createDeposition(path: string, post: ZenodoPost): Promise<ZenodoRecord>;
   getDepositions(): Promise<ZenodoRecord[]>;
   hasDepositionSync(path: string): boolean;
+  getDepositionSync(path: string): ZenodoRecord | undefined;
 }

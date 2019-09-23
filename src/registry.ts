@@ -54,15 +54,19 @@ export class ZenodoRegistry implements IZenodoRegistry {
     return this._records;
   }
 
+  getDepositionSync(path: string) {
+    return this._records.find(r => r.path === path);
+  }
+
   hasDepositionSync(path: string) {
-    return !!this._records.find(r => r.path === path);
+    return !!this.getDepositionSync(path);
   }
 
   private _serverSettings = ServerConnection.makeSettings();
   private _records = [] as ZenodoRecord[];
   private _recordsFetched = false;
   private _recordsFetchPromise: Promise<ZenodoRecord[]>;
-  private _updateRecords = (record: ZenodoRecord): void => {
+  private _updateRecords(record: ZenodoRecord): void {
     const indexOf = this._records.findIndex(({ path }) => path === record.path);
     if (indexOf >= 0) {
       this._records = this._records
@@ -71,7 +75,7 @@ export class ZenodoRegistry implements IZenodoRegistry {
     } else {
       this._records = this._records.concat([record]);
     }
-  };
+  }
 }
 
 namespace Private {

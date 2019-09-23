@@ -113,3 +113,16 @@
   padding-left: 20px;
   padding-right: 20px;
 }
+
+/* Add indicator for published items in filebrowser */
+
+.jp-DirListing-item[data-doi]::after {
+  box-sizing: border-box;
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #0067c9;
+  position: absolute;
+  border: 1px solid white;
+}
