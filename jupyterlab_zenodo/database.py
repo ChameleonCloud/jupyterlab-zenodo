@@ -55,7 +55,7 @@ def check_status(db_loc, db_name):
     with Connection(db_loc, db_name) as c:
         # Get last upload if it exists, otherwise return none
         try:
-            c.execute("SELECT path, doi FROM uploads ORDER BY date_uploaded DESC")
+            c.execute("SELECT directory, doi FROM uploads ORDER BY date_uploaded DESC")
         except sqlite3.OperationalError:
             return []
         else:
