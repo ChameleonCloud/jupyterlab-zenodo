@@ -22,41 +22,28 @@ class StoreRecordTest(unittest.TestCase):
         self.dir = "a_directory"
         self.tok = "atoken"
         self.test_dir = tempfile.mkdtemp()
+        self.db_path = f"{self.test_dir}/databasefile"
 
     def test_no_path(self):
-        not_a_dir = self.test_dir + "new/"
-        store_record(self.doi, self.filepath, self.dir, self.tok,
-                     not_a_dir, DB_NAME)
+        store_record(self.doi, self.dir, f"{self.test_dir}new/{DB_NAME}")
 
     def test_existing_db(self):
-        name = 'zenodo.db'
-        conn = sqlite3.connect(self.test_dir+name)
+        conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
-        c.execute("CREATE TABLE uploads (date_uploaded, doi, directory,"
-                  " filepath, access_token)")
-        c.execute("INSERT INTO uploads VALUES (?,?,?,?,?)",
-                  ["time", "doi", "directory", "filepath", "access_token"])
+        c.execute("CREATE TABLE uploads (date_uploaded, doi, directory)")
+        c.execute("INSERT INTO uploads VALUES (?,?,?)",
+                  ["time", "doi", "directory"])
         conn.commit()
         conn.close()
-        store_record(self.doi, self.filepath, self.dir, self.tok,
-                     self.test_dir, name)
+        store_record(self.doi, self.dir, self.db_path)
 
     def test_missing_doi(self):
         with self.assertRaises(Exception):
-            store_record("", self.filepath, self.dir, self.tok, self.test_dir)
-
-    def test_missing_file(self):
-        with self.assertRaises(Exception):
-            store_record(self.doi, None, self.dir, self.tok, self.test_dir)
+            store_record("", self.dir, self.db_path)
 
     def test_missing_dir(self):
         with self.assertRaises(Exception):
-            store_record(self.doi, self.filepath, "", self.tok, self.test_dir)
-
-    def test_missing_tok(self):
-        with self.assertRaises(Exception):
-            store_record(self.doi, self.filepath, self.dir, None,
-                         self.test_dir)
+            store_record(self.doi, "", self.db_path)
 
     def tearDown(self):
         shutil.rmtree(self.test_dir)
@@ -64,11 +51,11 @@ class StoreRecordTest(unittest.TestCase):
 
 class GetLastUploadNoDBTest(unittest.TestCase):
     def setUp(self):
-        self.db_dest = "/not_a_directory"+str(datetime.now())
+        self.db_path = f"/not_a_directory/{str(datetime.now())}/{DB_NAME}"
 
     def test_fail(self):
         with self.assertRaises(UserMistake):
-            get_last_upload(self.db_dest, DB_NAME)
+            get_last_upload(self.db_path)
 
 
 class GetLastUploadTest(unittest.TestCase):
@@ -77,51 +64,42 @@ class GetLastUploadTest(unittest.TestCase):
             'date_uploaded': datetime.now(),
             'doi': 'some_doi',
             'directory': 'mydir',
-            'filepath': 'somedir/file.zip',
-            'access_token': 'sometoken',
         }
         self.temp_dir = tempfile.mkdtemp()
-        self.temp_name = 'zenodo.db'
-        conn = sqlite3.connect(self.temp_dir + self.temp_name)
+        self.db_path = f"{self.temp_dir}/databasefile"
+        conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
-        c.execute("CREATE TABLE uploads (date_uploaded, doi, directory,"
-                  " filepath, access_token)")
+        c.execute("CREATE TABLE uploads (date_uploaded, doi, directory)")
 
     def test_missing_data(self):
-        conn = sqlite3.connect(self.temp_dir + self.temp_name)
+        conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
-        c.execute("INSERT INTO uploads VALUES (?,?,?,?,?)", [
+        c.execute("INSERT INTO uploads VALUES (?,?,?)", [
             self.info['date_uploaded'],
             "",
             self.info['directory'],
-            self.info['filepath'],
-            self.info['access_token'],
         ])
         conn.commit()
         c.close()
 
         with self.assertRaises(Exception):
-            get_last_upload(self.temp_dir, self.temp_name)
+            get_last_upload(self.db_path)
 
     def test_success(self):
-        conn = sqlite3.connect(self.temp_dir+self.temp_name)
+        conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
-        c.execute("INSERT INTO uploads VALUES (?,?,?,?,?)", [
+        c.execute("INSERT INTO uploads VALUES (?,?,?)", [
             self.info['date_uploaded'],
             self.info['doi'],
             self.info['directory'],
-            self.info['filepath'],
-            self.info['access_token'],
         ])
         conn.commit()
         c.close()
 
-        info_dict = get_last_upload(self.temp_dir, self.temp_name)
+        info_dict = get_last_upload(self.db_path)
         self.assertEqual(info_dict['date'], str(self.info['date_uploaded']))
         self.assertEqual(info_dict['doi'], self.info['doi'])
         self.assertEqual(info_dict['directory'], self.info['directory'])
-        self.assertEqual(info_dict['filepath'], self.info['filepath'])
-        self.assertEqual(info_dict['access_token'], self.info['access_token'])
 
     def tearDown(self):
         shutil.rmtree(self.temp_dir)

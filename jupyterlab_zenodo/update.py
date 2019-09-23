@@ -59,7 +59,7 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
 
         try:
             # Try to complete update
-            upload_data = get_last_upload(self.db_dest, self.db_name)
+            upload_data = get_last_upload(self.db_path)
             directory = os.path.join(self.notebook_dir, upload_data['directory'])
             archive = zip_dir(directory)
             doi = self.update_file(archive, get_id(upload_data['doi']),
@@ -74,5 +74,5 @@ class ZenodoUpdateHandler(ZenodoBaseHandler):
             return
         else:
             # Record the deposition creation and return success
-            store_record(doi, upload_data['directory'], self.db_dest, self.db_name)
+            store_record(doi, upload_data['directory'], self.db_path)
             self.return_creation_success(doi)

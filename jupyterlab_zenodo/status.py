@@ -14,7 +14,7 @@ class ZenodoStatusHandler(ZenodoBaseHandler):
     @gen.coroutine
     def get(self, path=''):
         try:
-            records = check_status(self.db_dest, self.db_name)
+            records = check_status(self.db_path)
         except Exception as x:
             # All other exceptions are internal
             self.log.exception("There was an error!")

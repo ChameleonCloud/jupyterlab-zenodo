@@ -9,8 +9,8 @@ from .utils import UserMistake
 LOG = logging.getLogger(__name__)
 
 
-def store_record(doi, directory, db_loc, db_name):
-    """Store a record of publication in the sqlite database db_name
+def store_record(doi, directory, db_path):
+    """Store a record of publication in the sqlite database db_path
 
     Parameters
     ----------
@@ -27,7 +27,7 @@ def store_record(doi, directory, db_loc, db_name):
         raise Exception("Given empty fields")
 
     # Connect to database
-    with Connection(db_loc, db_name) as c:
+    with Connection(db_path) as c:
         # Create uploads table if it doesn't exist
         try:
             c.execute("CREATE TABLE uploads (date_uploaded, doi, directory)")
@@ -39,7 +39,7 @@ def store_record(doi, directory, db_loc, db_name):
                 [datetime.now(), doi, directory])
 
 
-def check_status(db_loc, db_name):
+def check_status(db_path):
     """Look in a local sqlite database to see Zenodo upload status
     Parameters
     ---------
@@ -52,7 +52,7 @@ def check_status(db_loc, db_name):
     Notes:
     none
     """
-    with Connection(db_loc, db_name) as c:
+    with Connection(db_path) as c:
         # Get last upload if it exists, otherwise return none
         try:
             c.execute("SELECT directory, doi FROM uploads ORDER BY date_uploaded DESC")
@@ -62,11 +62,11 @@ def check_status(db_loc, db_name):
             return [dict(zip(('path', 'doi'), row)) for row in c.fetchall()]
 
 
-def get_last_upload(db_loc, db_name):
+def get_last_upload(db_path):
     """Get information about the last upload
     Parameters
     ----------
-    db_loc : string
+    db_path : string
         Supposed location of sqlite database with upload information
 
     Returns
@@ -77,7 +77,7 @@ def get_last_upload(db_loc, db_name):
     no_uploads_error = ("No previous upload. Press 'Upload to Zenodo' "
                         "to create a new deposition")
 
-    with Connection(db_loc, db_name) as c:
+    with Connection(db_path) as c:
         # If the table is empty or doesn't exist, there are no uploads
         try:
             c.execute("SELECT date_uploaded, doi, directory "
@@ -103,12 +103,12 @@ class Connection(object):
     A simple context manager for a sqlite connection, which handles
     the automatic disconnect/commit of the current transaction
     """
-    def __init__(self, db_path, db_name):
-        # If the database location doesn't exist, there are no uploads
-        if not os.path.exists(db_path):
-            os.mkdir(db_path, 0o644)
+    def __init__(self, db_path):
+        dirname = os.path.dirname(db_path)
+        if not os.path.exists(dirname):
+            os.mkdir(dirname, 0o644)
         # Connect to database
-        self.connection = sqlite3.connect(os.path.join(db_path, db_name))
+        self.connection = sqlite3.connect(db_path)
 
     def __enter__(self):
         return self.connection.cursor()
