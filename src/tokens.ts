@@ -1,5 +1,9 @@
 import { Token } from '@phosphor/coreutils';
 
+export class ZenodoConfig {
+  readonly baseUrl: string;
+}
+
 export class ZenodoRecord {
   readonly doi: string;
 

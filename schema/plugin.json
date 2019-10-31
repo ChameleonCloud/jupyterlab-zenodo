@@ -8,6 +8,11 @@
         "type": "string",
         "title": "Title for upload command",
         "default": "Publish to Zenodo"
+     },
+     "baseUrl": {
+       "type": "string",
+       "title": "Base URL for Zenodo URLs",
+       "default": "https://zenodo.org"
      }
   },
   "additionalProperties": false,
