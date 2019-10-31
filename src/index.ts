@@ -42,9 +42,7 @@ const zenodoRegistryPlugin: JupyterFrontEndPlugin<IZenodoRegistry> = {
   provides: IZenodoRegistry,
   requires: [],
   activate(app: JupyterFrontEnd) {
-    const zenodoRegistry = new ZenodoRegistry();
-
-    return zenodoRegistry.getDepositions().then(() => zenodoRegistry);
+    return new ZenodoRegistry();
   }
 };
 

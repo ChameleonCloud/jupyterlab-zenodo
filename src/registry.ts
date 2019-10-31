@@ -88,7 +88,6 @@ namespace Private {
     res: Response
   ): Promise<ZenodoRecord[]> {
     const { records } = await res.json();
-    console.log(records);
     if (!records || !Array.isArray(records)) {
       throw Error('Malformed response');
     }
