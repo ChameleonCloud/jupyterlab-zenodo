@@ -54,6 +54,11 @@ export class ZenodoRegistry implements IZenodoRegistry {
     return this._records;
   }
 
+  async getDeposition(path: string) {
+    const depositions = await this.getDepositions();
+    return depositions.find(record => record.path === path);
+  }
+
   getDepositionSync(path: string) {
     return this._records.find(r => r.path === path);
   }
@@ -122,7 +127,7 @@ namespace Private {
       const message = 'An error occurred creating the Zenodo deposition';
       throw new ServerConnection.ResponseError(res, message);
     }
-  
+
     let doi: string | undefined;
     let redirect: string | undefined;
 

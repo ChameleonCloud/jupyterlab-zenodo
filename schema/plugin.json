@@ -4,20 +4,25 @@
   "title": "Zenodo Extension",
   "description": "Zenodo extension settings.",
   "properties": {
-    "uploadTitle": {
+    "createLabel": {
       "type": "string",
-      "title": "Title for upload command",
-      "default": "Publish to Zenodo"
+      "title": "Title for create command",
+      "default": "Create Zenodo deposition"
     },
-    "updateLabel": {
+    "editLabel": {
       "type": "string",
-      "title": "Title for update command",
-      "default": "Update on Zenodo"
+      "title": "Title for edit command",
+      "default": "Edit Zenodo metadata"
     },
     "baseUrl": {
       "type": "string",
-      "title": "Base URL for Zenodo URLs",
+      "title": "Base URL for rendered Zenodo deposition URLs",
       "default": "https://zenodo.org"
+    },
+    "externalEditUrl": {
+      "type": "string",
+      "title": "External URL for editing depositions",
+      "default": ""
     }
   },
   "additionalProperties": false,

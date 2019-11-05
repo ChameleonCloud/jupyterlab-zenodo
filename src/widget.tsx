@@ -37,7 +37,7 @@ export class ZenodoFormInput extends React.Component<
     }
 
     return (
-      <div className='zenodo-InputRow'>
+      <div className="zenodo-InputRow">
         <label htmlFor={this.id} className={classNames.join(' ')}>
           {this.props.label}
         </label>
@@ -52,7 +52,7 @@ export class ZenodoFormInput extends React.Component<
           ></textarea>
         ) : (
           <input
-            type='text'
+            type="text"
             id={this.id}
             name={this.props.id}
             required={this.props.required}
@@ -99,58 +99,58 @@ export class ZenodoUploadForm extends React.Component<
 
   render() {
     return (
-      <form id="submit-form" onSubmit={this.props.onSubmit}>
+      <form id='submit-form' onSubmit={this.props.onSubmit}>
         <h2>Final Submission Details</h2>
         <p>
           <em>Note:</em> this will make your code publicly accessible on{' '}
-          <a href={this.props.baseUrl} target='_blank'>
+          <a href={this.props.baseUrl} target="_blank">
             {this.props.baseUrl}
           </a>
           .
         </p>
-        <div id="form-error-div">{this.state.error}</div>
+        <div id='form-error-div'>{this.state.error}</div>
         <ZenodoFormInput
-          id="title"
-          label="Title"
+          id='title'
+          label='Title'
           required
           default={this.props.defaults.title}
         />
         <ZenodoFormInput
-          id="author"
-          label="Author(s)"
+          id='author'
+          label='Author(s)'
           required
           default={this.props.defaults.author}
           placeholder={'Name <email@example.com>'}
         />
         <ZenodoFormInput
-          id="affiliation"
-          label="Affiliation"
+          id='affiliation'
+          label='Affiliation'
           required
           default={this.props.defaults.affiliation}
         />
         <ZenodoFormInput
-          id="description"
-          label="Description"
+          id='description'
+          label='Description'
           default={this.props.defaults.description}
           required
           multiline
           placeholder={'A short description of your artifact/files.'}
         />
         <ZenodoFormInput
-          id="directory"
-          label="Directory to publish"
+          id='directory'
+          label='Directory to publish'
           default={this.props.defaults.directory}
           placeholder={'./my-dir'}
         />
         <ZenodoFormInput
-          id="zenodo_token"
-          label="Zenodo access token"
+          id='zenodo_token'
+          label='Zenodo access token'
           default={this.props.defaults.zenodoToken}
           placeholder={'7I8PwXn60...'}
         />
         <button
-          type="submit"
-          className="zenodo-PublishButton jp-mod-styled jp-mod-accept"
+          type='submit'
+          className='zenodo-PublishButton jp-mod-styled jp-mod-accept'
         >
           Publish
         </button>
@@ -196,7 +196,7 @@ export class ZenodoSuccessMessage extends React.Component<
         <div>
           <button
             onClick={this.onViewButtonClick}
-            className="jp-mod-styled jp-mod-accept"
+            className='jp-mod-styled jp-mod-accept'
           >
             View on Zenodo
           </button>
@@ -205,10 +205,10 @@ export class ZenodoSuccessMessage extends React.Component<
         <h3>How is my code shared?</h3>
         <p>
           Your code is now publicly accessible as an archive on{' '}
-          <a href={this.recordUrl} target='_blank'>
+          <a href={this.recordUrl} target="_blank">
             Zenodo
-          </a>.{' '}
-          It has been assigned a DOI (digital object identifier):{' '}
+          </a>
+          . It has been assigned a DOI (digital object identifier):{' '}
           {this.props.doi}.
         </p>
         <h3>What if my code changes?</h3>
@@ -292,22 +292,22 @@ export class ZenodoManager extends React.Component<
     );
 
     return (
-      <div className="zenodo-Upload">
-        <div className="zenodo-WaitMessage" style={visibilities.waiting}>
-          <div className="jp-Spinner">
-            <div className="jp-SpinnerContent"></div>
-            <div className="zenodo-LoadingMessage">
+      <div className='zenodo-Upload'>
+        <div className='zenodo-WaitMessage' style={visibilities.waiting}>
+          <div className='jp-Spinner'>
+            <div className='jp-SpinnerContent'></div>
+            <div className='zenodo-LoadingMessage'>
               Please wait while your files are uploaded.
             </div>
           </div>
         </div>
-        <div className="zenodo-SuccessMessage" style={visibilities.success}>
+        <div className='zenodo-SuccessMessage' style={visibilities.success}>
           <ZenodoSuccessMessage
             baseUrl={this.props.zenodoConfig.baseUrl}
             doi={this.state.doi}
           />
         </div>
-        <div className="zenodo-ErrorMessage" style={visibilities.error}>
+        <div className='zenodo-ErrorMessage' style={visibilities.error}>
           {this.state.errorMessage}
         </div>
         <div style={visibilities.form}>

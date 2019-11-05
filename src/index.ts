@@ -132,11 +132,13 @@ function addZenodoCommands(
   browser: FileBrowser,
   zenodoRegistry: IZenodoRegistry
 ) {
-  const uploadLabel = settings.get('uploadTitle').composite as string;
-  const updateLabel = settings.get('updateLabel').composite as string;
+  const createLabel = settings.get('createLabel').composite as string;
+  const editLabel = settings.get('editLabel').composite as string;
   const baseUrl = settings.get('baseUrl').composite as string;
+  const externalEditUrl = settings.get('externalEditUrl').composite as string;
   const zenodoConfig = {
-    baseUrl
+    baseUrl,
+    externalEditUrl
   };
 
   let widget: MainAreaWidget<ZenodoWidget>;
@@ -152,7 +154,7 @@ function addZenodoCommands(
         zenodoConfig,
         formDefaults
       );
-      content.title.label = uploadLabel;
+      content.title.label = createLabel;
       widget = new MainAreaWidget({ content });
       widget.id = 'zenodo';
     }
@@ -169,18 +171,18 @@ function addZenodoCommands(
     app.shell.activateById(widget.id);
   }
 
-  function unsupportedItem(item: Contents.IModel) {
+  function unsupportedItem(item?: Contents.IModel) {
     return item && item.type !== 'directory';
   }
 
-  function hasDeposition(item: Contents.IModel) {
-    // No selection = check the root path (empty)
+  function hasDeposition(item?: Contents.IModel) {
+    // No item = check the root path (empty)
     return zenodoRegistry.hasDepositionSync((item && item.path) || '');
   }
 
   // Command to upload any set of files
   app.commands.addCommand(CommandIDs.upload, {
-    label: uploadLabel,
+    label: createLabel,
     iconClass: 'jp-MaterialIcon jp-FileUploadIcon',
     isEnabled: () => {
       const item = browser.selectedItems().next();
@@ -202,7 +204,7 @@ function addZenodoCommands(
   });
 
   app.commands.addCommand(CommandIDs.update, {
-    label: updateLabel,
+    label: editLabel,
     iconClass: 'jp-MaterialIcon jp-EditIcon',
     isEnabled: () => {
       const item = browser.selectedItems().next();
@@ -212,12 +214,19 @@ function addZenodoCommands(
       return hasDeposition(item);
     },
     execute: () => {
-      // Just update the first one we find
-      // TODO: this should either be smarter, or perhaps not exist
-      // as functionality? Need to deal with multiple depositions.
-      zenodoRegistry.getDepositions().then(([record]) => {
-        if (record) {
-          zenodoRegistry.updateDeposition(record.path);
+      const item = browser.selectedItems().next();
+      const path = (item && item.path) || '';
+      zenodoRegistry.getDeposition(path).then(record => {
+        if (!record) {
+          throw Error(`No deposition exists at path "${path}"`);
+        }
+
+        const { externalEditUrl } = zenodoConfig;
+        if (externalEditUrl) {
+          window.open(externalEditUrl.replace('{doi}', record.doi));
+        } else {
+          // TODO: open edit UI
+          throw Error('Not implemented yet');
         }
       });
     }

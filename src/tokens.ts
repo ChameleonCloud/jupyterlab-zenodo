@@ -2,6 +2,7 @@ import { Token } from '@phosphor/coreutils';
 
 export class ZenodoConfig {
   readonly baseUrl: string;
+  readonly externalEditUrl: string;
 }
 
 export class ZenodoRecord {
@@ -28,6 +29,7 @@ export interface IZenodoRegistry {
   updateDeposition(path: string): Promise<ZenodoRecord>;
   createDeposition(path: string, post: ZenodoFormFields): Promise<ZenodoRecord>;
   getDepositions(): Promise<ZenodoRecord[]>;
+  getDeposition(path: string): Promise<ZenodoRecord>;
   hasDepositionSync(path: string): boolean;
   getDepositionSync(path: string): ZenodoRecord | undefined;
 }
