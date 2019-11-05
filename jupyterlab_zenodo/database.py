@@ -106,7 +106,7 @@ class Connection(object):
     def __init__(self, db_path):
         dirname = os.path.dirname(db_path)
         if not os.path.exists(dirname):
-            os.mkdir(dirname, 0o644)
+            os.mkdir(dirname, 0o750)
         # Connect to database
         self.connection = sqlite3.connect(db_path)
 
