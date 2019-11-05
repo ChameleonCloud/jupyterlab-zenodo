@@ -4,32 +4,90 @@ import { ReactWidget } from '@jupyterlab/apputils';
 
 import {
   IZenodoRegistry,
-  ZenodoPost,
+  ZenodoFormFields,
   ZenodoConfig,
   ZenodoRecord
 } from './tokens';
 
+namespace ZenodoFormInput {
+  export interface IProps {
+    readonly id: string;
+    readonly label: string;
+    readonly required: boolean;
+    readonly multiline: boolean;
+    readonly default?: string;
+  }
+}
+
+export class ZenodoFormInput extends React.Component<
+  ZenodoFormInput.IProps,
+  {}
+> {
+  constructor(props: ZenodoFormInput.IProps) {
+    super(props);
+    this.id = `zenInput-${this.props.id}`;
+  }
+
+  render() {
+    const classNames = ['label'];
+
+    if (this.props.required) {
+      classNames.push('required');
+    }
+
+    return (
+      <div className="zenodo-InputRow">
+        <label htmlFor={this.id} className={classNames.join(' ')}>
+          {this.props.label}
+        </label>
+        {this.props.multiline ? (
+          <textarea
+            id={this.id}
+            name={this.props.id}
+            required={this.props.required}
+            rows={5}
+          >
+            {this.props.default}
+          </textarea>
+        ) : (
+          <input
+            id={this.id}
+            name={this.props.id}
+            required={this.props.required}
+            type="text"
+            value={this.props.default}
+          />
+        )}
+      </div>
+    );
+  }
+
+  private id: string;
+
+  static defaultProps: ZenodoFormInput.IProps = {
+    label: '',
+    id: '',
+    required: false,
+    multiline: false
+  };
+}
+
 namespace ZenodoUploadForm {
-  export interface IInputOptions {
-    label: string;
-    isRequired: boolean;
-    isMultiline: boolean;
+  export interface IProps {
+    readonly onSubmit: React.FormEventHandler;
+    readonly defaults: ZenodoFormFields;
   }
 
-  export interface IFormProps {
-    onSubmit: React.FormEventHandler;
-  }
-
-  export interface IFormState {
+  export interface IState {
     error?: string;
   }
 }
 
 export class ZenodoUploadForm extends React.Component<
-  ZenodoUploadForm.IFormProps,
-  ZenodoUploadForm.IFormState
+  ZenodoUploadForm.IProps,
+  ZenodoUploadForm.IState
 > {
-  constructor(props: ZenodoUploadForm.IFormProps) {
+  constructor(props: ZenodoUploadForm.IProps) {
     super(props);
     this.state = {
       error: null
@@ -38,77 +96,59 @@ export class ZenodoUploadForm extends React.Component<
 
   render() {
     return (
-      <form id="submit-form" onSubmit={this.props.onSubmit}>
+      <form id='submit-form' onSubmit={this.props.onSubmit}>
         <h2>Final Submission Details</h2>
         <p>
-          Please fill out the starred fields and then click 'Publish' to publish
-          to Zenodo.
+          Please fill out the required fields and then click 'Publish' to
+          publish to Zenodo.
         </p>
         <p>
           <em>Note:</em> this will make your code publicly accessible on{' '}
-          <a href="https://zenodo.org">zenodo.org</a>.
+          <a href='https://zenodo.org'>zenodo.org</a>.
         </p>
-        <div id="form-error-div">{this.state.error}</div>
-        {this._createInputRow('title', {
-          label: 'Title',
-          isRequired: true,
-          isMultiline: false
-        })}
-        {this._createInputRow('author', {
-          label: 'Author(s)',
-          isRequired: true,
-          isMultiline: false
-        })}
-        {this._createInputRow('affiliation', {
-          label: 'Affiliation',
-          isRequired: true,
-          isMultiline: false
-        })}
-        {this._createInputRow('description', {
-          label: 'Description',
-          isRequired: true,
-          isMultiline: true
-        })}
-        {this._createInputRow('directory', {
-          label: 'Directory to publish',
-          isRequired: false,
-          isMultiline: false
-        })}
-        {this._createInputRow('zenodo_token', {
-          label: 'Zenodo access token',
-          isRequired: false,
-          isMultiline: false
-        })}
-        <button type="submit" className="basic-btn">
+        <div id='form-error-div'>{this.state.error}</div>
+        <ZenodoFormInput
+          id='title'
+          label='Title'
+          required
+          default={this.props.defaults.title}
+        />
+        <ZenodoFormInput
+          id='author'
+          label='Author(s)'
+          required
+          default={this.props.defaults.author}
+        />
+        <ZenodoFormInput
+          id='affiliation'
+          label='Affiliation'
+          required
+          default={this.props.defaults.affiliation}
+        />
+        <ZenodoFormInput
+          id='description'
+          label='Description'
+          default={this.props.defaults.description}
+          required
+          multiline
+        />
+        <ZenodoFormInput
+          id='directory'
+          label='Directory to publish'
+          default={this.props.defaults.directory}
+        />
+        <ZenodoFormInput
+          id='zenodo_token'
+          label='Zenodo access token'
+          default={this.props.defaults.zenodoToken}
+        />
+        <button
+          type='submit'
+          className='zenodo-PublishButton jp-mod-styled jp-mod-accept'
+        >
           Publish
         </button>
       </form>
-    );
-  }
-
-  private _createInput(id: string, options: ZenodoUploadForm.IInputOptions) {
-    if (options.isMultiline) {
-      return <textarea name={id} required={options.isRequired}></textarea>;
-    } else {
-      return <input name={id} required={options.isRequired} type="text" />;
-    }
-  }
-
-  private _createInputRow(id: string, options: ZenodoUploadForm.IInputOptions) {
-    const classNames = ['label'];
-
-    if (options.isRequired) {
-      classNames.push('required');
-    }
-
-    return (
-      <tr>
-        <th className={classNames.join(' ')}>
-          {options.isRequired && <i>*</i>}
-          {options.label}
-        </th>
-        <td>{this._createInput(id, options)}</td>
-      </tr>
     );
   }
 }
@@ -124,29 +164,45 @@ export class ZenodoSuccessMessage extends React.Component<
   ZenodoSuccessMessage.IProps,
   {}
 > {
+  constructor(props: ZenodoSuccessMessage.IProps) {
+    super(props);
+    this.onViewButtonClick = this.onViewButtonClick.bind(this);
+  }
+
+  get recordUrl() {
+    const record = this.props.doi.split('.').pop();
+    return `${this.props.baseUrl}/record/${record}`;
+  }
+
+  onViewButtonClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    event.preventDefault();
+    window.open(this.recordUrl, '_blank');
+  }
+
   render() {
     if (!this.props.doi) {
       return <></>;
     }
 
-    const record = this.props.doi.split('.').pop();
-    const recordUrl = `${this.props.baseUrl}/record/${record}`;
-
     return (
       <div>
-        <h1>Congratulations, your files have been uploaded to Zenodo!</h1>
+        <h2>Congratulations, your files have been uploaded to Zenodo!</h2>
         <div>
-          <a href={recordUrl} target='_blank' className="basic-btn">
+          <button
+            onClick={this.onViewButtonClick}
+            className='jp-mod-styled jp-mod-accept'
+          >
             View on Zenodo
-          </a>
+          </button>
+          <strong>{this.props.doi}</strong>
         </div>
         <h3>How is my code shared?</h3>
         <p>
-          Your code is now publicly accessible on{' '}
-          <a href={recordUrl} target='_blank'>
+          Your code is now publicly accessible as an archive on{' '}
+          <a href={this.recordUrl} target="_blank">
             Zenodo
           </a>{' '}
-          as a Zip file. It has been assigned a DOI (digital object identifier):{' '}
+          . It has been assigned a DOI (digital object identifier):{' '}
           {this.props.doi}.
         </p>
         <h3>What if my code changes?</h3>
@@ -164,6 +220,7 @@ namespace ZenodoManager {
   export interface IProps {
     zenodoRegistry: IZenodoRegistry;
     zenodoConfig: ZenodoConfig;
+    formDefaults: ZenodoFormFields;
   }
 
   export type IStateValue = 'waiting' | 'success' | 'error' | 'form';
@@ -194,18 +251,13 @@ export class ZenodoManager extends React.Component<
   }
 
   onSubmit(event: React.FormEvent) {
+    const form = event.target as HTMLFormElement;
+
     event.preventDefault();
-
-    let form = document.getElementById('submit-form') as HTMLFormElement;
-    form.style.display = 'None';
-
-    // Show loading text
-    let loading = document.getElementById('loading-div') as HTMLElement;
-    loading.style.display = 'Block';
 
     // Convert form data to JSON
     const formData = new FormData(form);
-    const zenodoPost: ZenodoPost = {
+    const zenodoPost: ZenodoFormFields = {
       title: formData.get('title') as string,
       author: formData.get('author') as string,
       affiliation: formData.get('affiliation') as string,
@@ -234,21 +286,24 @@ export class ZenodoManager extends React.Component<
     );
 
     return (
-      <div className="zenodo-Upload">
-        <div className="zenodo-WaitMessage" style={visibilities.waiting}>
+      <div className='zenodo-Upload'>
+        <div className='zenodo-WaitMessage' style={visibilities.waiting}>
           Please wait; your files are being uploaded&hellip;
         </div>
-        <div className="zenodo-SuccessMessage" style={visibilities.success}>
+        <div className='zenodo-SuccessMessage' style={visibilities.success}>
           <ZenodoSuccessMessage
             baseUrl={this.props.zenodoConfig.baseUrl}
             doi={this.state.doi}
           />
         </div>
-        <div className="zenodo-ErrorMessage" style={visibilities.error}>
+        <div className='zenodo-ErrorMessage' style={visibilities.error}>
           {this.state.errorMessage}
         </div>
         <div style={visibilities.form}>
-          <ZenodoUploadForm onSubmit={this.onSubmit} />
+          <ZenodoUploadForm
+            onSubmit={this.onSubmit}
+            defaults={this.props.formDefaults}
+          />
         </div>
       </div>
     );
@@ -271,10 +326,16 @@ export class ZenodoManager extends React.Component<
 }
 
 export class ZenodoWidget extends ReactWidget {
-  constructor(zenodoRegistry: IZenodoRegistry, zenodoConfig: ZenodoConfig) {
+  constructor(
+    zenodoRegistry: IZenodoRegistry,
+    zenodoConfig: ZenodoConfig,
+    formDefaults: ZenodoFormFields
+  ) {
     super();
+    this.id = 'zenodo-Widget';
     this._zenodoRegistry = zenodoRegistry;
     this._zenodoConfig = zenodoConfig;
+    this._formDefaults = formDefaults;
   }
 
   render() {
@@ -282,10 +343,12 @@ export class ZenodoWidget extends ReactWidget {
       <ZenodoManager
         zenodoRegistry={this._zenodoRegistry}
         zenodoConfig={this._zenodoConfig}
+        formDefaults={this._formDefaults}
       />
     );
   }
 
   private _zenodoRegistry: IZenodoRegistry;
   private _zenodoConfig: ZenodoConfig;
+  private _formDefaults: ZenodoFormFields;
 }

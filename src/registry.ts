@@ -2,7 +2,7 @@ import { ServerConnection } from '@jupyterlab/services';
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { IZenodoRegistry, ZenodoPost, ZenodoRecord } from './tokens';
+import { IZenodoRegistry, ZenodoFormFields, ZenodoRecord } from './tokens';
 
 export class ZenodoRegistry implements IZenodoRegistry {
   async updateDeposition(path: string) {
@@ -18,7 +18,7 @@ export class ZenodoRegistry implements IZenodoRegistry {
     return record;
   }
 
-  async createDeposition(path: string, post: ZenodoPost) {
+  async createDeposition(path: string, post: ZenodoFormFields) {
     const res = await ServerConnection.makeRequest(
       Private.getUrl('upload', this._serverSettings),
       { method: 'POST', body: JSON.stringify(post) },
@@ -122,15 +122,22 @@ namespace Private {
       const message = 'An error occurred creating the Zenodo deposition';
       throw new ServerConnection.ResponseError(res, message);
     }
+  
+    let doi: string | undefined;
+    let redirect: string | undefined;
 
-    const json = await res.json();
+    try {
+      const json = await res.json();
+      doi = json.doi;
+      redirect = json.redirect;
+    } catch (err) {
+      throw new Error('Failed to process Zenodo response');
+    }
 
-    const doi = json.doi;
     if (!doi) {
       throw new Error('Missing DOI');
     }
 
-    const redirect = json.redirect;
     if (redirect) {
       window.open(redirect);
     }

@@ -6,21 +6,15 @@ export class ZenodoConfig {
 
 export class ZenodoRecord {
   readonly doi: string;
-
   readonly path: string;
 }
 
-export class ZenodoPost {
-  readonly title: string;
-
-  readonly author: string;
-
-  readonly affiliation: string;
-
-  readonly description: string;
-
+export class ZenodoFormFields {
+  readonly title?: string;
+  readonly author?: string;
+  readonly affiliation?: string;
+  readonly description?: string;
   readonly directory?: string;
-
   readonly zenodoToken?: string;
 }
 
@@ -32,7 +26,7 @@ export const IZenodoRegistry = new Token<IZenodoRegistry>(
 
 export interface IZenodoRegistry {
   updateDeposition(path: string): Promise<ZenodoRecord>;
-  createDeposition(path: string, post: ZenodoPost): Promise<ZenodoRecord>;
+  createDeposition(path: string, post: ZenodoFormFields): Promise<ZenodoRecord>;
   getDepositions(): Promise<ZenodoRecord[]>;
   hasDepositionSync(path: string): boolean;
   getDepositionSync(path: string): ZenodoRecord | undefined;

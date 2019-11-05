@@ -1,47 +1,66 @@
-/****** Main widget styles ******/
-/* Headings */
-#zenodo-upload-main h1,
-#zenodo-upload-main h2 {
-  text-align: center;
+#zenodo-Widget {
+  overflow-y: scroll;
 }
 
-#zenodo-upload-main h2 {
-  padding: 0px
+.zenodo-Upload {
+  max-width: 500px;
+  padding-bottom: 2em;
+  margin: 0 auto;
+  font-family: var(--jp-ui-font-family);
 }
 
-#zenodo-upload-main h3 {
-  text-align: left;
+.zenodo-Upload h2 {
+  font-weight: var(--jp-content-heading-font-weight);
+  font-size: var(--jp-content-font-size4);
 }
 
-/* Override link styles */
-#zenodo-upload-main .link {
+.zenodo-InputRow {
+  display: flex;
+  margin-top: 1em;
+}
+
+.zenodo-InputRow > * {
+  flex: 1;
+}
+
+.zenodo-InputRow input,
+.zenodo-InputRow textarea {
+  padding: 0.5em;
+}
+
+.zenodo-InputRow label {
+  padding: 0.5em 0.5em 0.5em 0;
+}
+
+.zenodo-InputRow input,
+.zenodo-InputRow textarea {
+  background: var(--jp-input-background);
+  border: 1px solid var(--jp-input-border-color);
+  box-shadow: var(--jp-input-box-shadow);
+}
+
+.zenodo-InputRow input:hover,
+.zenodo-InputRow textarea:hover {
+  background: var(--jp-input-hover-background);
+}
+
+.zenodo-InputRow input:focus,
+.zenodo-InputRow textarea:focus {
+  background: var(--jp-input-active-background);
+  border-color: var(--jp-input-active-border-color);
+  box-shadow: var(--jp-input-active-box-shadow-color);
+}
+
+.zenodo-PublishButton {
+  margin-top: 1em;
+}
+
+.zenodo-Upload a[href] {
   text-decoration: underline;
   color: blue;
 }
 
-#zenodo-upload-main .link:active {
-  text-decoration: underline;
-  color: red;
-}
-
-#zenodo-upload-main .link:visited {
-  text-decoration: underline;
-  color: purple;
-}
-
-/* Padding for body */
-#zenodo-upload-main {
-  padding: 15px;
-  font-family: var(--jp-ui-font-family);
-}
-
-/* Widget overflow rules */
-#zenodo-jupyterlab .p-Widget {
-  overflow-y: scroll;
-}
-
-/* Button styles */
-#zenodo-upload-main .basic-btn {
+.zenodo-Upload .basic-btn {
   background-color: #ededed;
   border: 1px solid transparent;
   border-color: grey;
@@ -49,69 +68,35 @@
   padding: 6px;
 }
 
-#zenodo-upload-main .basic-btn:hover {
+.zenodo-Upload .basic-btn:hover {
   background-color: #bdbdbd;
 }
 
 /****** Styles for upload form ******/
 /* Style form elements */
-#zenodo-upload-main textarea {
-  font-family: var(--jp-ui-font-family);
+.zenodo-InputRow {
   font-size: 14px;
 }
 
-#zenodo-upload-main td {
-  padding: 10px;
-  display: flex;
-  justify-content: left;
-}
-
-#zenodo-upload-main th {
-  font-weight: normal;
-}
-
-/* Form labels are right-aligned */
-#zenodo-upload-main .label {
-  padding: 10px;
-  text-align: right;
-}
-
 /* Required questions are bold */
-#zenodo-upload-main .required {
-  font-weight: bold;
+.zenodo-InputRow label.required::after {
+  content: 'required';
+  color: var(--jp-accent-color0);
+  font-size: var(--jp-ui-font-size0);
+  margin-right: 0.5em;
+  /* display: block; */
+  float: right;  
 }
 
 /* Hover elements for clarification on form */
-#zenodo-upload-main .hover {
+.zenodo-InputRow .hover {
   color: grey;
   text-decoration: underline;
   font-weight: normal;
 }
 
-#zenodo-upload-main .hover:hover {
+.zenodo-InputRow .hover:hover {
   color: blue;
-}
-
-/* Bottom margin for paragraphs */
-#zenodo-upload-main #submit-form p {
-  margin-bottom: 10px;
-}
-
-/***** Styles for success page ******/
-/* Center success content */
-#success-div {
-  display: flex;
-  flex-direction: column;
-}
-
-#success-div td {
-  justify-content: center;
-}
-
-/* Pad the info area */
-#info-area {
-  padding-left: 20px;
-  padding-right: 20px;
 }
 
 /* Add indicator for published items in filebrowser */
