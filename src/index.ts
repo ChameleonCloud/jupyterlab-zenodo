@@ -25,6 +25,7 @@ import { ZenodoRegistry } from './registry';
 import { ZenodoWidget } from './widget';
 
 import { IFileBrowserFactory, FileBrowser } from '@jupyterlab/filebrowser';
+import { Contents } from '@jupyterlab/services';
 
 const zenodoPluginId = '@chameleoncloud/jupyterlab_zenodo:plugin';
 
@@ -132,6 +133,7 @@ function addZenodoCommands(
   zenodoRegistry: IZenodoRegistry
 ) {
   const uploadLabel = settings.get('uploadTitle').composite as string;
+  const updateLabel = settings.get('updateLabel').composite as string;
   const baseUrl = settings.get('baseUrl').composite as string;
   const zenodoConfig = {
     baseUrl
@@ -167,10 +169,26 @@ function addZenodoCommands(
     app.shell.activateById(widget.id);
   }
 
+  function unsupportedItem(item: Contents.IModel) {
+    return item && item.type !== 'directory';
+  }
+
+  function hasDeposition(item: Contents.IModel) {
+    // No selection = check the root path (empty)
+    return zenodoRegistry.hasDepositionSync((item && item.path) || '');
+  }
+
   // Command to upload any set of files
   app.commands.addCommand(CommandIDs.upload, {
     label: uploadLabel,
     iconClass: 'jp-MaterialIcon jp-FileUploadIcon',
+    isEnabled: () => {
+      const item = browser.selectedItems().next();
+      if (unsupportedItem(item)) {
+        return false;
+      }
+      return !hasDeposition(item);
+    },
     execute: () => {
       let formDefaults: ZenodoFormFields;
 
@@ -184,8 +202,15 @@ function addZenodoCommands(
   });
 
   app.commands.addCommand(CommandIDs.update, {
-    label: 'Update Zenodo Deposition',
+    label: updateLabel,
     iconClass: 'jp-MaterialIcon jp-FileUploadIcon',
+    isEnabled: () => {
+      const item = browser.selectedItems().next();
+      if (unsupportedItem(item)) {
+        return false;
+      }
+      return hasDeposition(item);
+    },
     execute: () => {
       // Just update the first one we find
       // TODO: this should either be smarter, or perhaps not exist

@@ -5,15 +5,20 @@
   "description": "Zenodo extension settings.",
   "properties": {
     "uploadTitle": {
-        "type": "string",
-        "title": "Title for upload command",
-        "default": "Publish to Zenodo"
-     },
-     "baseUrl": {
-       "type": "string",
-       "title": "Base URL for Zenodo URLs",
-       "default": "https://zenodo.org"
-     }
+      "type": "string",
+      "title": "Title for upload command",
+      "default": "Publish to Zenodo"
+    },
+    "updateLabel": {
+      "type": "string",
+      "title": "Title for update command",
+      "default": "Update on Zenodo"
+    },
+    "baseUrl": {
+      "type": "string",
+      "title": "Base URL for Zenodo URLs",
+      "default": "https://zenodo.org"
+    }
   },
   "additionalProperties": false,
   "type": "object"
