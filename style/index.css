@@ -14,6 +14,12 @@
   font-size: var(--jp-content-font-size4);
 }
 
+.zenodo-LoadingMessage {
+  position: absolute;
+  top: calc(50% + 3em);
+  color: var(--jp-ui-font-color3);
+}
+
 .zenodo-InputRow {
   display: flex;
   margin-top: 1em;
@@ -37,6 +43,13 @@
   background: var(--jp-input-background);
   border: 1px solid var(--jp-input-border-color);
   box-shadow: var(--jp-input-box-shadow);
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size1);
+}
+
+.zenodo-InputRow input::placeholder,
+.zenodo-InputRow textarea::placeholder {
+  color: var(--jp-ui-font-color3);
 }
 
 .zenodo-InputRow input:hover,

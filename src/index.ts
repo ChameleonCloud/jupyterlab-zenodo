@@ -4,8 +4,6 @@ import {
   ILayoutRestorer
 } from '@jupyterlab/application';
 
-import { IIterator } from '@phosphor/algorithm';
-
 import {
   ICommandPalette,
   MainAreaWidget,
@@ -25,8 +23,8 @@ import { IZenodoRegistry, ZenodoFormFields } from './tokens';
 import { ZenodoRegistry } from './registry';
 
 import { ZenodoWidget } from './widget';
+
 import { IFileBrowserFactory, FileBrowser } from '@jupyterlab/filebrowser';
-import { Contents } from '@jupyterlab/services';
 
 const zenodoPluginId = '@chameleoncloud/jupyterlab_zenodo:plugin';
 

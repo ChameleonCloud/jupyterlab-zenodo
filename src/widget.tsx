@@ -16,6 +16,7 @@ namespace ZenodoFormInput {
     readonly required: boolean;
     readonly multiline: boolean;
     readonly default?: string;
+    readonly placeholder?: string;
   }
 }
 
@@ -45,16 +46,18 @@ export class ZenodoFormInput extends React.Component<
             id={this.id}
             name={this.props.id}
             required={this.props.required}
+            placeholder={this.props.placeholder}
             rows={5}
           >
             {this.props.default}
           </textarea>
         ) : (
           <input
+            type="text"
             id={this.id}
             name={this.props.id}
             required={this.props.required}
-            type="text"
+            placeholder={this.props.placeholder}
             value={this.props.default}
           />
         )}
@@ -76,6 +79,7 @@ namespace ZenodoUploadForm {
   export interface IProps {
     readonly onSubmit: React.FormEventHandler;
     readonly defaults: ZenodoFormFields;
+    readonly baseUrl: string;
   }
 
   export interface IState {
@@ -99,48 +103,48 @@ export class ZenodoUploadForm extends React.Component<
       <form id='submit-form' onSubmit={this.props.onSubmit}>
         <h2>Final Submission Details</h2>
         <p>
-          Please fill out the required fields and then click 'Publish' to
-          publish to Zenodo.
-        </p>
-        <p>
           <em>Note:</em> this will make your code publicly accessible on{' '}
-          <a href='https://zenodo.org'>zenodo.org</a>.
+          <a href={this.props.baseUrl} target="_blank">{this.props.baseUrl}</a>.
         </p>
         <div id='form-error-div'>{this.state.error}</div>
         <ZenodoFormInput
           id='title'
           label='Title'
           required
-          default={this.props.defaults.title}
+          defaultValue={this.props.defaults.title}
         />
         <ZenodoFormInput
           id='author'
           label='Author(s)'
           required
-          default={this.props.defaults.author}
+          defaultValue={this.props.defaults.author}
+          placeholder={"Name <email@example.com>"}
         />
         <ZenodoFormInput
           id='affiliation'
           label='Affiliation'
           required
-          default={this.props.defaults.affiliation}
+          defaultValue={this.props.defaults.affiliation}
         />
         <ZenodoFormInput
           id='description'
           label='Description'
-          default={this.props.defaults.description}
+          defaultValue={this.props.defaults.description}
           required
           multiline
+          placeholder={"A short description of your artifact/files."}
         />
         <ZenodoFormInput
           id='directory'
           label='Directory to publish'
-          default={this.props.defaults.directory}
+          defaultValue={this.props.defaults.directory}
+          placeholder={"./my-dir"}
         />
         <ZenodoFormInput
           id='zenodo_token'
           label='Zenodo access token'
-          default={this.props.defaults.zenodoToken}
+          defaultValue={this.props.defaults.zenodoToken}
+          placeholder={"7I8PwXn60..."}
         />
         <button
           type='submit'
@@ -288,7 +292,12 @@ export class ZenodoManager extends React.Component<
     return (
       <div className='zenodo-Upload'>
         <div className='zenodo-WaitMessage' style={visibilities.waiting}>
-          Please wait; your files are being uploaded&hellip;
+          <div className='jp-Spinner'>
+            <div className='jp-SpinnerContent'></div>
+            <div className='zenodo-LoadingMessage'>
+              Please wait while your files are uploaded.
+            </div>
+          </div>
         </div>
         <div className='zenodo-SuccessMessage' style={visibilities.success}>
           <ZenodoSuccessMessage
@@ -302,6 +311,7 @@ export class ZenodoManager extends React.Component<
         <div style={visibilities.form}>
           <ZenodoUploadForm
             onSubmit={this.onSubmit}
+            baseUrl={this.props.zenodoConfig.baseUrl}
             defaults={this.props.formDefaults}
           />
         </div>
