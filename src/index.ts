@@ -203,7 +203,7 @@ function addZenodoCommands(
 
   app.commands.addCommand(CommandIDs.update, {
     label: updateLabel,
-    iconClass: 'jp-MaterialIcon jp-FileUploadIcon',
+    iconClass: 'jp-MaterialIcon jp-EditIcon',
     isEnabled: () => {
       const item = browser.selectedItems().next();
       if (unsupportedItem(item)) {
