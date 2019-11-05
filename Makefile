@@ -1,4 +1,4 @@
-JUPYTERLAB_ZENODO_SERVER_VERSION = $(shell python -c $$'from jupyterlab_zenodo._version import __version__\nprint(__version__)')
+JUPYTERLAB_ZENODO_SERVER_VERSION = $(shell cat VERSION)
 
 .PHONY: publish-server
 publish-server:

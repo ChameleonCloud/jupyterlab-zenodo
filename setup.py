@@ -8,13 +8,14 @@ from setuptools import setup, find_packages
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
 
-# The text of the README file
-README = (HERE / "README.md").read_text()
+README = (HERE / 'README.md').read_text()
+
+VERSION = (HERE / 'VERSION').read_text()
 
 setup_args = dict(
     name             = 'jupyterlab_zenodo',
     description      = 'A Jupyter Notebook extension which enables uploading to Zenodo from JupyterLab',
-    version          = '0.1.3',
+    version          = VERSION,
     author           = 'University of Chicago',
     author_email     = 'dev@chameleoncloud.org',
     url              = 'https://github.com/chameleoncloud/jupyterlab-zenodo',

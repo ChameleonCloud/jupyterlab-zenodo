@@ -7,7 +7,6 @@ from notebook.utils import url_path_join
 from .status import ZenodoStatusHandler
 from .upload import ZenodoUploadHandler
 from .update import ZenodoUpdateHandler
-from ._version import __version__
 
 LOG = logging.getLogger(__name__)
 
