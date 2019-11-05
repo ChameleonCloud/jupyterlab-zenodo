@@ -1,6 +1,6 @@
 {
   "name": "@chameleoncloud/jupyterlab_zenodo",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "JupyterLab extension for uploading to Zenodo",
   "keywords": [
     "jupyter",
@@ -16,8 +16,8 @@
     "type": "git",
     "url": "https://github.com/ChameleonCloud/jupyterlab-zenodo.git"
   },
-  "license": "None",
-  "author": "Maxine King",
+  "license": "MIT",
+  "author": "Maxine King <maxineking@uchicago.edu>",
   "files": [
     "lib/*/*d.ts",
     "lib/*/*.js",
