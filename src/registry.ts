@@ -5,19 +5,6 @@ import { URLExt } from '@jupyterlab/coreutils';
 import { IZenodoRegistry, ZenodoFormFields, ZenodoRecord } from './tokens';
 
 export class ZenodoRegistry implements IZenodoRegistry {
-  async updateDeposition(path: string) {
-    const res = await ServerConnection.makeRequest(
-      Private.getUrl('update', this._serverSettings),
-      { method: 'POST' },
-      this._serverSettings
-    );
-
-    const record = await Private.handleUpdateResponse(path, res);
-    this._updateRecords(record);
-
-    return record;
-  }
-
   async createDeposition(path: string, post: ZenodoFormFields) {
     const res = await ServerConnection.makeRequest(
       Private.getUrl('upload', this._serverSettings),
@@ -26,6 +13,19 @@ export class ZenodoRegistry implements IZenodoRegistry {
     );
 
     const record = await Private.handleCreateResponse(path, res);
+    this._updateRecords(record);
+
+    return record;
+  }
+
+  async newDepositionVersion(path: string) {
+    const res = await ServerConnection.makeRequest(
+      Private.getUrl('update', this._serverSettings),
+      { method: 'POST' },
+      this._serverSettings
+    );
+
+    const record = await Private.handleUpdateResponse(path, res);
     this._updateRecords(record);
 
     return record;

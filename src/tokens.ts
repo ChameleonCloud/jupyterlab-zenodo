@@ -26,7 +26,7 @@ export const IZenodoRegistry = new Token<IZenodoRegistry>(
 /* tslint:enable */
 
 export interface IZenodoRegistry {
-  updateDeposition(path: string): Promise<ZenodoRecord>;
+  newDepositionVersion(path: string): Promise<ZenodoRecord>;
   createDeposition(path: string, post: ZenodoFormFields): Promise<ZenodoRecord>;
   getDepositions(): Promise<ZenodoRecord[]>;
   getDeposition(path: string): Promise<ZenodoRecord>;
