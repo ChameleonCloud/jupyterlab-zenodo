@@ -11,7 +11,7 @@ from tornado import gen, web
 
 from .base import ZenodoBaseHandler
 from .database import store_record
-from .utils import get_id, UserMistake, zip_dir
+from .utils import add_query_parameter, get_id, UserMistake, zip_dir
 from .zenodo import Deposition
 
 LOG = logging.getLogger(__name__)
@@ -73,20 +73,26 @@ class ZenodoUploadHandler(ZenodoBaseHandler):
             directory = os.path.join(self.notebook_dir, upload_data['directory_to_zip'])
             archive = zip_dir(directory)
             doi = self.upload_file(archive, metadata, upload_data['access_token'])
-
         except UserMistake as e:
             # UserMistake exceptions contain messages for the user
             self.return_error(str(e))
-
-        except Exception as x:
+        except Exception:
             # All other exceptions are internal
             LOG.exception("There was an error!")
             self.return_error("Something went wrong")
-
         else:
             # Record the upload and return success
             store_record(doi, upload_data['directory_to_zip'], self.db_path)
-            self.return_creation_success(doi)
+            info = dict(status='success', doi=doi)
+
+            redirect = self.zenodo_config.upload_redirect_url
+            if redirect:
+                info['redirect'] = add_query_parameter(redirect, info)
+
+            # Return info with a 201 status
+            self.set_status(201)
+            self.write(info)
+            self.finish()
 
 
 def assemble_upload_data(request_data, tok):

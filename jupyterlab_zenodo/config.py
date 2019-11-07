@@ -15,7 +15,10 @@ class ZenodoConfig(Configurable):
         help='Set this to True to publish to Zenodo sandbox while testing')
     upload_redirect_url = Unicode(config=True,
         help='URL to redirect to after upload.'
-             ' Doi will be added as a query parameter.')
+             ' The created DOI will be added as a `doi` query parameter.')
+    update_redirect_url = Unicode(config=True,
+        help='URL to redirect to after a new version is created.'
+             ' The former and current DOIs will be added as query parameters `previous_doi` and `doi`.')
     database_location = Unicode('/work/.zenodo/', config=True,
         help='Custom location for status storage database')
     database_name = Unicode('zenodo.db', config=True,
