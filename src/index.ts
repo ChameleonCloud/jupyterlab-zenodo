@@ -5,6 +5,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
+  Clipboard,
   ICommandPalette,
   MainAreaWidget,
   WidgetTracker
@@ -59,12 +60,17 @@ namespace CommandIDs {
   /*
    * Open a form that users can submit to publish to Zenodo
    */
-  export const upload = 'zenodo:upload';
+  export const create = 'zenodo:upload';
 
   /*
    * Update existing Zenodo deposition with new archive
    */
   export const update = 'zenodo:update';
+
+  /*
+   * Copy currently selected artifact's DOI to system clipboard
+   */
+  export const copyDOI = 'zenodo:copyDOI';
 }
 
 /**
@@ -94,24 +100,36 @@ function activateZenodoPlugin(
 
       // Create sharing menu with 'upload' and 'update' commands
       const menu = new Menu({ commands: app.commands });
-      menu.addItem({ command: CommandIDs.upload });
+      menu.addItem({ command: CommandIDs.create });
       menu.addItem({ command: CommandIDs.update });
       menu.title.label = 'Share';
       mainMenu.addMenu(menu, { rank: 20 });
 
       // Add commands to Command Palette
-      palette.addItem({ command: CommandIDs.upload, category: 'Sharing' });
-      palette.addItem({ command: CommandIDs.update, category: 'Sharing' });
+      const category = 'Sharing';
+      palette.addItem({ command: CommandIDs.create, category });
+      palette.addItem({ command: CommandIDs.update, category });
+      palette.addItem({ command: CommandIDs.copyDOI, category });
 
       // Add context menu for directories
+      const publishedDirSelector =
+        '.jp-DirListing-item[data-isdir=true][data-doi]';
+      const candidateDirSelector =
+        '.jp-DirListing-item[data-isdir=true]:not([data-doi])';
+
       app.contextMenu.addItem({
         command: CommandIDs.update,
-        selector: '.jp-DirListing-item[data-isdir=true][data-doi]',
+        selector: publishedDirSelector,
         rank: 4
       });
       app.contextMenu.addItem({
-        command: CommandIDs.upload,
-        selector: '.jp-DirListing-item[data-isdir=true]:not([data-doi])',
+        command: CommandIDs.copyDOI,
+        selector: publishedDirSelector,
+        rank: 4
+      });
+      app.contextMenu.addItem({
+        command: CommandIDs.create,
+        selector: candidateDirSelector,
         rank: 4
       });
     })
@@ -180,18 +198,28 @@ function addZenodoCommands(
     return zenodoRegistry.hasDepositionSync((item && item.path) || '');
   }
 
+  function currentItemHasDeposition() {
+    const item = browser.selectedItems().next();
+    if (unsupportedItem(item)) {
+      return false;
+    }
+    return hasDeposition(item);
+  }
+
+  function currentItemMissingDeposition() {
+    const item = browser.selectedItems().next();
+    if (unsupportedItem(item)) {
+      return false;
+    }
+    return !hasDeposition(item);
+  }
+
   // Command to upload any set of files
-  app.commands.addCommand(CommandIDs.upload, {
+  app.commands.addCommand(CommandIDs.create, {
     label: createLabel,
     iconClass: 'jp-MaterialIcon jp-FileUploadIcon',
-    isEnabled: () => {
-      const item = browser.selectedItems().next();
-      if (unsupportedItem(item)) {
-        return false;
-      }
-      return !hasDeposition(item);
-    },
-    execute: () => {
+    isEnabled: currentItemMissingDeposition,
+    execute() {
       let formDefaults: ZenodoFormFields;
 
       const item = browser.selectedItems().next();
@@ -206,14 +234,8 @@ function addZenodoCommands(
   app.commands.addCommand(CommandIDs.update, {
     label: editLabel,
     iconClass: 'jp-MaterialIcon jp-EditIcon',
-    isEnabled: () => {
-      const item = browser.selectedItems().next();
-      if (unsupportedItem(item)) {
-        return false;
-      }
-      return hasDeposition(item);
-    },
-    execute: () => {
+    isEnabled: currentItemHasDeposition,
+    execute() {
       const item = browser.selectedItems().next();
       const path = (item && item.path) || '';
       zenodoRegistry.getDeposition(path).then(record => {
@@ -232,8 +254,20 @@ function addZenodoCommands(
     }
   });
 
+  app.commands.addCommand(CommandIDs.copyDOI, {
+    label: 'Copy DOI',
+    isEnabled: currentItemHasDeposition,
+    execute() {
+      const item = browser.selectedItems().next();
+      const path = (item && item.path) || '';
+      zenodoRegistry.getDeposition(path).then(record => {
+        Clipboard.copyToSystem(record.doi);
+      });
+    }
+  });
+
   restorer.restore(tracker, {
-    command: CommandIDs.upload,
+    command: CommandIDs.create,
     name: () => 'zenodo'
   });
 }
