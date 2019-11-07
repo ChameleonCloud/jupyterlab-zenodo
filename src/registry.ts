@@ -110,10 +110,14 @@ namespace Private {
     }
 
     const json = await res.json();
-    const doi = json.doi;
+    const { doi, redirect } = json;
 
     if (!doi) {
       throw new Error('Missing DOI');
+    }
+
+    if (redirect) {
+      window.open(redirect);
     }
 
     return { path, doi };
@@ -128,16 +132,8 @@ namespace Private {
       throw new ServerConnection.ResponseError(res, message);
     }
 
-    let doi: string | undefined;
-    let redirect: string | undefined;
-
-    try {
-      const json = await res.json();
-      doi = json.doi;
-      redirect = json.redirect;
-    } catch (err) {
-      throw new Error('Failed to process Zenodo response');
-    }
+    const json = await res.json();
+    const { doi, redirect } = json;
 
     if (!doi) {
       throw new Error('Missing DOI');
