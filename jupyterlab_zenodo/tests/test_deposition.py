@@ -3,7 +3,7 @@ import os
 import tempfile
 import unittest
 
-from jupyterlab_zenodo.test_init import TEST_API_TOKEN
+from . import TEST_API_TOKEN
 from jupyterlab_zenodo.zenodo import Deposition
 
 TEST_DEP_ID = '355162'
@@ -119,22 +119,22 @@ class NewVersionTest(unittest.TestCase):
         new_id = self.dep.id
         self.assertNotEqual(old_id, new_id)
 
+# FIXME: don't hardcode record ID
+# class ClearFilesTest(unittest.TestCase):
+#     def setUp(self):
+#         token = TEST_API_TOKEN
+#         self.dep = Deposition(True, token, TEST_DEP_ID)
+#         self.dep.new_version()
+#         cmd = "echo "+str(datetime.now())+" > "+test_filename
+#         os.system(cmd)
 
-class ClearFilesTest(unittest.TestCase):
-    def setUp(self):
-        token = TEST_API_TOKEN
-        self.dep = Deposition(True, token, TEST_DEP_ID)
-        self.dep.new_version()
-        cmd = "echo "+str(datetime.now())+" > "+test_filename
-        os.system(cmd)
+#     def test_success(self):
+#         self.dep.clear_files()
 
-    def test_success(self):
-        self.dep.clear_files()
-
-    def tearDown(self):
-        filepath = test_filename
-        self.dep.set_file(filepath)
-        self.dep.publish()
+#     def tearDown(self):
+#         filepath = test_filename
+#         self.dep.set_file(filepath)
+#         self.dep.publish()
 
 
 def tearDownModule():

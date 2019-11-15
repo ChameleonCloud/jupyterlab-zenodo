@@ -146,6 +146,29 @@ class Client:
     """
     A class to interface with the Zenodo API
     """
+    def __init__(self, dev, access_token):
+        """ Initialize Zenodo client
+
+        Parameters
+        ---------
+        dev : boolean
+            True if in development environment, False in deployment
+        access_token : string
+            Access token for Zenodo
+
+        Returns
+        -------
+        Client
+        """
+
+        if dev is True:
+            self.url_base = 'https://sandbox.zenodo.org/api'
+        else:
+            self.url_base = 'https://zenodo.org/api'
+
+        self.access_token = access_token
+        self.headers = {"Content-Type": "application/json"}
+
 
     def process_zenodo_response(self, response, message, field=None):
         """ Process a response from a request to the Zenodo API
@@ -213,28 +236,6 @@ class Client:
         else:
             raise Exception(exception_message)
 
-    def __init__(self, dev, access_token):
-        """ Initialize Zenodo client
-
-        Parameters
-        ---------
-        dev : boolean
-            True if in development environment, False in deployment
-        access_token : string
-            Access token for Zenodo
-
-        Returns
-        -------
-        Client
-        """
-
-        if dev is True:
-            self.url_base = 'https://sandbox.zenodo.org/api'
-        else:
-            self.url_base = 'https://zenodo.org/api'
-
-        self.access_token = access_token
-        self.headers = {"Content-Type": "application/json"}
 
     def create_deposition(self):
         """ Create new deposition on Zenodo

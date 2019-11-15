@@ -41,6 +41,7 @@ setup_args = dict(
     install_requires = [
         'notebook>=4.3.0',
         'python-slugify>=3.0.3',
+        'requests'
     ],
     include_package_data = True,
     long_description_content_type = "text/markdown",

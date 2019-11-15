@@ -23,8 +23,8 @@ def store_record(doi, directory, db_path):
     -------
     void
     """
-    if any(map(lambda x: not x, [doi, directory])):
-        raise Exception("Given empty fields")
+    if not doi:
+        raise ValueError('Missing DOI')
 
     # Connect to database
     with Connection(db_path) as c:

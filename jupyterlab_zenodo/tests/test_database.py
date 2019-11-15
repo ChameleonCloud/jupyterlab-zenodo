@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 from jupyterlab_zenodo.database import (store_record, check_status,
-                                        get_last_upload)
+                        get_last_upload)
 from jupyterlab_zenodo.utils import UserMistake
 
 sample_info = ['somedate', 'somedoi', 'somedir',
@@ -38,12 +38,8 @@ class StoreRecordTest(unittest.TestCase):
         store_record(self.doi, self.dir, self.db_path)
 
     def test_missing_doi(self):
-        with self.assertRaises(Exception):
-            store_record("", self.dir, self.db_path)
-
-    def test_missing_dir(self):
-        with self.assertRaises(Exception):
-            store_record(self.doi, "", self.db_path)
+        with self.assertRaises(ValueError):
+            store_record('', self.dir, self.db_path)
 
     def tearDown(self):
         shutil.rmtree(self.test_dir)
@@ -54,7 +50,7 @@ class GetLastUploadNoDBTest(unittest.TestCase):
         self.db_path = f"/not_a_directory/{str(datetime.now())}/{DB_NAME}"
 
     def test_fail(self):
-        with self.assertRaises(UserMistake):
+        with self.assertRaises(FileNotFoundError):
             get_last_upload(self.db_path)
 
 

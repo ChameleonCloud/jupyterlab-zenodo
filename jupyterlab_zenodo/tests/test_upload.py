@@ -1,6 +1,6 @@
 import unittest
 
-from jupyterlab_zenodo.test_init import TEST_API_TOKEN
+from . import TEST_API_TOKEN
 from jupyterlab_zenodo.upload import assemble_upload_data, assemble_metadata
 from jupyterlab_zenodo.utils import UserMistake
 
@@ -24,13 +24,13 @@ class AssembleUploadDataTest(unittest.TestCase):
     def test_zerolength_dir(self):
         self.response['directory'] = ''
         data = assemble_upload_data(self.response, self.access_token)
-        self.assertEqual(data['directory_to_zip'], 'work')
+        self.assertEqual(data['directory_to_zip'], '')
         self.assertEqual(data['access_token'], 'sometoken')
 
     def test_no_dir(self):
         self.response.pop('directory')
         data = assemble_upload_data(self.response, self.access_token)
-        self.assertEqual(data['directory_to_zip'], 'work')
+        self.assertEqual(data['directory_to_zip'], '')
         self.assertEqual(data['access_token'], 'sometoken')
 
     def test_no_tok(self):

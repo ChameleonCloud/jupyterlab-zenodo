@@ -4,9 +4,10 @@ import requests
 import tempfile
 import unittest
 
-from jupyterlab_zenodo.test_init import TEST_API_TOKEN
 from jupyterlab_zenodo.utils import UserMistake
 from jupyterlab_zenodo.zenodo import Client
+
+from . import TEST_API_TOKEN
 
 # API bases for dev and non-dev
 API_BASE_URL_DEV = 'https://sandbox.zenodo.org/api'
@@ -207,38 +208,46 @@ class PublishNewVersionTest(unittest.TestCase):
         with self.assertRaises(UserMistake):
             self.client.publish_deposition(new_id)
 
+    # FIXME: don't hardcode record ID
+    # def test_get_files(self):
+    #     new_id = self.client.new_deposition_version('355162')
+    #     file_ids = self.client.get_deposition_files(new_id)
+    #     self.assertNotEqual(len(file_ids), 0)
+
 
 class GetFilesTest(unittest.TestCase):
     def setUp(self):
         good_token = TEST_API_TOKEN
         self.client = Client(True, good_token)
 
-    def test_success(self):
-        new_id = self.client.new_deposition_version('355162')
-        file_ids = self.client.get_deposition_files(new_id)
-        self.assertNotEqual(len(file_ids), 0)
+    # FIXME: don't hardcode record ID
+    # def test_success(self):
+    #     new_id = self.client.new_deposition_version('355162')
+    #     file_ids = self.client.get_deposition_files(new_id)
+    #     self.assertNotEqual(len(file_ids), 0)
 
     def test_bad_id(self):
         with self.assertRaises(Exception):
             self.client.get_deposition_files('1010101')
 
 
-class DeleteFilesSuccessTest(unittest.TestCase):
-    def setUp(self):
-        good_token = TEST_API_TOKEN
-        self.client = Client(True, good_token)
-        self.new_id = self.client.new_deposition_version('355162')
-        self.file_ids = self.client.get_deposition_files(self.new_id)
-        cmd = "echo "+str(datetime.now())+" > "+test_filename
-        os.system(cmd)
+# FIXME: don't hardcode record ID
+# class DeleteFilesSuccessTest(unittest.TestCase):
+#     def setUp(self):
+#         good_token = TEST_API_TOKEN
+#         self.client = Client(True, good_token)
+#         self.new_id = self.client.new_deposition_version('355162')
+#         self.file_ids = self.client.get_deposition_files(self.new_id)
+#         cmd = "echo "+str(datetime.now())+" > "+test_filename
+#         os.system(cmd)
 
-    def test_success(self):
-        self.client.delete_deposition_files(self.new_id, self.file_ids)
+#     def test_success(self):
+#         self.client.delete_deposition_files(self.new_id, self.file_ids)
 
-    def tearDown(self):
-        filepath = test_filename
-        self.client.add_file(self.new_id, filepath)
-        self.client.publish_deposition(self.new_id)
+#     def tearDown(self):
+#         filepath = test_filename
+#         self.client.add_file(self.new_id, filepath)
+#         self.client.publish_deposition(self.new_id)
 
 
 class DeleteFilesFailTest(unittest.TestCase):

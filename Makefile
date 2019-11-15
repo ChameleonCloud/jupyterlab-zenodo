@@ -12,4 +12,4 @@ publish-client:
 
 .PHONY: tests
 tests:
-	python3 -m unittest discover jupyterlab_zenodo.tests
+	python3 -m unittest discover jupyterlab_zenodo 

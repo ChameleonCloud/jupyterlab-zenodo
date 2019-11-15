@@ -113,7 +113,9 @@ def assemble_upload_data(request_data, tok):
     """
 
     # If the user has no access token, use ours
-    access_token = request_data.get('zenodo_token', tok)
+    access_token = request_data.get('zenodo_token')
+    if not access_token:
+        access_token = tok
 
     # If they provided no access token and there are no defaults, ask again
     if not access_token:

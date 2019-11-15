@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 from jupyterlab_zenodo.utils import (UserMistake, get_id, zip_dir,
-                                     add_query_parameter)
+                     add_query_parameter)
 
 
 class AddQueryParameterTest(unittest.TestCase):
@@ -76,7 +76,7 @@ class ZipDirTest(unittest.TestCase):
         self.loc = tempfile.mkdtemp()
 
     def test_empty(self):
-        filepath = zip_dir(self.dir, "myfile")
+        filepath = zip_dir(self.dir)
 
         self.assertTrue(os.path.exists(filepath))
 
@@ -85,7 +85,7 @@ class ZipDirTest(unittest.TestCase):
         os.system("touch "+self.dir+"/file2")
         os.system("echo 'hi' > "+self.dir+"/file1")
         os.system("echo 'hello' > "+self.dir+"/file2")
-        filepath = zip_dir(self.dir, "myfile.zip")
+        filepath = zip_dir(self.dir)
         self.assertTrue(os.path.exists(filepath))
 
     def test_no_dotzip(self):
@@ -93,21 +93,21 @@ class ZipDirTest(unittest.TestCase):
         os.system("touch "+self.dir+"/file2")
         os.system("echo 'hi' > "+self.dir+"/file1")
         os.system("echo 'hello' > "+self.dir+"/file2")
-        filepath = zip_dir(self.dir, "myfile")
+        filepath = zip_dir(self.dir)
         self.assertTrue(os.path.exists(filepath))
 
     def test_with_slash(self):
         os.system("touch "+self.dir+"/file1")
         os.system("echo 'hi' > "+self.dir+"/file1")
         this_dir = self.dir + "/"
-        filepath = zip_dir(this_dir, "myfile")
+        filepath = zip_dir(this_dir)
         self.assertTrue(os.path.exists(filepath))
 
     def test_bad_dir(self):
         bad_dir = self.dir+"not_a_directory"
         self.assertFalse(os.path.exists(bad_dir))
         with self.assertRaises(UserMistake):
-            zip_dir(bad_dir, "myfile")
+            zip_dir(bad_dir)
 
     def tearDown(self):
         shutil.rmtree(self.dir)
