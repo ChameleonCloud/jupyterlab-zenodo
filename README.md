@@ -1,9 +1,10 @@
-# Jupyterlab-Zenodo
-A Zenodo extension for JupyterHub
+# jupyterlab-zenodo
+
+A [Zenodo](https://zenodo.org) extension for JupyterLab.
 
 ## Installation
 
-This is part of a two-part extension: the lab extension (UI) and the server extension (which interfaces with Zenodo). In order to use this extension, both parts must be enabled. The following instructions should be run in your terminal.
+This is part of a two-part extension: the JupyterLab extension (UI) and the Notebook server extension (which interfaces with Zenodo). In order to use this extension, both parts must be enabled. The following instructions should be run in your terminal.
 
 To install the server extension:
 ```bash
@@ -21,6 +22,7 @@ jupyter labextension install @chameleoncloud/jupyterlab_zenodo
 ```
 
 ## Customization
+
 You can add a series of (optional) custom features by adding lines to your `jupyter_notebook_config.py` file.
 
 ### `ZenodoConfig.access_token`
@@ -72,6 +74,7 @@ c.ZenodoConfig.database_name = '<database_name>'
 ```
 
 ## Development
+
 To work with the extension without publishing directly to Zenodo, use Zenodo sandbox.
 Indicate that you're in a development environment and provide a default sandbox token in `jupyter_notebook_config.py`:
 
@@ -81,6 +84,7 @@ c.ZenodoConfig.access_token = '<your sandbox token>'
 ```
 
 ## Testing
+
 The server side of this extension comes with a set of integration tests. They can be used as follows:
 1. [Create a Zenodo sandbox access token](https://sandbox.zenodo.org/account/settings/applications/tokens/new/)
 2. Run `ZENODO_ACCESS_TOKEN=<token> make tests` from the root in your terminal, using the sandbox access token as `<token>`.
