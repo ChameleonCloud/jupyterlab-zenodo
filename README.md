@@ -23,29 +23,50 @@ jupyter labextension install @chameleoncloud/jupyterlab_zenodo
 ## Customization
 You can add a series of (optional) custom features by adding lines to your `jupyter_notebook_config.py` file.
 
-1. [Create a default Zenodo access token](https://zenodo.org/account/settings/applications/tokens/new/) so that users don't need their own:
+### `ZenodoConfig.access_token`
+
+You can [create a default Zenodo access token](https://zenodo.org/account/settings/applications/tokens/new/) so that users don't need their own. This token will be used for any user of the Jupyter Notebook, so it should probably be created under a dedicated account for your deployment.
 
 ```python
 c.ZenodoConfig.access_token = '<your token>'
 ```
 
-2. Set up a post-upload redirect. By setting `<your-url>` below, users will be redirected to that site with an added 'doi' query parameter when they successfully create a new Zenodo upload.
+### `ZenodoConfig.upload_redirect_url`
+
+If you want to perform additional processing on the upload after it is published to Zenodo, you can specify a post-create redirect location. By setting `<your-url>` below, users will be redirected to that site (with an added "doi" query parameter for the created Zenodo artifact) when the upload is successfully published.
 
 ```python
 c.ZenodoConfig.upload_redirect_url = '<your-url>'
 ```
 
-3. Set a default Zenodo community. The below will identify all depositions published with this extension with `<your community>`.
+### `ZenodoConfig.update_redirect_url`
+
+Similar to `upload_redirect_url`, this allows you to redirect users to a custom URL after a new version of an existing artifact is successfully published. A "doi" and "previous_doi" query parameter will be added to the URL for you.
+
+```python
+c.ZenodoConfig.update_redirect_url = '<your-url>'
+```
+
+### `ZenodoConfig.community`
+
+Set a default [Zenodo community](https://zenodo.org/communities/). All depositions published with this extension will automatically be associated with the community `<your community>`.
 
 ```python
 c.ZenodoConfig.community = '<your community>'
 ```
 
-4. Customize the internal storage database. Information about previous uploads to Zenodo on a user's server will be stored in `<database-location>` in a sqlite database called `<database-name>`. These default to `/work/.zenodo/` and `zenodo.db`, respectively.
+### `ZenodoConfig.database_location`
+
+Information about previous uploads to Zenodo on a user's server will be stored in `<database-location>` in a SQLite database. This defaults to `/work/.zenodo/`.
 
 ```python
 c.ZenodoConfig.database_location = '<database-location>'
 ```
+
+### `ZenodoConfig.database_name`
+
+Set a custom SQLite3 database name. This defaults to `zenodo.db`.
+
 ```python
 c.ZenodoConfig.database_name = '<database_name>'
 ```
