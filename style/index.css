@@ -3,21 +3,33 @@
 }
 
 .zenodo-Upload {
-  max-width: 500px;
-  padding-bottom: 2em;
-  margin: 0 auto;
+  padding: 10px 10px 2em 74px;
   font-family: var(--jp-ui-font-family);
 }
 
 .zenodo-Upload h2 {
   font-weight: var(--jp-content-heading-font-weight);
-  font-size: var(--jp-content-font-size4);
+  font-size: var(--jp-content-font-size5);
+}
+
+.zenodo-Upload h3 {
+  font-weight: var(--jp-content-heading-font-weight);
+  font-size: var(--jp-content-font-size2);
 }
 
 .zenodo-LoadingMessage {
   position: absolute;
   top: calc(50% + 3em);
   color: var(--jp-ui-font-color3);
+}
+
+.zenodo-SuccessMessageFAQ {
+  margin-top: 2em;
+}
+
+.zenodo-SuccessMessageFAQ p {
+  max-width: 35em;
+  line-height: 1.5em;
 }
 
 .zenodo-InputRow {

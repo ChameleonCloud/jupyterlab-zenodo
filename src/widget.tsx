@@ -192,7 +192,7 @@ export class ZenodoSuccessMessage extends React.Component<
 
     return (
       <div>
-        <h2>Congratulations, your files have been uploaded to Zenodo!</h2>
+        <h2>Your code is now published for citation</h2>
         <div>
           <button
             onClick={this.onViewButtonClick}
@@ -200,23 +200,24 @@ export class ZenodoSuccessMessage extends React.Component<
           >
             View on Zenodo
           </button>
-          <strong>{this.props.doi}</strong>
         </div>
-        <h3>How is my code shared?</h3>
-        <p>
-          Your code is now publicly accessible as an archive on{' '}
-          <a href={this.recordUrl} target="_blank">
-            Zenodo
-          </a>
-          . It has been assigned a DOI (digital object identifier):{' '}
-          {this.props.doi}.
-        </p>
-        <h3>What if my code changes?</h3>
-        <p>
-          If you make changes to your files, you can create a new version on
-          Zenodo (which will be linked to the first) by clicking 'Update Zenodo
-          Deposition' in the share menu.
-        </p>
+        <div className='zenodo-SuccessMessageFAQ'>
+          <h3>How is my code shared?</h3>
+          <p>
+            Your code is now publicly accessible as an archive on{' '}
+            <a href={this.recordUrl} target="_blank">
+              Zenodo
+            </a>
+            . It has been assigned a DOI (digital object identifier):
+            <em>{this.props.doi}</em>
+          </p>
+          <h3>What if my code changes?</h3>
+          <p>
+            If you make changes to your files, you can create a new version on
+            Zenodo (which will be linked to the first) by clicking 'Update Zenodo
+            Deposition' in the share menu.
+          </p>
+        </div>
       </div>
     );
   }
