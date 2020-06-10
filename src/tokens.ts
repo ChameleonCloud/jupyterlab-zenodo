@@ -1,4 +1,4 @@
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
 export class ZenodoConfig {
   readonly baseUrl: string;

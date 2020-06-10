@@ -11,11 +11,11 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 
 import { fileBrowserFactory } from './filebrowser';
 

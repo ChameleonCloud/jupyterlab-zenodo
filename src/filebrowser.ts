@@ -5,11 +5,13 @@ import {
 
 import { ToolbarButton, WidgetTracker } from '@jupyterlab/apputils';
 
-import { IStateDB } from '@jupyterlab/coreutils';
+import { IStateDB } from '@jupyterlab/statedb';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
+
+import { addIcon } from '@jupyterlab/ui-components'
 
 import {
   FileBrowserModel,
@@ -20,15 +22,13 @@ import {
 
 import { Contents } from '@jupyterlab/services';
 
-import { IIconRegistry } from '@jupyterlab/ui-components';
-
 import { IZenodoRegistry } from './tokens';
 
 class ZenodoFileBrowserModel extends FileBrowserModel {}
 
 class ZenodoDirListingRenderer extends DirListing.Renderer {
-  constructor(icoReg: IIconRegistry, zenodoReg: IZenodoRegistry) {
-    super(icoReg);
+  constructor(zenodoReg: IZenodoRegistry) {
+    super();
     this._zenodoReg = zenodoReg;
   }
 
@@ -54,7 +54,6 @@ class ZenodoDirListingRenderer extends DirListing.Renderer {
 
 function activateFactory(
   app: JupyterFrontEnd,
-  icoReg: IIconRegistry,
   docManager: IDocumentManager,
   state: IStateDB,
   zenodoRegistry: IZenodoRegistry
@@ -66,13 +65,12 @@ function activateFactory(
     options: IFileBrowserFactory.IOptions = {}
   ) => {
     const model = new ZenodoFileBrowserModel({
-      iconRegistry: icoReg,
       manager: docManager,
       driveName: options.driveName || '',
       refreshInterval: options.refreshInterval,
       state: options.state === null ? null : options.state || state
     });
-    const renderer = new ZenodoDirListingRenderer(icoReg, zenodoRegistry);
+    const renderer = new ZenodoDirListingRenderer(zenodoRegistry);
     const widget = new FileBrowser({
       id,
       model,
@@ -81,7 +79,7 @@ function activateFactory(
 
     // Add a launcher toolbar item.
     let launcher = new ToolbarButton({
-      iconClassName: 'jp-AddIcon',
+      icon: addIcon,
       onClick: () => commands.execute('filebrowser:create-main-launcher'),
       tooltip: 'New Launcher'
     });
@@ -105,5 +103,5 @@ export const fileBrowserFactory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
   id: '@chameleoncloud/jupyterlab_zenodo:file-browser-factory',
   provides: IFileBrowserFactory,
-  requires: [IIconRegistry, IDocumentManager, IStateDB, IZenodoRegistry]
+  requires: [IDocumentManager, IStateDB, IZenodoRegistry]
 };
